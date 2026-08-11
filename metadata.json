@@ -1,0 +1,6 @@
+{
+  "name": "سیستم مدیریت مالی و قیمت‌گذاری رستوران",
+  "description": "سامانه هوشمند قیمت‌گذاری، آنالیز فرمول ساخت، محاسبه سود و زیان و مهندسی منوی رستوران و کافه",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
