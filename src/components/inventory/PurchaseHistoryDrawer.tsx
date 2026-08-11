@@ -8,6 +8,8 @@ import {
   Layers,
   ShoppingBag,
   Info,
+  Edit2,
+  CheckCircle2,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -20,12 +22,16 @@ import {
 } from 'recharts';
 import { Modal } from '../ui/Modal';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
+import { SmartMoneyInput } from '../ui/SmartMoneyInput';
+import { JalaliDatePicker } from '../ui/JalaliDatePicker';
+import { Pagination } from '../ui/Pagination';
 import { db } from '../../db';
 import type { Ingredient, PurchaseLog } from '../../types';
 import { useAppStore } from '../../store/useAppStore';
 import { calculateWACFromLogs, recalculateIngredientCost } from '../../lib/inventoryCost';
-import { formatCurrency, toPersianDigits, getUnitLabel } from '../../lib/utils';
-import { formatJalaliReadable } from '../../lib/jalali';
+import { formatCurrency, toPersianDigits, toEnglishDigits, parseFormattedNumber, getUnitLabel } from '../../lib/utils';
+import { formatJalaliReadable, getTodayJalaliIso, toJalaliIso } from '../../lib/jalali';
 
 interface PurchaseHistoryDrawerProps {
   ingredient: Ingredient | null;
@@ -43,12 +49,28 @@ export const PurchaseHistoryDrawer: React.FC<PurchaseHistoryDrawerProps> = ({
   const [logs, setLogs] = useState<PurchaseLog[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Pagination state for history table
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+
+  // Edit Log State
+  const [editingLog, setEditingLog] = useState<PurchaseLog | null>(null);
+  const [editDate, setEditDate] = useState<string>(getTodayJalaliIso());
+  const [editQty, setEditQty] = useState<number | string>('');
+  const [editTotalPrice, setEditTotalPrice] = useState<number | ''>('');
+  const [editNote, setEditNote] = useState('');
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+
   const fetchLogs = async () => {
     if (!ingredient?.id) return;
     setIsLoading(true);
     try {
       const data = await db.purchaseLogs.where('ingredientId').equals(ingredient.id).toArray();
-      setLogs(data);
+      const normalized = data.map((item) => ({
+        ...item,
+        date: toJalaliIso(item.date),
+      }));
+      setLogs(normalized);
     } catch (err) {
       console.error('Error fetching purchase logs:', err);
     } finally {
@@ -59,6 +81,7 @@ export const PurchaseHistoryDrawer: React.FC<PurchaseHistoryDrawerProps> = ({
   useEffect(() => {
     if (isOpen && ingredient?.id) {
       fetchLogs();
+      setCurrentPage(1);
     } else {
       setLogs([]);
     }
@@ -81,6 +104,14 @@ export const PurchaseHistoryDrawer: React.FC<PurchaseHistoryDrawerProps> = ({
       return (b.createdAt || '').localeCompare(a.createdAt || '');
     });
   }, [logs]);
+
+  // Paginated logs
+  const totalPages = Math.ceil(logsNewestFirst.length / itemsPerPage) || 1;
+  const validPage = Math.min(currentPage, totalPages);
+  const paginatedLogs = useMemo(() => {
+    const start = (validPage - 1) * itemsPerPage;
+    return logsNewestFirst.slice(start, start + itemsPerPage);
+  }, [logsNewestFirst, validPage, itemsPerPage]);
 
   // Chart data
   const chartData = useMemo(() => {
@@ -112,6 +143,70 @@ export const PurchaseHistoryDrawer: React.FC<PurchaseHistoryDrawerProps> = ({
     }
     return map;
   }, [purchaseLogsChronological]);
+
+  // Open Edit Modal for a specific purchase log
+  const handleOpenEditModal = (log: PurchaseLog) => {
+    setEditingLog(log);
+    setEditDate(toJalaliIso(log.date));
+    setEditQty(log.quantity);
+    setEditTotalPrice(log.reason === 'purchase' ? log.totalPrice : 0);
+    setEditNote(log.note || '');
+  };
+
+  // Save edited purchase log
+  const handleSaveEditLog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingLog?.id || !ingredient?.id) return;
+
+    try {
+      setIsSubmittingEdit(true);
+      const qtyNum = parseFormattedNumber(editQty);
+      const totalPriceNum = editingLog.reason === 'purchase' ? parseFormattedNumber(editTotalPrice) : 0;
+
+      if (qtyNum <= 0 && editingLog.reason === 'purchase') {
+        notify.error('مقدار نامعتبر', 'مقدار فاکتور باید بیشتر از صفر باشد.');
+        return;
+      }
+
+      if (totalPriceNum <= 0 && editingLog.reason === 'purchase') {
+        notify.error('مبلغ نامعتبر', 'مبلغ کل فاکتور خرید باید بیشتر از صفر باشد.');
+        return;
+      }
+
+      const unitCost = editingLog.reason === 'purchase' && qtyNum > 0
+        ? Math.round(totalPriceNum / qtyNum)
+        : 0;
+
+      // Update the log in DB
+      await db.purchaseLogs.update(editingLog.id, {
+        date: editDate || getTodayJalaliIso(),
+        quantity: qtyNum,
+        totalPrice: totalPriceNum,
+        unitCost,
+        note: editNote.trim() || undefined,
+      });
+
+      // Recalculate WAC cost & updated stocks
+      if (editingLog.reason === 'purchase') {
+        await recalculateIngredientCost(ingredient.id);
+      } else {
+        // Recalculate current stock based on diff
+        const diffQty = qtyNum - editingLog.quantity;
+        await db.ingredients.update(ingredient.id, {
+          currentStock: ingredient.currentStock + diffQty,
+        });
+      }
+
+      notify.success('ویرایش شد', 'اطلاعات فاکتور خرید به‌روزرسانی شد و محاسبات میانگین قیمت اعمال گردید.');
+      setEditingLog(null);
+      await fetchLogs();
+    } catch (err) {
+      console.error('Error updating purchase log:', err);
+      notify.error('خطا در ویرایش فاکتور خرید');
+    } finally {
+      setIsSubmittingEdit(false);
+    }
+  };
 
   const handleDeleteLog = (logToDelete: PurchaseLog) => {
     if (!ingredient?.id || !logToDelete.id) return;
@@ -154,232 +249,335 @@ export const PurchaseHistoryDrawer: React.FC<PurchaseHistoryDrawerProps> = ({
   const unitLabel = getUnitLabel(ingredient.unit);
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={`سوابق خرید و نوسان قیمت: ${ingredient.name}`}
-      description={`بهای میانگین خرید فعلی: ${formatCurrency(ingredient.unitCost)} تومان به ازای هر ${unitLabel}`}
-      maxWidth="4xl"
-    >
-      <div className="space-y-6">
-        {/* Top Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-4 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-1">
-            <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] font-bold">
-              <ShoppingBag className="h-4 w-4 text-[var(--brand-primary)]" />
-              <span>میانگین قیمت هر {unitLabel}</span>
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={`سوابق خرید و نوسان قیمت: ${ingredient.name}`}
+        description={`بهای میانگین خرید فعلی: ${formatCurrency(ingredient.unitCost)} تومان به ازای هر ${unitLabel}`}
+        maxWidth="4xl"
+      >
+        <div className="space-y-4">
+          {/* Top Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div className="p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-0.5">
+              <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)] font-bold">
+                <ShoppingBag className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
+                <span>میانگین قیمت هر {unitLabel}</span>
+              </div>
+              <p className="text-sm font-black text-[var(--brand-primary)]">
+                {formatCurrency(ingredient.unitCost)}{' '}
+                <span className="text-[10px] font-bold text-[var(--text-secondary)]">تومان</span>
+              </p>
             </div>
-            <p className="text-base font-black text-[var(--brand-primary)]">
-              {formatCurrency(ingredient.unitCost)}{' '}
-              <span className="text-xs font-bold text-[var(--text-secondary)]">تومان</span>
-            </p>
-          </div>
 
-          <div className="p-4 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-1">
-            <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] font-bold">
-              <History className="h-4 w-4 text-[var(--status-info-text)]" />
-              <span>تعداد کل فاکتورها</span>
+            <div className="p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-0.5">
+              <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)] font-bold">
+                <History className="h-3.5 w-3.5 text-[var(--status-info-text)]" />
+                <span>تعداد کل سوابق</span>
+              </div>
+              <p className="text-sm font-black text-[var(--text-primary)]">
+                {toPersianDigits(logs.length)}{' '}
+                <span className="text-[10px] font-bold text-[var(--text-secondary)]">نوبت</span>
+              </p>
             </div>
-            <p className="text-base font-black text-[var(--text-primary)]">
-              {toPersianDigits(purchaseLogsChronological.length)}{' '}
-              <span className="text-xs font-bold text-[var(--text-secondary)]">نوبت خرید</span>
-            </p>
-          </div>
 
-          <div className="p-4 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-1">
-            <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] font-bold">
-              <Layers className="h-4 w-4 text-[var(--status-success-text)]" />
-              <span>موجودی فعلی انبار</span>
-            </div>
-            <p className="text-base font-black text-[var(--text-primary)]">
-              {toPersianDigits(ingredient.currentStock)}{' '}
-              <span className="text-xs font-bold text-[var(--text-secondary)]">{unitLabel}</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Price Trend Chart */}
-        {chartData.length > 1 && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black text-[var(--text-primary)] flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-[var(--brand-primary)]" />
-                <span>نمودار روند تغییر قیمت فی خرید در طول زمان</span>
-              </h3>
-            </div>
-            <div className="h-48 sm:h-56 w-full pt-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 10, fill: 'var(--text-secondary)' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 10, fill: 'var(--text-secondary)' }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(val) => toPersianDigits(Math.round(val / 1000)) + ' هزار'}
-                  />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        return (
-                          <div className="p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-lg text-xs font-bold space-y-1 dir-rtl">
-                            <p className="text-[var(--text-secondary)]">{data.date}</p>
-                            <p className="text-[var(--brand-primary)] font-black">
-                              قیمت هر {unitLabel}: {formatCurrency(data.unitCost)} تومان
-                            </p>
-                            <p className="text-[var(--text-primary)]">
-                              مقدار خرید: {toPersianDigits(data.quantity)} {unitLabel}
-                            </p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="unitCost"
-                    stroke="var(--brand-primary)"
-                    strokeWidth={2.5}
-                    dot={{ fill: 'var(--brand-primary)', r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <div className="p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-0.5">
+              <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)] font-bold">
+                <Layers className="h-3.5 w-3.5 text-[var(--status-success-text)]" />
+                <span>موجودی فعلی انبار</span>
+              </div>
+              <p className="text-sm font-black text-[var(--text-primary)]">
+                {toPersianDigits(ingredient.currentStock)}{' '}
+                <span className="text-[10px] font-bold text-[var(--text-secondary)]">{unitLabel}</span>
+              </p>
             </div>
           </div>
-        )}
 
-        {/* Purchase History Table */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-black text-[var(--text-primary)] flex items-center gap-2">
-              <History className="h-4 w-4 text-[var(--brand-primary)]" />
-              <span>ریز فاکتورهای خرید و اصلاحات</span>
-            </h3>
-            <span className="text-[11px] text-[var(--text-secondary)] font-medium">
-              مرتب‌شده بر اساس جدیدترین
-            </span>
-          </div>
-
-          {isLoading ? (
-            <div className="p-8 text-center text-xs font-bold text-[var(--text-secondary)]">
-              در حال دریافت سوابق...
-            </div>
-          ) : logsNewestFirst.length === 0 ? (
-            <div className="p-8 text-center rounded-2xl border border-dashed border-[var(--border-subtle)] text-xs font-bold text-[var(--text-secondary)] space-y-1">
-              <Info className="h-6 w-6 mx-auto text-[var(--text-secondary)]/50" />
-              <p>هیچ سابقه خریدی برای این ماده ثبت نشده است.</p>
-            </div>
-          ) : (
-            <div className="border border-[var(--border-subtle)] rounded-2xl overflow-hidden bg-[var(--bg-card)]">
-              <div className="overflow-x-auto">
-                <table className="w-full text-right text-xs">
-                  <thead className="bg-[var(--bg-base)] border-b border-[var(--border-subtle)] text-[var(--text-secondary)] font-black">
-                    <tr>
-                      <th className="p-3">تاریخ</th>
-                      <th className="p-3">نوع ثبت</th>
-                      <th className="p-3">مقدار</th>
-                      <th className="p-3">مبلغ کل (تومان)</th>
-                      <th className="p-3">قیمت واحد (تومان)</th>
-                      <th className="p-3">تغییر نسبت به خرید قبل</th>
-                      <th className="p-3 text-center">عملیات</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--border-subtle)] font-medium">
-                    {logsNewestFirst.map((log) => {
-                      const isPurchase = log.reason === 'purchase';
-                      const changePct = log.id ? priceChangesMap.get(log.id) : null;
-
-                      return (
-                        <tr key={log.id} className="hover:bg-[var(--bg-base)] transition-colors">
-                          {/* Date */}
-                          <td className="p-3 font-bold text-[var(--text-primary)] whitespace-nowrap">
-                            <span className="flex items-center gap-1.5">
-                              <Calendar className="h-3.5 w-3.5 text-[var(--text-secondary)] shrink-0" />
-                              <span>{formatJalaliReadable(log.date)}</span>
-                            </span>
-                          </td>
-
-                          {/* Reason Badge */}
-                          <td className="p-3 whitespace-nowrap">
-                            {isPurchase ? (
-                              <Badge className="bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)]/20 text-[10px] font-black">
-                                <ShoppingBag className="h-3 w-3 ml-1" />
-                                خرید جدید
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-[var(--status-info-bg)] text-[var(--status-info-text)] border-[var(--status-info-text)]/20 text-[10px] font-black">
-                                اصلاح موجودی
-                              </Badge>
-                            )}
-                          </td>
-
-                          {/* Quantity */}
-                          <td className="p-3 font-bold text-[var(--text-primary)] whitespace-nowrap">
-                            {toPersianDigits(log.quantity)} {unitLabel}
-                          </td>
-
-                          {/* Total Price */}
-                          <td className="p-3 font-extrabold text-[var(--text-primary)] whitespace-nowrap">
-                            {isPurchase ? formatCurrency(log.totalPrice) : '-'}
-                          </td>
-
-                          {/* Unit Cost */}
-                          <td className="p-3 font-black text-[var(--brand-primary)] whitespace-nowrap">
-                            {isPurchase ? formatCurrency(log.unitCost) : '-'}
-                          </td>
-
-                          {/* Price Change Percentage */}
-                          <td className="p-3 whitespace-nowrap">
-                            {isPurchase && changePct !== undefined && changePct !== null ? (
-                              changePct > 0 ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-[var(--status-warning-bg)] text-[var(--status-warning-text)] border border-[var(--status-warning-text)]/20">
-                                  <TrendingUp className="h-3 w-3" />
-                                  <span>{toPersianDigits(Math.abs(changePct).toFixed(1))}%+ (گران‌تر)</span>
-                                </span>
-                              ) : changePct < 0 ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-[var(--status-success-bg)] text-[var(--status-success-text)] border border-[var(--status-success-text)]/20">
-                                  <TrendingDown className="h-3 w-3" />
-                                  <span>{toPersianDigits(Math.abs(changePct).toFixed(1))}%- (ارزان‌تر)</span>
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--bg-base)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-                                  بدون تغییر
-                                </span>
-                              )
-                            ) : (
-                              <span className="text-[var(--text-secondary)] text-[10px]">-</span>
-                            )}
-                          </td>
-
-                          {/* Actions */}
-                          <td className="p-3 text-center whitespace-nowrap">
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteLog(log)}
-                              className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] transition-colors cursor-pointer"
-                              title="حذف این سابقه"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+          {/* Minimal Compact Price Trend Chart */}
+          {chartData.length > 1 && (
+            <div className="p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-1.5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[11px] font-black text-[var(--text-primary)] flex items-center gap-1.5">
+                  <TrendingUp className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
+                  <span>نمودار نوسان قیمت فی خرید</span>
+                </h3>
+              </div>
+              <div className="h-32 w-full pt-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 9, fill: 'var(--text-secondary)' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 9, fill: 'var(--text-secondary)' }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(val) => toPersianDigits(Math.round(val / 1000)) + 'k'}
+                    />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="p-2.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-md text-[11px] font-bold space-y-0.5 dir-rtl">
+                              <p className="text-[var(--text-secondary)]">{data.date}</p>
+                              <p className="text-[var(--brand-primary)] font-black">
+                                فی: {formatCurrency(data.unitCost)} تومان
+                              </p>
+                              <p className="text-[var(--text-primary)]">
+                                مقدار: {toPersianDigits(data.quantity)} {unitLabel}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="unitCost"
+                      stroke="var(--brand-primary)"
+                      strokeWidth={2}
+                      dot={{ fill: 'var(--brand-primary)', r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </div>
           )}
+
+          {/* Purchase History Table with Pagination */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[11px] font-black text-[var(--text-primary)] flex items-center gap-1.5">
+                <History className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
+                <span>ریز فاکتورهای خرید و اصلاحات</span>
+              </h3>
+              <span className="text-[10px] text-[var(--text-secondary)] font-medium">
+                جدیدترین‌ها در ابتدا
+              </span>
+            </div>
+
+            {isLoading ? (
+              <div className="p-6 text-center text-xs font-bold text-[var(--text-secondary)]">
+                در حال دریافت سوابق...
+              </div>
+            ) : logsNewestFirst.length === 0 ? (
+              <div className="p-6 text-center rounded-xl border border-dashed border-[var(--border-subtle)] text-xs font-bold text-[var(--text-secondary)] space-y-1">
+                <Info className="h-5 w-5 mx-auto text-[var(--text-secondary)]/50" />
+                <p>هیچ سابقه خریدی برای این ماده ثبت نشده است.</p>
+              </div>
+            ) : (
+              <div className="border border-[var(--border-subtle)] rounded-xl overflow-hidden bg-[var(--bg-card)]">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right text-xs">
+                    <thead className="bg-[var(--bg-base)] border-b border-[var(--border-subtle)] text-[10px] text-[var(--text-secondary)] font-black">
+                      <tr>
+                        <th className="p-2.5">تاریخ</th>
+                        <th className="p-2.5">نوع ثبت</th>
+                        <th className="p-2.5">مقدار</th>
+                        <th className="p-2.5">مبلغ کل (تومان)</th>
+                        <th className="p-2.5">قیمت واحد</th>
+                        <th className="p-2.5">تغییر نرخ</th>
+                        <th className="p-2.5 text-center">عملیات</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--border-subtle)] font-medium text-[11px]">
+                      {paginatedLogs.map((log) => {
+                        const isPurchase = log.reason === 'purchase';
+                        const changePct = log.id ? priceChangesMap.get(log.id) : null;
+
+                        return (
+                          <tr key={log.id} className="hover:bg-[var(--bg-base)] transition-colors">
+                            {/* Jalali Date Display (Always converted cleanly) */}
+                            <td className="p-2.5 font-bold text-[var(--text-primary)] whitespace-nowrap">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3 text-[var(--text-secondary)] shrink-0" />
+                                <span>{formatJalaliReadable(log.date)}</span>
+                              </span>
+                            </td>
+
+                            {/* Reason Badge */}
+                            <td className="p-2.5 whitespace-nowrap">
+                              {isPurchase ? (
+                                <Badge className="bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)]/20 text-[9px] font-black">
+                                  خرید
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-[var(--status-info-bg)] text-[var(--status-info-text)] border-[var(--status-info-text)]/20 text-[9px] font-black">
+                                  اصلاح
+                                </Badge>
+                              )}
+                            </td>
+
+                            {/* Quantity */}
+                            <td className="p-2.5 font-bold text-[var(--text-primary)] whitespace-nowrap">
+                              {toPersianDigits(log.quantity)} {unitLabel}
+                            </td>
+
+                            {/* Total Price */}
+                            <td className="p-2.5 font-extrabold text-[var(--text-primary)] whitespace-nowrap">
+                              {isPurchase ? formatCurrency(log.totalPrice) : '-'}
+                            </td>
+
+                            {/* Unit Cost */}
+                            <td className="p-2.5 font-black text-[var(--brand-primary)] whitespace-nowrap">
+                              {isPurchase ? formatCurrency(log.unitCost) : '-'}
+                            </td>
+
+                            {/* Price Change Percentage */}
+                            <td className="p-2.5 whitespace-nowrap">
+                              {isPurchase && changePct !== undefined && changePct !== null ? (
+                                changePct > 0 ? (
+                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[var(--status-warning-bg)] text-[var(--status-warning-text)] border border-[var(--status-warning-text)]/20">
+                                    <TrendingUp className="h-2.5 w-2.5" />
+                                    <span>{toPersianDigits(Math.abs(changePct).toFixed(1))}%+</span>
+                                  </span>
+                                ) : changePct < 0 ? (
+                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[var(--status-success-bg)] text-[var(--status-success-text)] border border-[var(--status-success-text)]/20">
+                                    <TrendingDown className="h-2.5 w-2.5" />
+                                    <span>{toPersianDigits(Math.abs(changePct).toFixed(1))}%-</span>
+                                  </span>
+                                ) : (
+                                  <span className="text-[var(--text-secondary)] text-[9px]">بدون تغییر</span>
+                                )
+                              ) : (
+                                <span className="text-[var(--text-secondary)] text-[9px]">-</span>
+                              )}
+                            </td>
+
+                            {/* Actions: Edit & Delete */}
+                            <td className="p-2.5 text-center whitespace-nowrap">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditModal(log)}
+                                  className="p-1 rounded-md text-[var(--text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
+                                  title="ویرایش فاکتور"
+                                >
+                                  <Edit2 className="h-3.5 w-3.5" />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteLog(log)}
+                                  className="p-1 rounded-md text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] transition-colors cursor-pointer"
+                                  title="حذف سابقه"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <Pagination
+                  currentPage={validPage}
+                  totalPages={totalPages}
+                  totalItems={logsNewestFirst.length}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={(p) => setCurrentPage(p)}
+                  onItemsPerPageChange={(sz) => {
+                    setItemsPerPage(sz);
+                    setCurrentPage(1);
+                  }}
+                  itemsPerPageOptions={[5, 10, 15]}
+                  itemLabel="سابقه"
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </Modal>
+      </Modal>
+
+      {/* Modal for Editing a Purchase Log */}
+      {editingLog && (
+        <Modal
+          isOpen={!!editingLog}
+          onClose={() => setEditingLog(null)}
+          title={`ویرایش سابقه ${editingLog.reason === 'purchase' ? 'خرید' : 'اصلاح'}: ${ingredient.name}`}
+          description="ویرایش تاریخ، مقدار و مبلغ ثبت‌شده و محاسبه مجدد میانگین بهای انبار"
+          maxWidth="lg"
+        >
+          <form onSubmit={handleSaveEditLog} noValidate className="space-y-3.5">
+            <JalaliDatePicker
+              label="تاریخ فاکتور"
+              value={editDate}
+              onChange={setEditDate}
+            />
+
+            <div>
+              <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1">
+                مقدار ({unitLabel}) <span className="text-[var(--status-error-text)]">*</span>
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={editQty === '' ? '' : toPersianDigits(editQty)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const eng = toEnglishDigits(val).replace(',', '.').replace('/', '.');
+                  if (eng === '') setEditQty('');
+                  else if (/^\d*\.?\d*$/.test(eng)) setEditQty(val);
+                }}
+                className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+              />
+            </div>
+
+            {editingLog.reason === 'purchase' && (
+              <SmartMoneyInput
+                label="مبلغ کل فاکتور (تومان)"
+                value={editTotalPrice}
+                onChange={(val) => setEditTotalPrice(val)}
+                placeholder="مبلغ کل"
+                suffix="تومان"
+              />
+            )}
+
+            <div>
+              <label className="block text-xs font-bold text-[var(--text-secondary)] mb-1">
+                توضیحات (اختیاری)
+              </label>
+              <input
+                type="text"
+                value={editNote}
+                onChange={(e) => setEditNote(e.target.value)}
+                placeholder="توضیحات فاکتور"
+                className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-medium text-[var(--text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border-subtle)]">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditingLog(null)}
+                className="h-10 px-4 rounded-xl text-xs font-bold"
+              >
+                انصراف
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={isSubmittingEdit}
+                className="h-10 px-5 rounded-xl text-xs font-black bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
+              >
+                {isSubmittingEdit ? 'در حال ذخیره...' : 'ذخیره تغییرات و محاسبه مجدد'}
+              </Button>
+            </div>
+          </form>
+        </Modal>
+      )}
+    </>
   );
 };

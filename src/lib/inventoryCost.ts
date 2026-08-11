@@ -77,11 +77,13 @@ export async function recalculateIngredientCost(ingredientId: number): Promise<v
       // If no purchase logs left, preserve unitCost if non-zero, or set 0
       const hasPurchases = logs.some((l) => l.reason === 'purchase');
       const finalUnitCost = hasPurchases ? unitCost : ingredient.unitCost;
+      const finalTotalQty = hasPurchases ? totalPurchasedQuantity : 0;
+      const finalTotalPrice = hasPurchases ? totalPurchasedPrice : 0;
 
       await db.ingredients.update(ingredientId, {
         unitCost: finalUnitCost,
-        totalQuantity: totalPurchasedQuantity || ingredient.totalQuantity,
-        totalPrice: totalPurchasedPrice || ingredient.totalPrice,
+        totalQuantity: finalTotalQty,
+        totalPrice: finalTotalPrice,
         updatedAt: new Date().toISOString(),
       });
     }

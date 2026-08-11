@@ -342,18 +342,22 @@ export const GuideManager: React.FC = () => {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
-                  <span className="text-[11px] font-bold text-[var(--text-secondary)]">{toPersianDigits(1)}. ثبت قیمت خرید</span>
-                  <p className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">قیمت خرید طبق فاکتور تامین‌کننده</p>
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
+                  <span className="text-[11px] font-bold text-[var(--text-secondary)]">{toPersianDigits(1)}. ثبت قیمت و خرید</span>
+                  <p className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">ثبت فاکتورهای جدید خرید مواد اولیه</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
-                  <span className="text-[11px] font-bold text-[var(--status-warning-text)]">{toPersianDigits(2)}. ثبت درصد افت</span>
-                  <p className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">درصد ضایعات پاک‌کردن و ریشه/پوست</p>
+                <div className="p-3.5 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
+                  <span className="text-[11px] font-bold text-[var(--status-warning-text)]">{toPersianDigits(2)}. میانگین موزون (WAC)</span>
+                  <p className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">محاسبه خودکار بهای تمام‌شده بر اساس خریدهای متوالی</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
-                  <span className="text-[11px] font-bold text-[var(--status-success-text)]">{toPersianDigits(3)}. حد حداقل موجودی</span>
-                  <p className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">دریافت هشدار خودکار در صورت کمبود</p>
+                <div className="p-3.5 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
+                  <span className="text-[11px] font-bold text-[var(--status-info-text)]">{toPersianDigits(3)}. نمودار نوسان قیمت</span>
+                  <p className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">تحلیل تغییرات نرخ خرید و ویرایش ریز فاکتورها</p>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
+                  <span className="text-[11px] font-bold text-[var(--status-success-text)]">{toPersianDigits(4)}. نقطه سفارش</span>
+                  <p className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">دریافت هشدار خودکار در صورت کمبود موجودی</p>
                 </div>
               </div>
             </CardContent>

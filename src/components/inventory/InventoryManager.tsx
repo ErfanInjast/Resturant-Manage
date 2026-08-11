@@ -530,7 +530,8 @@ export const InventoryManager: React.FC = () => {
         />
       ) : (
         <Card className="overflow-hidden border border-[var(--border-subtle)]">
-          <div className="overflow-x-auto">
+          {/* Desktop & Tablet Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-right border-collapse">
               <thead>
                 <tr className="bg-[var(--bg-base)] border-b border-[var(--border-subtle)] text-[11px] font-black text-[var(--text-secondary)] select-none">
@@ -662,6 +663,104 @@ export const InventoryManager: React.FC = () => {
                 </motion.tbody>
               </AnimatePresence>
             </table>
+          </div>
+
+          {/* Mobile-optimized Card List View */}
+          <div className="block md:hidden">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={validPage}
+                custom={direction}
+                variants={tablePageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="divide-y divide-[var(--border-subtle)] text-xs"
+              >
+                {paginatedIngredients.map((item) => {
+                  const isLow = item.currentStock <= item.minimumStock;
+                  return (
+                    <motion.div
+                      key={item.id}
+                      variants={tableRowVariants}
+                      className={`p-4 space-y-3.5 transition-colors ${
+                        isLow ? 'bg-[var(--status-error-bg)]/10 dark:bg-[var(--status-error-bg)]/5' : 'bg-white dark:bg-stone-950/25'
+                      }`}
+                    >
+                      {/* Ingredient Header Info */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h4 className="text-sm font-black text-[var(--text-primary)] dark:text-white">
+                            {item.name}
+                          </h4>
+                          <span className="text-[10px] text-[var(--text-secondary)] mt-0.5 inline-block">
+                            شناسه: {toPersianDigits(item.id || 0)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Badge variant="default" className="text-[9px] px-2 py-0.5">
+                            {item.category}
+                          </Badge>
+                          {isLow ? (
+                            <Badge variant="danger" className="text-[9px] px-2 py-0.5">کمبود موجودی</Badge>
+                          ) : (
+                            <Badge variant="success" className="text-[9px] px-2 py-0.5">عادی</Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Stock Info Details */}
+                      <div className="grid grid-cols-2 gap-3 bg-[var(--bg-base)] dark:bg-stone-900/40 p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-stone-900">
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] text-[var(--text-secondary)]">موجودی فعلی:</span>
+                          <div className={`text-xs font-black ${isLow ? 'text-[var(--status-error-text)]' : 'text-[var(--text-primary)] dark:text-stone-200'}`}>
+                            {toPersianDigits(item.currentStock)} {getUnitLabel(item.unit)}
+                          </div>
+                        </div>
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] text-[var(--text-secondary)]">نقطه سفارش (حداقل):</span>
+                          <div className="text-xs font-bold text-[var(--text-primary)] dark:text-stone-300">
+                            {toPersianDigits(item.minimumStock)} {getUnitLabel(item.unit)}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tactile Touch Actions (at least 44px touch-friendly) */}
+                      <div className="flex items-center justify-end gap-1 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setHistoryDrawerIngredient(item)}
+                          className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--brand-primary-subtle)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                          title="سوابق خرید و نمودار قیمت"
+                        >
+                          <History className="h-3.5 w-3.5" />
+                          <span>تاریخچه خرید</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(item)}
+                          className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                          title="ویرایش مشخصات"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                          <span>اصلاح و ویرایش</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => item.id && handleDelete(item.id, item.name)}
+                          className="flex items-center gap-1 px-2.5 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                          title="حذف ماده اولیه"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-[var(--status-error-text)]" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           <Pagination

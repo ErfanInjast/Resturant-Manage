@@ -347,10 +347,10 @@ export const PnLDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setDatePreset('today')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
               datePreset === 'today'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
+                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
             }`}
           >
             امروز
@@ -359,10 +359,10 @@ export const PnLDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setDatePreset('specific')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1 border ${
               datePreset === 'specific'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
+                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
             }`}
           >
             <Calendar className="h-3.5 w-3.5" />
@@ -372,10 +372,10 @@ export const PnLDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setDatePreset('last7')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
               datePreset === 'last7'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
+                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
             }`}
           >
             ۷ روز اخیر
@@ -384,10 +384,10 @@ export const PnLDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setDatePreset('last30')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
               datePreset === 'last30'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
+                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
             }`}
           >
             ۳۰ روز اخیر
@@ -396,10 +396,10 @@ export const PnLDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setDatePreset('currentMonth')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
               datePreset === 'currentMonth'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
+                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
             }`}
           >
             ماه جاری
@@ -408,10 +408,10 @@ export const PnLDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setDatePreset('allTime')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
               datePreset === 'allTime'
-                ? 'bg-[var(--brand-primary)] text-white shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
+                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
             }`}
           >
             کل تاریخچه

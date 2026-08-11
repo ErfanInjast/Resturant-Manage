@@ -625,13 +625,14 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
       {/* VIEW 1: PRODUCT TABLE VIEW */}
       {mainView === 'table' && (
         <Card className="overflow-hidden border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-          <div className="overflow-x-auto">
+          {/* Desktop and Tablet table */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-right border-collapse text-xs">
               <thead>
                 <tr className="bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-[11px] font-black text-[var(--text-secondary)] dark:text-[var(--text-secondary)] select-none">
                   <th
                     onClick={() => handleSort('name')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>نام محصول</span>
@@ -640,7 +641,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                   </th>
                   <th
                     onClick={() => handleSort('matrixCategoryCalculated')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>وضعیت سودآوری (ماتریس)</span>
@@ -649,7 +650,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                   </th>
                   <th
                     onClick={() => handleSort('sellingPrice')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>قیمت فروش</span>
@@ -658,7 +659,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                   </th>
                   <th
                     onClick={() => handleSort('primeCost')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>بهای تمام‌شده (COGS)</span>
@@ -667,7 +668,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                   </th>
                   <th
                     onClick={() => handleSort('grossProfit')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>سود ناخالص هر پرس</span>
@@ -676,7 +677,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                   </th>
                   <th
                     onClick={() => handleSort('computedVolume')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>فروش ۳۰ روزه</span>
@@ -685,7 +686,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                   </th>
                   <th
                     onClick={() => handleSort('monthlyGrossProfitContribution')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>کل سود ماهانه</span>
@@ -703,7 +704,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                   initial="initial"
                   animate="animate"
                   exit="exit"
-                  className="divide-y divide-[var(--border-subtle)] divide-[var(--border-subtle)]"
+                  className="divide-y divide-[var(--border-subtle)]"
                 >
                   {filteredAndSortedItems.length === 0 ? (
                     <tr>
@@ -785,6 +786,98 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                 </motion.tbody>
               </AnimatePresence>
             </table>
+          </div>
+
+          {/* Mobile Card Layout View */}
+          <div className="block lg:hidden">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={validPage}
+                custom={direction}
+                variants={tablePageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="divide-y divide-[var(--border-subtle)] text-xs"
+              >
+                {filteredAndSortedItems.length === 0 ? (
+                  <div className="p-8 text-center text-[var(--text-secondary)] font-bold text-xs bg-white dark:bg-stone-950/25">
+                    هیچ محصولی مطابق با جستجو یا فیلتر انتخابی یافت نشد.
+                  </div>
+                ) : (
+                  paginatedItems.map((item) => {
+                    const quad = QUADRANT_CONFIGS[item.matrixCategoryCalculated];
+                    const QuadIcon = quad.icon;
+                    return (
+                      <motion.div
+                        key={item.id}
+                        variants={tableRowVariants}
+                        className="p-4 space-y-3.5 bg-white dark:bg-stone-950/25 transition-colors"
+                      >
+                        {/* Title and Badge header */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h4 className="text-sm font-black text-[var(--text-primary)] dark:text-white">
+                              {item.name}
+                            </h4>
+                            <span className="text-[10px] text-[var(--text-secondary)] font-medium mt-0.5 inline-block">
+                              دسته‌بندی: {item.category}
+                            </span>
+                          </div>
+                          <div className="shrink-0">
+                            <Badge variant={quad.badgeVariant} className="text-[10px] gap-1 py-0.5 px-2 font-bold">
+                              <QuadIcon className="h-3 w-3" />
+                              <span>{quad.title}</span>
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Financial and volume metrics grid */}
+                        <div className="grid grid-cols-2 gap-2 bg-[var(--bg-base)] dark:bg-stone-900/40 p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-stone-900">
+                          <div className="space-y-0.5">
+                            <span className="text-[9px] text-[var(--text-secondary)] font-bold block">قیمت و سود هر پرس:</span>
+                            <div className="text-[11px] font-black text-[var(--text-primary)]">
+                              فروش: {formatToman(item.sellingPrice).text}
+                            </div>
+                            <div className="text-[11px] font-bold text-[var(--text-secondary)]">
+                              بها (COGS): {formatToman(item.primeCost).text}
+                            </div>
+                            <div className="text-[11px] font-black text-[var(--status-success-text)] mt-0.5">
+                              سود: {formatToman(item.grossProfit || 0).text} <span className="text-[9px] font-bold">({formatNumber(item.marginPercent)}٪)</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-0.5 border-r border-[var(--border-subtle)]/50 dark:border-stone-800 pr-2.5">
+                            <span className="text-[9px] text-[var(--text-secondary)] font-bold block">مجموع عملکرد ۳۰ روزه:</span>
+                            <div className="text-[11px] font-black text-[var(--text-primary)]">
+                              تعداد فروش: {formatNumber(item.computedVolume)} پرس
+                            </div>
+                            <div className="text-[11px] font-black text-[var(--status-success-text)] mt-1">
+                              مجموع سود ماهانه:
+                              <span className="block text-[12px] font-black text-[var(--status-success-text)]">
+                                {formatToman(item.monthlyGrossProfitContribution).text}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Detail Touch Button */}
+                        <div className="flex items-center justify-end pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedDetailItem(item)}
+                            className="flex items-center gap-1.5 px-4 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--brand-primary-subtle)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                          >
+                            <Eye className="h-4 w-4 text-[var(--brand-primary)]" />
+                            <span>مشاهده شناسنامه محصول</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           <Pagination

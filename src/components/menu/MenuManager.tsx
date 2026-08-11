@@ -382,13 +382,14 @@ export const MenuManager: React.FC = () => {
         />
       ) : (
         <Card className="overflow-hidden border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-          <div className="overflow-x-auto">
+          {/* Desktop & Tablet Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-right border-collapse">
               <thead>
                 <tr className="bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-[11px] font-black text-[var(--text-secondary)] dark:text-[var(--text-secondary)] select-none">
                   <th
                     onClick={() => handleSort('name')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>نام آیتم منو</span>
@@ -397,7 +398,7 @@ export const MenuManager: React.FC = () => {
                   </th>
                   <th
                     onClick={() => handleSort('category')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>دسته‌بندی</span>
@@ -406,7 +407,7 @@ export const MenuManager: React.FC = () => {
                   </th>
                   <th
                     onClick={() => handleSort('sellingPrice')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>قیمت فروش فعلی</span>
@@ -415,7 +416,7 @@ export const MenuManager: React.FC = () => {
                   </th>
                   <th
                     onClick={() => handleSort('targetPrice')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>قیمت پیشنهادی (فودکاست {formatNumber(settings.targetFoodCostPercent)}٪)</span>
@@ -424,7 +425,7 @@ export const MenuManager: React.FC = () => {
                   </th>
                   <th
                     onClick={() => handleSort('primeCost')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>بهای تمام شده هر پرس</span>
@@ -433,7 +434,7 @@ export const MenuManager: React.FC = () => {
                   </th>
                   <th
                     onClick={() => handleSort('grossProfit')}
-                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                    className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>سود ناخالص (حاشیه سود)</span>
@@ -452,7 +453,7 @@ export const MenuManager: React.FC = () => {
                   initial="initial"
                   animate="animate"
                   exit="exit"
-                  className="divide-y divide-[var(--border-subtle)] divide-[var(--border-subtle)] text-xs"
+                  className="divide-y divide-[var(--border-subtle)] text-xs"
                 >
                   {paginatedMenuItems.map((item) => {
                     const isBelowTarget = item.sellingPrice < item.targetPrice;
@@ -498,7 +499,7 @@ export const MenuManager: React.FC = () => {
                           <div className="flex items-center justify-center gap-1">
                             <button
                               onClick={() => openEditModal(item)}
-                              className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-base)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
+                              className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
                               title="ویرایش رسپی"
                               aria-label={`ویرایش رسپی ${item.name}`}
                             >
@@ -506,7 +507,7 @@ export const MenuManager: React.FC = () => {
                             </button>
                             <button
                               onClick={() => item.id && handleDelete(item.id, item.name)}
-                              className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] dark:hover:text-[var(--status-error-text)] rounded-lg hover:bg-[var(--bg-base)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
+                              className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] rounded-lg hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
                               title="حذف"
                               aria-label={`حذف آیتم ${item.name}`}
                             >
@@ -520,6 +521,107 @@ export const MenuManager: React.FC = () => {
                 </motion.tbody>
               </AnimatePresence>
             </table>
+          </div>
+
+          {/* Mobile & Tablet Card Layout */}
+          <div className="block lg:hidden">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={validPage}
+                custom={direction}
+                variants={tablePageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="divide-y divide-[var(--border-subtle)] text-xs"
+              >
+                {paginatedMenuItems.map((item) => {
+                  const isBelowTarget = item.sellingPrice < item.targetPrice;
+                  return (
+                    <motion.div
+                      key={item.id}
+                      variants={tableRowVariants}
+                      className="p-4 space-y-3.5 bg-white dark:bg-stone-950/25 transition-colors"
+                    >
+                      {/* Name & Badges */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h4 className="text-sm font-black text-[var(--text-primary)] dark:text-white">
+                            {item.name}
+                          </h4>
+                          <span className="text-[10px] text-[var(--text-secondary)] mt-0.5 inline-block">
+                            {formatNumber(item.ingredients?.length || 0)} ماده اولیه در فرمول ساخت
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Badge variant="secondary" className="text-[9px] px-1.5 py-0.5">
+                            {item.category}
+                          </Badge>
+                          <Badge variant={isBelowTarget ? 'danger' : 'success'} className="text-[9px] px-1.5 py-0.5">
+                            {isBelowTarget ? 'سوددهی کم' : 'مناسب'}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Financial 2x2 Grid */}
+                      <div className="grid grid-cols-2 gap-3 bg-[var(--bg-base)] dark:bg-stone-900/40 p-3 rounded-xl border border-[var(--border-subtle)] dark:border-stone-900">
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] text-[var(--text-secondary)] font-bold">قیمت فروش فعلی:</span>
+                          <div className="text-xs font-black text-[var(--text-primary)] dark:text-stone-100">
+                            {formatToman(item.sellingPrice).text}
+                          </div>
+                        </div>
+
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] text-[var(--text-secondary)] font-bold">پیشنهادی (فودکاست {formatNumber(settings.targetFoodCostPercent)}٪):</span>
+                          <div className="text-xs font-black text-[var(--status-success-text)]">
+                            {formatToman(item.targetPrice).text}
+                          </div>
+                        </div>
+
+                        <div className="space-y-0.5 pt-1 border-t border-[var(--border-subtle)]/40 dark:border-stone-800">
+                          <span className="text-[10px] text-[var(--text-secondary)] font-bold">بهای تمام‌شده هر پرس:</span>
+                          <div className="text-xs font-bold text-[var(--status-warning-text)]">
+                            {formatToman(item.primeCost).text}
+                          </div>
+                        </div>
+
+                        <div className="space-y-0.5 pt-1 border-t border-[var(--border-subtle)]/40 dark:border-stone-800">
+                          <span className="text-[10px] text-[var(--text-secondary)] font-bold">سود ناخالص (حاشیه):</span>
+                          <div className="text-xs font-black">
+                            <span className={item.grossProfit >= 0 ? 'text-[#00A650] dark:text-[var(--status-success-text)]' : 'text-[var(--status-error-text)]'}>
+                              {formatToman(item.grossProfit).text} ({formatNumber(item.marginPercent)}٪)
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Triggers */}
+                      <div className="flex items-center justify-end gap-1.5 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(item)}
+                          className="flex items-center gap-1 px-4 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                          title="ویرایش رسپی"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                          <span>ویرایش رسپی و قیمت</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => item.id && handleDelete(item.id, item.name)}
+                          className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
+                          title="حذف آیتم منو"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-[var(--status-error-text)]" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           <Pagination

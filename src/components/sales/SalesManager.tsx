@@ -906,13 +906,14 @@ export const SalesManager: React.FC = () => {
 
             return (
               <Card className="overflow-hidden border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-                <div className="overflow-x-auto">
+                {/* Desktop and Tablet table */}
+                <div className="hidden lg:block overflow-x-auto">
                   <table className="w-full text-right border-collapse">
                     <thead>
                       <tr className="bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-[11px] font-black text-[var(--text-secondary)] dark:text-[var(--text-secondary)] select-none">
                         <th
                           onClick={() => handleSalesSort('date')}
-                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                         >
                           <div className="flex items-center gap-1.5">
                             <span>تاریخ ثبت</span>
@@ -921,7 +922,7 @@ export const SalesManager: React.FC = () => {
                         </th>
                         <th
                           onClick={() => handleSalesSort('totalUnits')}
-                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                         >
                           <div className="flex items-center gap-1.5">
                             <span>حجم فروش (تعداد کل)</span>
@@ -930,7 +931,7 @@ export const SalesManager: React.FC = () => {
                         </th>
                         <th
                           onClick={() => handleSalesSort('totalRevenue')}
-                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                         >
                           <div className="flex items-center gap-1.5">
                             <span>درآمد کل</span>
@@ -939,7 +940,7 @@ export const SalesManager: React.FC = () => {
                         </th>
                         <th
                           onClick={() => handleSalesSort('totalCOGS')}
-                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                         >
                           <div className="flex items-center gap-1.5">
                             <span>بهای تمام شده (COGS)</span>
@@ -948,7 +949,7 @@ export const SalesManager: React.FC = () => {
                         </th>
                         <th
                           onClick={() => handleSalesSort('grossProfit')}
-                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                         >
                           <div className="flex items-center gap-1.5">
                             <span>سود ناخالص</span>
@@ -966,7 +967,7 @@ export const SalesManager: React.FC = () => {
                         initial="initial"
                         animate="animate"
                         exit="exit"
-                        className="divide-y divide-[var(--border-subtle)] divide-[var(--border-subtle)] text-xs"
+                        className="divide-y divide-[var(--border-subtle)] text-xs"
                       >
                         {paginatedRecords.map((record) => {
                           const grossProfit = record.totalRevenue - record.totalCOGS;
@@ -1027,14 +1028,14 @@ export const SalesManager: React.FC = () => {
                                   </button>
                                   <button
                                     onClick={() => openEditSalesModal(record)}
-                                    className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--brand-primary)] dark:hover:text-[var(--status-warning-text)] rounded-lg hover:bg-[var(--bg-base)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
+                                    className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--brand-primary)] dark:hover:text-[var(--status-warning-text)] rounded-lg hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
                                     title="ویرایش"
                                   >
                                     <Pencil className="h-4 w-4" />
                                   </button>
                                   <button
                                     onClick={() => record.id && handleDeleteSalesRecord(record.id)}
-                                    className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] dark:hover:text-[var(--status-error-text)] rounded-lg hover:bg-[var(--bg-base)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
+                                    className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] dark:hover:text-[var(--status-error-text)] rounded-lg hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
                                     title="حذف"
                                   >
                                     <Trash2 className="h-4 w-4" />
@@ -1047,6 +1048,105 @@ export const SalesManager: React.FC = () => {
                       </motion.tbody>
                     </AnimatePresence>
                   </table>
+                </div>
+
+                {/* Mobile Card List View */}
+                <div className="block lg:hidden">
+                  <AnimatePresence mode="wait" custom={salesDirection}>
+                    <motion.div
+                      key={validPage}
+                      custom={salesDirection}
+                      variants={tablePageVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      className="divide-y divide-[var(--border-subtle)] text-xs"
+                    >
+                      {paginatedRecords.map((record) => {
+                        const grossProfit = record.totalRevenue - record.totalCOGS;
+                        const totalUnits = record.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+                        const typesCount = record.items?.length || 0;
+
+                        return (
+                          <motion.div
+                            key={record.id}
+                            variants={tableRowVariants}
+                            className="p-4 space-y-3.5 bg-white dark:bg-stone-950/25 transition-colors"
+                          >
+                            {/* Card Header: Date & Quantity */}
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <h4 className="text-sm font-black text-[var(--text-primary)] dark:text-white">
+                                  فروش روز {formatJalaliReadable(record.date)}
+                                </h4>
+                                <span className="text-[10px] text-[var(--text-secondary)] font-mono mt-0.5 inline-block">
+                                  تاریخ: {toPersianDigits(record.date)}
+                                </span>
+                              </div>
+                              <div className="text-left shrink-0">
+                                <Badge variant="default" className="text-[10px] bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] px-2 py-0.5 font-bold">
+                                  {formatNumber(totalUnits)} عدد کل
+                                </Badge>
+                                <div className="text-[10px] text-[var(--text-secondary)] mt-1 font-medium">
+                                  {formatNumber(typesCount)} نوع محصول
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Financial Summary Grid */}
+                            <div className="grid grid-cols-3 gap-2 bg-[var(--bg-base)] dark:bg-stone-900/40 p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-stone-900">
+                              <div className="space-y-0.5 text-center">
+                                <span className="block text-[9px] text-[var(--text-secondary)] font-bold">درآمد کل:</span>
+                                <span className="text-[11px] font-black text-[var(--status-success-text)]">
+                                  {formatToman(record.totalRevenue).text}
+                                </span>
+                              </div>
+                              <div className="space-y-0.5 text-center border-r border-[var(--border-subtle)]/50 dark:border-stone-800">
+                                <span className="block text-[9px] text-[var(--text-secondary)] font-bold">بهای مواد (COGS):</span>
+                                <span className="text-[11px] font-black text-[var(--brand-primary)] dark:text-stone-300">
+                                  {formatToman(record.totalCOGS).text}
+                                </span>
+                              </div>
+                              <div className="space-y-0.5 text-center border-r border-[var(--border-subtle)]/50 dark:border-stone-800">
+                                <span className="block text-[9px] text-[var(--text-secondary)] font-bold">سود ناخالص:</span>
+                                <span className={`text-[11px] font-black ${grossProfit >= 0 ? 'text-[var(--status-success-text)]' : 'text-[var(--status-error-text)]'}`}>
+                                  {formatToman(grossProfit).text}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Tactile Touch Actions */}
+                            <div className="flex items-center justify-end gap-1.5 pt-1">
+                              <button
+                                onClick={() => setDetailRecord(record)}
+                                className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--brand-primary-subtle)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                                title="مشاهده جزئیات فاکتور"
+                              >
+                                <Eye className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
+                                <span>جزئیات فروش</span>
+                              </button>
+
+                              <button
+                                onClick={() => openEditSalesModal(record)}
+                                className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
+                                title="ویرایش"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+
+                              <button
+                                onClick={() => record.id && handleDeleteSalesRecord(record.id)}
+                                className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
+                                title="حذف"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 text-[var(--status-error-text)]" />
+                              </button>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
 
                 <Pagination
@@ -1157,13 +1257,14 @@ export const SalesManager: React.FC = () => {
 
             return (
               <Card className="overflow-hidden border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] border-r-4 border-r-rose-500">
-                <div className="overflow-x-auto">
+                {/* Desktop and Tablet table */}
+                <div className="hidden lg:block overflow-x-auto">
                   <table className="w-full text-right border-collapse">
                     <thead>
                       <tr className="bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-[11px] font-black text-[var(--text-secondary)] dark:text-[var(--text-secondary)] select-none">
                         <th
                           onClick={() => handleWasteSort('date')}
-                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                         >
                           <div className="flex items-center gap-1.5">
                             <span>تاریخ ثبت</span>
@@ -1172,7 +1273,7 @@ export const SalesManager: React.FC = () => {
                         </th>
                         <th
                           onClick={() => handleWasteSort('totalUnits')}
-                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                         >
                           <div className="flex items-center gap-1.5">
                             <span>تعداد موارد ضایعات</span>
@@ -1181,7 +1282,7 @@ export const SalesManager: React.FC = () => {
                         </th>
                         <th
                           onClick={() => handleWasteSort('totalCost')}
-                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] group transition-colors"
+                          className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                         >
                           <div className="flex items-center gap-1.5">
                             <span>مجموع خسارت مالی</span>
@@ -1192,7 +1293,7 @@ export const SalesManager: React.FC = () => {
                         <th className="p-3.5 text-center">عملیات</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[var(--border-subtle)] divide-[var(--border-subtle)] text-xs">
+                    <tbody className="divide-y divide-[var(--border-subtle)] text-xs">
                       {paginatedGroups.map((group) => {
                         return (
                           <tr
@@ -1251,14 +1352,14 @@ export const SalesManager: React.FC = () => {
                                     setWasteDate(group.date);
                                     openWasteModal();
                                   }}
-                                  className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] dark:hover:text-[var(--status-error-text)] rounded-lg hover:bg-[var(--bg-base)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
+                                  className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] dark:hover:text-[var(--status-error-text)] rounded-lg hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
                                   title="ثبت ضایعات در این تاریخ"
                                 >
                                   <Plus className="h-4 w-4" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteWasteGroup(group)}
-                                  className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] dark:hover:text-[var(--status-error-text)] rounded-lg hover:bg-[var(--bg-base)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
+                                  className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] dark:hover:text-[var(--status-error-text)] rounded-lg hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
                                   title="حذف کلیه ضایعات این تاریخ"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -1270,6 +1371,96 @@ export const SalesManager: React.FC = () => {
                       })}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Mobile Card List View */}
+                <div className="block lg:hidden divide-y divide-[var(--border-subtle)]">
+                  {paginatedGroups.map((group) => {
+                    return (
+                      <div
+                        key={group.date}
+                        className="p-4 space-y-3.5 bg-white dark:bg-stone-950/25 transition-colors"
+                      >
+                        {/* Card Header: Date & Waste count */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h4 className="text-sm font-black text-[var(--text-primary)] dark:text-white">
+                              ضایعات روز {formatJalaliReadable(group.date)}
+                            </h4>
+                            <span className="text-[10px] text-[var(--text-secondary)] font-mono mt-0.5 inline-block">
+                              تاریخ: {toPersianDigits(group.date)}
+                            </span>
+                          </div>
+                          <div className="text-left shrink-0">
+                            <Badge variant="outline" className="text-[10px] bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 px-2 py-0.5 font-bold">
+                              {formatNumber(group.logs.length)} مورد ضایعات
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Damage & Reasons Summary */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--bg-base)] dark:bg-stone-900/40 p-3 rounded-xl border border-[var(--border-subtle)] dark:border-stone-900">
+                          <div className="space-y-0.5">
+                            <span className="block text-[9px] text-[var(--text-secondary)] font-bold">مجموع خسارت مالی:</span>
+                            <span className="text-sm font-black text-[var(--status-error-text)]">
+                              {formatToman(group.totalCost).text}
+                            </span>
+                          </div>
+
+                          <div className="space-y-1">
+                            <span className="block text-[9px] text-[var(--text-secondary)] font-bold">علت‌های اصلی:</span>
+                            <div className="flex flex-wrap gap-1">
+                              {group.reasons.slice(0, 2).map((r, i) => (
+                                <Badge
+                                  key={i}
+                                  variant="outline"
+                                  className="text-[9px] bg-white dark:bg-stone-900 text-[var(--status-error-text)] dark:text-rose-300 border-[var(--status-error-text)]/20 px-1.5 py-0"
+                                >
+                                  {r}
+                                </Badge>
+                              ))}
+                              {group.reasons.length > 2 && (
+                                <span className="text-[9px] text-[var(--text-secondary)] font-bold self-center">
+                                  +{toPersianDigits(group.reasons.length - 2)} مورد دیگر
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Tactile Actions */}
+                        <div className="flex items-center justify-end gap-1.5 pt-1">
+                          <button
+                            onClick={() => setDetailWasteDate(group.date)}
+                            className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                            title="مشاهده جزئیات ضایعات"
+                          >
+                            <Eye className="h-3.5 w-3.5 text-[var(--status-error-text)]" />
+                            <span>جزئیات ضایعات</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setWasteDate(group.date);
+                              openWasteModal();
+                            }}
+                            className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
+                            title="ثبت ضایعات در این تاریخ"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteWasteGroup(group)}
+                            className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
+                            title="حذف کلیه ضایعات این تاریخ"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-[var(--status-error-text)]" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <Pagination

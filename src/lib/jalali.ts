@@ -68,7 +68,42 @@ export function formatJalali(
   }
 }
 
-// Convert date string or Date to Persian readable string: e.g. "۱۴۰۵ تیر ۰۵"
+// Convert date string or Date to Jalali ISO string: e.g. "1405-05-16"
+export function toJalaliIso(dateInput?: string | Date | null): string {
+  if (!dateInput) return getTodayJalaliIso();
+
+  try {
+    if (typeof dateInput === 'string') {
+      const cleanStr = toEnglishDigits(dateInput.trim());
+      const match = cleanStr.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+      if (match) {
+        const y = parseInt(match[1], 10);
+        const m = parseInt(match[2], 10);
+        const d = parseInt(match[3], 10);
+        const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+
+        if (y >= 1300 && y <= 1500) {
+          return `${y}-${pad(m)}-${pad(d)}`;
+        } else if (y >= 1900 && y <= 2200) {
+          const j = toJalaali(y, m, d);
+          return `${j.jy}-${pad(j.jm)}-${pad(j.jd)}`;
+        }
+      }
+      const dObj = new Date(dateInput);
+      if (!isNaN(dObj.getTime())) {
+        return formatJalali(dObj, 'iso');
+      }
+    } else if (dateInput instanceof Date && !isNaN(dateInput.getTime())) {
+      return formatJalali(dateInput, 'iso');
+    }
+  } catch (e) {
+    console.error('Error in toJalaliIso:', e);
+  }
+
+  return getTodayJalaliIso();
+}
+
+// Convert date string or Date to Persian readable string: e.g. "۱۶ مرداد ۱۴۰۵"
 export function formatJalaliReadable(dateInput: string | Date | undefined | null): string {
   if (!dateInput) return '';
 
@@ -81,13 +116,32 @@ export function formatJalaliReadable(dateInput: string | Date | undefined | null
       const cleanStr = toEnglishDigits(dateInput.trim());
       const match = cleanStr.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
       if (match) {
-        jy = parseInt(match[1], 10);
-        jm = parseInt(match[2], 10);
-        jd = parseInt(match[3], 10);
+        const y = parseInt(match[1], 10);
+        const m = parseInt(match[2], 10);
+        const d = parseInt(match[3], 10);
+
+        if (y >= 1300 && y <= 1500) {
+          jy = y;
+          jm = m;
+          jd = d;
+        } else if (y >= 1900 && y <= 2200) {
+          const j = toJalaali(y, m, d);
+          jy = j.jy;
+          jm = j.jm;
+          jd = j.jd;
+        } else {
+          const dObj = new Date(dateInput);
+          if (!isNaN(dObj.getTime())) {
+            const j = getJalaliDate(dObj);
+            jy = j.jy;
+            jm = j.jm;
+            jd = j.jd;
+          }
+        }
       } else {
-        const d = new Date(dateInput);
-        if (!isNaN(d.getTime())) {
-          const j = getJalaliDate(d);
+        const dObj = new Date(dateInput);
+        if (!isNaN(dObj.getTime())) {
+          const j = getJalaliDate(dObj);
           jy = j.jy;
           jm = j.jm;
           jd = j.jd;
@@ -106,7 +160,7 @@ export function formatJalaliReadable(dateInput: string | Date | undefined | null
   if (jy >= 1300 && jy <= 1500 && jm >= 1 && jm <= 12 && jd >= 1 && jd <= 31) {
     const monthName = PERSIAN_MONTH_NAMES[jm - 1] || '';
     const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
-    return toPersianDigits(`${jy} ${monthName} ${pad(jd)}`);
+    return toPersianDigits(`${pad(jd)} ${monthName} ${jy}`);
   }
 
   return toPersianDigits(String(dateInput));

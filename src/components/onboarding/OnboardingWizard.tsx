@@ -361,9 +361,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
     { step: 1, title: 'کسب‌وکار', icon: Store },
     { step: 2, title: 'ظرفیت', icon: Clock },
     { step: 3, title: 'هزینه‌ها', icon: DollarSign },
-    { step: 4, title: 'انبار', icon: Boxes },
-    { step: 5, title: 'منو', icon: UtensilsCrossed },
-    { step: 6, title: 'تایید', icon: CheckCircle2 },
+    { step: 4, title: 'تایید', icon: CheckCircle2 },
   ];
 
   return (
@@ -411,7 +409,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
               <div className="text-left bg-white dark:bg-[var(--bg-card)] px-2.5 py-1 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                 <span className="text-[10px] font-extrabold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">گام </span>
                 <span className="text-xs font-black text-[var(--brand-primary)]">{toPersianDigits(currentStep)}</span>
-                <span className="text-[10px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]"> / {toPersianDigits(6)}</span>
+                <span className="text-[10px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]"> / {toPersianDigits(4)}</span>
               </div>
             </div>
           </div>
@@ -425,7 +423,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
           </div>
 
           {/* Compact Step Icons */}
-          <div className="grid grid-cols-6 gap-1 mt-2.5">
+          <div className="grid grid-cols-4 gap-1 mt-2.5">
             {STEPS_CONFIG.map((s) => {
               const Icon = s.icon;
               const isActive = s.step === currentStep;
@@ -726,285 +724,8 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                 </div>
               )}
 
-              {/* STEP 4: INITIAL INGREDIENTS */}
+              {/* STEP 4: SUMMARY & FINAL CONFIRMATION */}
               {currentStep === 4 && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
-                      <Boxes className="h-4 w-4 text-[var(--brand-primary)]" />
-                      <span>تعریف مواد اولیه (انبار اولیه)</span>
-                    </h2>
-
-                    {ingredientsList.length === 0 && (
-                      <button
-                        type="button"
-                        onClick={handleApplyPresetIngredients}
-                        className="bg-[var(--brand-primary)]/10 dark:bg-[var(--brand-primary)]/20 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/20 dark:hover:bg-[var(--brand-primary)]/30 border border-[var(--brand-primary)]/30 font-bold text-[11px] px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all cursor-pointer"
-                      >
-                        <Sparkles className="h-3 w-3" />
-                        <span>پیش‌فرض هوشمند</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {/* High Density Add Form */}
-                  <div className="bg-[var(--bg-base)] dark:bg-[var(--bg-card)] p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-2">
-                    <div className="grid grid-cols-12 gap-2">
-                      <input
-                        type="text"
-                        value={newIngName}
-                        onChange={(e) => setNewIngName(e.target.value)}
-                        placeholder="نام ماده اولیه"
-                        className="col-span-4 h-9 rounded-lg border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-stone-950 px-2.5 text-xs font-bold text-[var(--text-primary)] dark:text-white placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
-                      />
-                      <div className="col-span-3">
-                        <SearchableSelect
-                          options={INGREDIENT_CATEGORY_OPTIONS}
-                          value={newIngCategory}
-                          onChange={(val) => setNewIngCategory(String(val))}
-                          placeholder="دسته‌بندی"
-                          triggerClassName="h-9 rounded-lg border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-stone-950 px-2 text-xs font-bold text-[var(--text-primary)] dark:text-white"
-                          enableSearch={false}
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <SearchableSelect
-                          options={INGREDIENT_UNIT_OPTIONS}
-                          value={newIngUnit}
-                          onChange={(val) => setNewIngUnit(val as UnitType)}
-                          placeholder="واحد"
-                          triggerClassName="h-9 rounded-lg border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-stone-950 px-2 text-xs font-bold text-[var(--text-primary)] dark:text-white"
-                          enableSearch={false}
-                        />
-                      </div>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        value={newIngQty === '' ? '' : toPersianDigits(newIngQty)}
-                        onChange={(e) => {
-                          const eng = toEnglishDigits(e.target.value);
-                          setNewIngQty(eng === '' ? '' : Number(eng));
-                        }}
-                        placeholder="مقدار"
-                        className="col-span-3 h-9 rounded-lg border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-stone-950 px-2 text-xs font-bold text-[var(--text-primary)] dark:text-white text-right focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-12 gap-2">
-                      <div className="col-span-9">
-                        <SmartMoneyInput
-                          className="bg-white dark:bg-stone-950 border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-white text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
-                          value={newIngPrice}
-                          onChange={setNewIngPrice}
-                          placeholder="قیمت کل خرید (تومان)"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleAddIngredient}
-                        className="col-span-3 h-9 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white font-bold rounded-lg flex items-center justify-center gap-1 text-xs transition-all cursor-pointer"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                        <span>افزودن</span>
-                      </button>
-                    </div>
-
-                    {newIngCategory === 'سایر / سفارشی' && (
-                      <input
-                        type="text"
-                        value={customIngCategory}
-                        onChange={(e) => setCustomIngCategory(e.target.value)}
-                        placeholder="دسته‌بندی سفارشی..."
-                        className="w-full h-8 rounded-lg border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-stone-950 px-2.5 text-xs font-bold text-[var(--text-primary)] dark:text-white placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
-                      />
-                    )}
-                  </div>
-
-                  {/* Chips Display with Pagination */}
-                  <div className="space-y-2">
-                    {ingredientsList.length === 0 ? (
-                      <div className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] text-[11px] py-1 font-medium">
-                        هنوز ماده اولیه‌ای ثبت نشده است (اختیاری).
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex flex-wrap gap-1.5 min-h-[42px]">
-                          {ingredientsList
-                            .slice((ingPage - 1) * 6, ingPage * 6)
-                            .map((ing) => (
-                              <div
-                                key={ing.id}
-                                className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-[var(--text-primary)] dark:text-[var(--text-primary)] text-[11px] px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs"
-                              >
-                                <span className="font-black">{ing.name}</span>
-                                <span className="text-[var(--brand-primary)]">({toPersianDigits(ing.totalQuantity)} {ing.unit})</span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveIngredient(ing.id)}
-                                  className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--status-error-text)] dark:hover:text-[var(--status-error-text)] mr-1 cursor-pointer"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </button>
-                              </div>
-                            ))}
-                        </div>
-                        {ingredientsList.length > 6 && (
-                          <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-[var(--border-subtle)]/60 dark:border-[var(--border-subtle)]">
-                            <span className="text-[var(--text-secondary)] font-bold">
-                              نمایش {toPersianDigits((ingPage - 1) * 6 + 1)} تا {toPersianDigits(Math.min(ingPage * 6, ingredientsList.length))} از {toPersianDigits(ingredientsList.length)} ماده اولیه
-                            </span>
-                            <div className="flex items-center gap-1">
-                              <button
-                                type="button"
-                                disabled={ingPage === 1}
-                                onClick={() => setIngPage((p) => Math.max(1, p - 1))}
-                                className="p-1 rounded-md bg-[var(--bg-base)] dark:bg-[var(--bg-card)] disabled:opacity-40 text-[var(--text-primary)] dark:text-[var(--text-secondary)] cursor-pointer"
-                              >
-                                <ChevronRight className="h-3.5 w-3.5" />
-                              </button>
-                              <span className="px-1.5 font-bold text-[var(--text-primary)] dark:text-[var(--text-secondary)]">
-                                {toPersianDigits(ingPage)} / {toPersianDigits(Math.ceil(ingredientsList.length / 6))}
-                              </span>
-                              <button
-                                type="button"
-                                disabled={ingPage >= Math.ceil(ingredientsList.length / 6)}
-                                onClick={() => setIngPage((p) => p + 1)}
-                                className="p-1 rounded-md bg-[var(--bg-base)] dark:bg-[var(--bg-card)] disabled:opacity-40 text-[var(--text-primary)] dark:text-[var(--text-secondary)] cursor-pointer"
-                              >
-                                <ChevronLeft className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 5: INITIAL MENU ITEMS */}
-              {currentStep === 5 && (
-                <div className="space-y-3">
-                  <div>
-                    <h2 className="text-sm font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
-                      <UtensilsCrossed className="h-4 w-4 text-[var(--brand-primary)]" />
-                      <span>تعریف اولین آیتم‌های منو</span>
-                    </h2>
-                  </div>
-
-                  {/* Compact Menu Form */}
-                  <div className="bg-[var(--bg-base)] dark:bg-[var(--bg-card)] p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-2">
-                    <div className="grid grid-cols-12 gap-2 items-center">
-                      <input
-                        type="text"
-                        value={newItemName}
-                        onChange={(e) => setNewItemName(e.target.value)}
-                        placeholder="نام محصول (اسپرسو، چلوکباب...)"
-                        className="col-span-4 h-9 rounded-lg border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-stone-950 px-2.5 text-xs font-bold text-[var(--text-primary)] dark:text-white placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
-                      />
-                      <div className="col-span-3">
-                        <SearchableSelect
-                          options={MENU_CATEGORY_OPTIONS}
-                          value={newItemCategory}
-                          onChange={(val) => setNewItemCategory(String(val))}
-                          placeholder="دسته منو"
-                          triggerClassName="h-9 rounded-lg border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-stone-950 px-2 text-xs font-bold text-[var(--text-primary)] dark:text-white"
-                          enableSearch={false}
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <SmartMoneyInput
-                          className="bg-white dark:bg-stone-950 border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-white text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
-                          value={newItemPrice}
-                          onChange={setNewItemPrice}
-                          placeholder="قیمت فروش"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleAddMenuItem}
-                        className="col-span-2 h-9 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white font-bold rounded-lg flex items-center justify-center gap-1 text-xs transition-all cursor-pointer"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                        <span>ثبت</span>
-                      </button>
-                    </div>
-
-                    {newItemCategory === 'سایر / سفارشی' && (
-                      <input
-                        type="text"
-                        value={customMenuItemCategory}
-                        onChange={(e) => setCustomMenuItemCategory(e.target.value)}
-                        placeholder="دسته‌بندی سفارشی منو..."
-                        className="w-full h-8 rounded-lg border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-stone-950 px-2.5 text-xs font-bold text-[var(--text-primary)] dark:text-white placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
-                      />
-                    )}
-                  </div>
-
-                  {/* Menu List Chips with Pagination */}
-                  <div className="space-y-2">
-                    {menuList.length === 0 ? (
-                      <div className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] text-[11px] py-1 font-medium">
-                        هنوز آیتمی ثبت نکرده‌اید (می‌توانید بعداً اضافه کنید).
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex flex-wrap gap-1.5 min-h-[42px]">
-                          {menuList
-                            .slice((menuPage - 1) * 6, menuPage * 6)
-                            .map((item) => (
-                              <div
-                                key={item.id}
-                                className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-[var(--text-primary)] dark:text-[var(--text-primary)] text-[11px] px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs"
-                              >
-                                <span className="font-black">{item.name}</span>
-                                <span className="text-[var(--brand-primary)]">({formatToman(item.sellingPrice).text})</span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveMenuItem(item.id)}
-                                  className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--status-error-text)] dark:hover:text-[var(--status-error-text)] mr-1 cursor-pointer"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </button>
-                              </div>
-                            ))}
-                        </div>
-                        {menuList.length > 6 && (
-                          <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-[var(--border-subtle)]/60 dark:border-[var(--border-subtle)]">
-                            <span className="text-[var(--text-secondary)] font-bold">
-                              نمایش {toPersianDigits((menuPage - 1) * 6 + 1)} تا {toPersianDigits(Math.min(menuPage * 6, menuList.length))} از {toPersianDigits(menuList.length)} آیتم منو
-                            </span>
-                            <div className="flex items-center gap-1">
-                              <button
-                                type="button"
-                                disabled={menuPage === 1}
-                                onClick={() => setMenuPage((p) => Math.max(1, p - 1))}
-                                className="p-1 rounded-md bg-[var(--bg-base)] dark:bg-[var(--bg-card)] disabled:opacity-40 text-[var(--text-primary)] dark:text-[var(--text-secondary)] cursor-pointer"
-                              >
-                                <ChevronRight className="h-3.5 w-3.5" />
-                              </button>
-                              <span className="px-1.5 font-bold text-[var(--text-primary)] dark:text-[var(--text-secondary)]">
-                                {toPersianDigits(menuPage)} / {toPersianDigits(Math.ceil(menuList.length / 6))}
-                              </span>
-                              <button
-                                type="button"
-                                disabled={menuPage >= Math.ceil(menuList.length / 6)}
-                                onClick={() => setMenuPage((p) => p + 1)}
-                                className="p-1 rounded-md bg-[var(--bg-base)] dark:bg-[var(--bg-card)] disabled:opacity-40 text-[var(--text-primary)] dark:text-[var(--text-secondary)] cursor-pointer"
-                              >
-                                <ChevronLeft className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 6: SUMMARY & FINAL CONFIRMATION */}
-              {currentStep === 6 && (
                 <div className="space-y-3">
                   <div>
                     <h2 className="text-sm font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
@@ -1019,19 +740,9 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                       <span className="font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">{restaurantName}</span>
                     </div>
 
-                    <div className="flex justify-between items-center border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] pb-2">
+                    <div className="flex justify-between items-center">
                       <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">هزینه‌های ثابت ماهانه:</span>
                       <span className="font-black text-[var(--brand-primary)]">{formatToman(totalMonthlyFixedCosts).text}</span>
-                    </div>
-
-                    <div className="flex justify-between items-center border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] pb-2">
-                      <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">مواد اولیه ثبت‌شده:</span>
-                      <span className="font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">{toPersianDigits(ingredientsList.length)} قلم</span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">آیتم‌های اولیه منو:</span>
-                      <span className="font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">{toPersianDigits(menuList.length)} آیتم</span>
                     </div>
                   </div>
 
@@ -1077,7 +788,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
           </div>
 
           <div>
-            {currentStep < 6 ? (
+            {currentStep < 4 ? (
               <Button
                 type="button"
                 variant="primary"
