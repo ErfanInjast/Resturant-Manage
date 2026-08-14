@@ -26,6 +26,12 @@ import {
   Trash2,
   ClipboardList,
   X,
+  Info,
+  Moon,
+  Sun,
+  Palette,
+  Eye,
+  Check,
 } from 'lucide-react';
 import { db, DEFAULT_SETTINGS, exportDatabaseJSON, importDatabaseJSON, seedDemoData, syncAndRecalculateAllData } from '../../db';
 import type { AppSettings, FixedCosts } from '../../types';
@@ -40,7 +46,7 @@ import { PageSkeleton } from '../ui/PageSkeleton';
 import { useAppStore } from '../../store/useAppStore';
 import { PnLReportExportModal } from '../dashboard/PnLReportExportModal';
 
-type SettingsTab = 'profile' | 'financials' | 'thresholds' | 'data';
+type SettingsTab = 'profile' | 'appearance' | 'financials' | 'thresholds' | 'data';
 
 const BUSINESS_TYPES = [
   'کافه رستوران',
@@ -52,7 +58,7 @@ const BUSINESS_TYPES = [
 ];
 
 export const SettingsManager: React.FC = () => {
-  const { notify, askConfirmation } = useAppStore();
+  const { notify, askConfirmation, theme, setTheme, toggleTheme, isSimpleMode, setIsSimpleMode } = useAppStore();
   const settingsQuery = useLiveQuery(() => db.settings.get('config'));
   const settings = settingsQuery ?? DEFAULT_SETTINGS;
 
@@ -327,11 +333,11 @@ export const SettingsManager: React.FC = () => {
             <Settings className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
-              تنظیمات سیستم و مدیریت داده‌ها
+            <h2 className="text-lg font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
+              تنظیمات سیستم
             </h2>
             <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium mt-0.5">
-              پیکربندی مشخصات مجموعه، محاسبات مالی ماهانه، آستانه‌های انبار و نسخه پشتیبان
+              مدیریت مشخصات مجموعه، پارامترهای مالی، آستانه‌های انبار و پشتیبان‌گیری
             </p>
           </div>
         </div>
@@ -341,10 +347,10 @@ export const SettingsManager: React.FC = () => {
           variant="primary"
           onClick={() => handleSaveSettings()}
           isLoading={isSaving}
-          className="h-10 px-5 rounded-2xl shadow-sm text-xs font-black self-start sm:self-auto cursor-pointer"
+          className="h-10 px-5 rounded-2xl text-xs font-bold self-start sm:self-auto cursor-pointer"
         >
           <Save className="h-4 w-4 ml-1.5" />
-          ذخیره تغییرات تنظیمات
+          ذخیره تغییرات
         </Button>
       </div>
 
@@ -355,12 +361,25 @@ export const SettingsManager: React.FC = () => {
           onClick={() => setActiveTab('profile')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'profile'
-              ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs font-black'
-              : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)]'
+              ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs font-bold'
+              : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           }`}
         >
           <Building className="h-4 w-4" />
-          <span>هویت و مشخصات مجموعه</span>
+          <span>مشخصات مجموعه</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('appearance')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+            activeTab === 'appearance'
+              ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs font-bold'
+              : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+          }`}
+        >
+          <Palette className="h-4 w-4" />
+          <span>ظاهر و پوسته</span>
         </button>
 
         <button
@@ -368,12 +387,12 @@ export const SettingsManager: React.FC = () => {
           onClick={() => setActiveTab('financials')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'financials'
-              ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs font-black'
-              : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)]'
+              ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs font-bold'
+              : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           }`}
         >
           <DollarSign className="h-4 w-4" />
-          <span>پارامترهای مالی و هزینه‌ها</span>
+          <span>پارامترهای مالی</span>
         </button>
 
         <button
@@ -381,12 +400,12 @@ export const SettingsManager: React.FC = () => {
           onClick={() => setActiveTab('thresholds')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'thresholds'
-              ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs font-black'
-              : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)]'
+              ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs font-bold'
+              : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           }`}
         >
           <Sliders className="h-4 w-4" />
-          <span>آستانه‌ها و هشدارهای انبار</span>
+          <span>آستانه‌های انبار</span>
         </button>
 
         <button
@@ -394,12 +413,12 @@ export const SettingsManager: React.FC = () => {
           onClick={() => setActiveTab('data')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'data'
-              ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs font-black'
-              : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)]'
+              ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs font-bold'
+              : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           }`}
         >
           <Database className="h-4 w-4" />
-          <span>پشتیبان‌گیری و ذخیره اطلاعات</span>
+          <span>پشتیبان‌گیری</span>
         </button>
       </div>
 
@@ -479,6 +498,124 @@ export const SettingsManager: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* TAB: APPEARANCE & DISPLAY PREFERENCES */}
+      {activeTab === 'appearance' && (
+        <div className="space-y-6">
+          {/* Day / Night Theme Selection Card */}
+          <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)]">
+            <CardHeader className="border-b border-[var(--border-subtle)]/60 dark:border-[var(--border-subtle)] pb-4">
+              <CardTitle className="text-sm font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
+                <Palette className="h-4 w-4 text-[var(--brand-primary)]" />
+                پوسته و حالت نمایش بصری
+              </CardTitle>
+              <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium mt-0.5">
+                تنظیم حالت روز و شب بر اساس نور محیط کار یا سلیقه بصری شما
+              </p>
+            </CardHeader>
+            <CardContent className="pt-5 space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Light Mode Option */}
+                <button
+                  type="button"
+                  onClick={() => setTheme('light')}
+                  className={`p-4 rounded-2xl border text-right transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
+                    theme === 'light'
+                      ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/5 ring-2 ring-[var(--brand-primary)]/20 shadow-xs'
+                      : 'border-[var(--border-subtle)] bg-[var(--bg-base)]/60 hover:bg-[var(--bg-base)]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400">
+                        <Sun className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-black text-[var(--text-primary)] block">حالت روز (روشن)</span>
+                        <span className="text-[11px] text-[var(--text-secondary)]">کنتراست بالا و مناسب نور روز</span>
+                      </div>
+                    </div>
+                    {theme === 'light' && (
+                      <span className="p-1 rounded-full bg-[var(--brand-primary)] text-white">
+                        <Check className="h-3.5 w-3.5" />
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-white border border-stone-200 text-[10px] text-stone-600 flex items-center justify-between">
+                    <span className="font-bold">پیش‌نمایش پس‌زمینه روشن</span>
+                    <span className="px-2 py-0.5 rounded bg-stone-100 text-stone-800 font-black">استاندارد</span>
+                  </div>
+                </button>
+
+                {/* Dark Mode Option */}
+                <button
+                  type="button"
+                  onClick={() => setTheme('dark')}
+                  className={`p-4 rounded-2xl border text-right transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
+                    theme === 'dark'
+                      ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/5 ring-2 ring-[var(--brand-primary)]/20 shadow-xs'
+                      : 'border-[var(--border-subtle)] bg-[var(--bg-base)]/60 hover:bg-[var(--bg-base)]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400">
+                        <Moon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-black text-[var(--text-primary)] block">حالت شب (تاریک)</span>
+                        <span className="text-[11px] text-[var(--text-secondary)]">کاهش خستگی چشم در محیط کم‌نور</span>
+                      </div>
+                    </div>
+                    {theme === 'dark' && (
+                      <span className="p-1 rounded-full bg-[var(--brand-primary)] text-white">
+                        <Check className="h-3.5 w-3.5" />
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-stone-900 border border-stone-800 text-[10px] text-stone-300 flex items-center justify-between">
+                    <span className="font-bold">پیش‌نمایش پس‌زمینه تیره</span>
+                    <span className="px-2 py-0.5 rounded bg-stone-800 text-stone-200 font-black">حرفه‌ای</span>
+                  </div>
+                </button>
+              </div>
+
+              {/* Simple Mode Toggle */}
+              <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 shrink-0">
+                    <Eye className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-[var(--text-primary)]">حالت ساده و متمرکز (نمایش خلاصه)</h4>
+                    <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                      پنهان‌سازی جزییات غیرضروری و نمایش فشرده کارت‌های آماری جهت تسریع کاربری روزمره
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-end sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => setIsSimpleMode(!isSimpleMode, true)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                      isSimpleMode ? 'bg-[var(--brand-primary)]' : 'bg-stone-300 dark:bg-stone-700'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        isSimpleMode ? '-translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* TAB 2: FINANCIALS & FIXED OVERHEAD */}

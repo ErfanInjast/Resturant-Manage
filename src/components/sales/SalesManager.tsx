@@ -286,7 +286,7 @@ export const SalesManager: React.FC = () => {
 
   const unitCost = wasteType === 'ingredient'
     ? (selectedIng?.unitCost || 0)
-    : (selectedMI?.primeCost || 0);
+    : (selectedMI?.foodCost ?? selectedMI?.primeCost ?? 0);
 
   const autoCalculatedCost = Math.round(wasteQtyNum * unitCost);
 
@@ -483,20 +483,24 @@ export const SalesManager: React.FC = () => {
     .map((si) => {
       const mi = menuItems.find((m) => Number(m.id) === Number(si.menuItemId));
       const unitSellingPrice = mi?.sellingPrice || 0;
-      const unitCost = mi?.primeCost || 0;
+      const unitCost = mi?.foodCost ?? mi?.primeCost ?? 0;
+      const unitLaborCost = mi?.laborCost || 0;
       return {
         menuItemId: Number(si.menuItemId),
         menuItemName: mi?.name || 'محصول منو',
         quantity: Number(si.quantity),
         unitSellingPrice,
         unitCost,
+        unitLaborCost,
         totalRevenue: roundCurrency(si.quantity * unitSellingPrice),
         totalCost: roundCurrency(si.quantity * unitCost),
+        totalLaborCost: roundCurrency(si.quantity * unitLaborCost),
       };
     });
 
   const modalTotalRevenue = calculatedItems.reduce((acc, curr) => acc + curr.totalRevenue, 0);
   const modalTotalCOGS = calculatedItems.reduce((acc, curr) => acc + curr.totalCost, 0);
+  const modalTotalLaborCost = calculatedItems.reduce((acc, curr) => acc + (curr.totalLaborCost || 0), 0);
 
   const adjustInventoryForSalesItems = async (
     items: { menuItemId: number; quantity: number }[],
@@ -569,6 +573,7 @@ export const SalesManager: React.FC = () => {
         items: calculatedItems,
         totalRevenue: modalTotalRevenue,
         totalCOGS: modalTotalCOGS,
+        totalLaborCost: modalTotalLaborCost,
         totalWasteCost: matchingWaste,
         netProfit: roundCurrency(modalTotalRevenue - modalTotalCOGS - matchingWaste),
         createdAt: new Date().toISOString(),
@@ -757,7 +762,7 @@ export const SalesManager: React.FC = () => {
       </div>
 
       {/* Sales Forecast Analytical Summary Card */}
-      <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-gradient-to-br from-[var(--bg-base)] via-white to-amber-50/20 ">
+      <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-[var(--bg-card)] dark:bg-[var(--bg-card)] shadow-2xs">
         <CardContent className="p-4 sm:p-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
@@ -779,7 +784,7 @@ export const SalesManager: React.FC = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <div className="px-3.5 py-2 rounded-xl bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-right">
+              <div className="px-3.5 py-2 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/60 border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-right">
                 <span className="block text-[10px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-bold mb-0.5">
                   پیش‌بینی هفته آینده
                 </span>
@@ -788,7 +793,7 @@ export const SalesManager: React.FC = () => {
                 </span>
               </div>
 
-              <div className="px-3.5 py-2 rounded-xl bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-right">
+              <div className="px-3.5 py-2 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/60 border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-right">
                 <span className="block text-[10px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-bold mb-0.5">
                   پیش‌بینی ۴ هفته (یک‌ماه)
                 </span>
@@ -800,7 +805,7 @@ export const SalesManager: React.FC = () => {
               <Button
                 variant="outline"
                 onClick={() => setActiveTab('analytics')}
-                className="text-xs border-[var(--border-subtle)] dark:border-[var(--border-subtle)] hover:bg-[var(--bg-base)] hover:bg-[var(--bg-base)]"
+                className="text-xs border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-[var(--bg-card)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-primary)] hover:bg-[var(--bg-base)]"
               >
                 <BarChart3 className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
                 مشاهده تحلیل کامل
@@ -943,7 +948,7 @@ export const SalesManager: React.FC = () => {
                           className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                         >
                           <div className="flex items-center gap-1.5">
-                            <span>بهای تمام شده (COGS)</span>
+                            <span>بهای تمام شده مواد</span>
                             {renderSalesSortIcon('totalCOGS')}
                           </div>
                         </th>
@@ -1102,7 +1107,7 @@ export const SalesManager: React.FC = () => {
                                 </span>
                               </div>
                               <div className="space-y-0.5 text-center border-r border-[var(--border-subtle)]/50 dark:border-stone-800">
-                                <span className="block text-[9px] text-[var(--text-secondary)] font-bold">بهای مواد (COGS):</span>
+                                <span className="block text-[9px] text-[var(--text-secondary)] font-bold">بهای مواد مصرفی:</span>
                                 <span className="text-[11px] font-black text-[var(--brand-primary)] dark:text-stone-300">
                                   {formatToman(record.totalCOGS).text}
                                 </span>
@@ -1881,7 +1886,7 @@ export const SalesManager: React.FC = () => {
                   options={menuItems.map((mi) => ({
                     value: mi.id!,
                     label: mi.name,
-                    sublabel: `قیمت تمام شده (COGS): ${formatToman(mi.primeCost).text} | دسته‌بندی: ${mi.category}`,
+                    sublabel: `قیمت تمام شده مواد: ${formatToman(mi.foodCost ?? mi.primeCost ?? 0).text} | دسته‌بندی: ${mi.category}`,
                   }))}
                   value={selectedMenuItemId}
                   onChange={(val) => setSelectedMenuItemId(val as number)}

@@ -21,6 +21,7 @@ import {
   Receipt,
   Utensils,
   Layers,
+  Users,
   Sparkles,
 } from 'lucide-react';
 import { db, DEFAULT_SETTINGS } from '../../db';
@@ -172,6 +173,7 @@ export const PnLDashboard: React.FC = () => {
   const {
     totalRevenue: filteredRevenue,
     totalCOGS: filteredCOGS,
+    totalLaborCost: filteredLaborCost,
     loggedWaste: filteredLoggedWaste,
     salesWaste: filteredSalesWaste,
     totalWaste: filteredTotalWaste,
@@ -179,6 +181,8 @@ export const PnLDashboard: React.FC = () => {
     periodOverhead: filteredPeriodOverhead,
     netProfit: filteredNetProfit,
     foodCostPercent: filteredFoodCostPercent,
+    laborCostPercent: filteredLaborCostPercent,
+    primeCostPercent: filteredPrimeCostPercent,
     netMarginPercent: filteredNetMarginPercent,
     periodDaysCount,
   } = metrics;
@@ -329,116 +333,125 @@ export const PnLDashboard: React.FC = () => {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      {/* Interactive Date Scope Filter Bar */}
-      <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] p-4 space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] pb-3">
-          <div className="flex items-center gap-2">
+      {/* Sleek Minimalist Date Scope Filter & Action Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl p-3 sm:p-4 shadow-xs">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-1.5 text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] pl-2 border-l border-[var(--border-subtle)] dark:border-[var(--border-subtle)] shrink-0">
             <Filter className="h-4 w-4 text-[var(--brand-primary)]" />
-            <span className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">
-              انتخاب بازه زمانی گزارش سود و زیان:
-            </span>
+            <span>بازه گزارش:</span>
           </div>
+
+          {/* Minimalist Filter Preset Buttons */}
+          <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none select-none">
+            <button
+              type="button"
+              onClick={() => setDatePreset('today')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
+                datePreset === 'today'
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
+                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
+              }`}
+            >
+              امروز
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDatePreset('specific')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 border whitespace-nowrap ${
+                datePreset === 'specific'
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
+                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
+              }`}
+            >
+              <Calendar className="h-3.5 w-3.5" />
+              یک روز به‌خصوص
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDatePreset('last7')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
+                datePreset === 'last7'
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
+                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
+              }`}
+            >
+              ۷ روز اخیر
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDatePreset('last30')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
+                datePreset === 'last30'
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
+                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
+              }`}
+            >
+              ۳۰ روز اخیر
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDatePreset('currentMonth')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
+                datePreset === 'currentMonth'
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
+                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
+              }`}
+            >
+              ماه جاری
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDatePreset('allTime')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
+                datePreset === 'allTime'
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
+                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
+              }`}
+            >
+              کل تاریخچه
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-[var(--border-subtle)] shrink-0">
           <span className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
-            محاسبه‌شده بر اساس: <span className="text-[var(--text-primary)] dark:text-[var(--text-primary)] font-extrabold">{toPersianDigits(periodDaysCount)} روز کاری/عملیاتی</span>
+            دوره: <strong className="text-[var(--text-primary)] dark:text-[var(--text-primary)]">{toPersianDigits(periodDaysCount)} روز</strong>
           </span>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsExportModalOpen(true)}
+            className="text-xs font-bold border-[var(--border-subtle)] hover:border-[var(--brand-primary)] text-[var(--text-primary)] hover:text-[var(--brand-primary)] rounded-xl gap-1.5 shadow-2xs"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            <span>خروجی گزارش</span>
+          </Button>
         </div>
 
-        {/* Filter Preset Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-none select-none">
-          <button
-            type="button"
-            onClick={() => setDatePreset('today')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border whitespace-nowrap ${
-              datePreset === 'today'
-                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
-            }`}
-          >
-            امروز
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setDatePreset('specific')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1 border whitespace-nowrap ${
-              datePreset === 'specific'
-                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
-            }`}
-          >
-            <Calendar className="h-3.5 w-3.5" />
-            یک روز به‌خصوص
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setDatePreset('last7')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border whitespace-nowrap ${
-              datePreset === 'last7'
-                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
-            }`}
-          >
-            ۷ روز اخیر
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setDatePreset('last30')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border whitespace-nowrap ${
-              datePreset === 'last30'
-                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
-            }`}
-          >
-            ۳۰ روز اخیر
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setDatePreset('currentMonth')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border whitespace-nowrap ${
-              datePreset === 'currentMonth'
-                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
-            }`}
-          >
-            ماه جاری
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setDatePreset('allTime')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border whitespace-nowrap ${
-              datePreset === 'allTime'
-                ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
-                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
-            }`}
-          >
-            کل تاریخچه
-          </button>
-        </div>
-
-        {/* Specific Date Picker Row (When preset === 'specific') */}
+        {/* Specific Date Picker Sub-row */}
         {datePreset === 'specific' && (
-          <div className="pt-2 border-t border-dashed border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[var(--bg-base)] dark:bg-[var(--bg-card)] p-3 rounded-xl">
-            <div className="flex items-center gap-3">
-              <label className="text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] shrink-0">
-                تاریخ روز مورد نظر:
-              </label>
-              <JalaliDatePicker
-                value={customSpecificDate}
-                onChange={setCustomSpecificDate}
-                minDate={MIN_JALALI_DATE}
-                maxDate={todayIso}
-                showSteppers={true}
-              />
-            </div>
+          <div className="w-full pt-3 mt-1 border-t border-dashed border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex items-center gap-3">
+            <label className="text-xs font-bold text-[var(--text-secondary)] shrink-0">
+              انتخاب تاریخ روز:
+            </label>
+            <JalaliDatePicker
+              value={customSpecificDate}
+              onChange={setCustomSpecificDate}
+              minDate={MIN_JALALI_DATE}
+              maxDate={todayIso}
+              showSteppers={true}
+            />
           </div>
         )}
-      </Card>
+      </div>
 
-      {/* Filtered Metric Cards Grid */}
+      {/* Filtered Metric Cards Grid - 4 Core Pillars */}
       <motion.div
         variants={staggerContainer}
         initial="initial"
@@ -449,10 +462,10 @@ export const PnLDashboard: React.FC = () => {
         <motion.div variants={fadeInUpItem} whileHover={cardHover.whileHover} transition={cardHover.transition} className="h-full">
           <Card
             onClick={() => setActiveKpiModal('revenue')}
-            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-[var(--brand-primary)]/60 dark:hover:border-[var(--brand-primary)]/60 hover:shadow-lg transition-all h-full flex flex-col justify-between min-h-[165px] cursor-pointer group relative overflow-hidden"
+            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-[var(--brand-primary)]/60 dark:hover:border-[var(--brand-primary)]/60 hover:shadow-md transition-all h-full flex flex-col justify-between cursor-pointer group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between pb-1.5">
+            <CardHeader className="flex flex-row items-center justify-between pb-1">
               <CardTitle className="text-xs font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">فروش و درآمد دوره</CardTitle>
               <div className="rounded-full bg-[var(--status-success-bg)] dark:bg-emerald-950/50 p-2 text-[var(--status-success-text)] dark:text-[var(--status-success-text)] shrink-0 group-hover:scale-110 transition-transform">
                 <TrendingUp className="h-4 w-4" />
@@ -463,30 +476,25 @@ export const PnLDashboard: React.FC = () => {
                 {formatToman(filteredRevenue).text}
               </div>
 
-              <div className="space-y-1">
-                <p className="text-[11px] font-medium text-[var(--text-secondary)] dark:text-[var(--text-secondary)] leading-snug">
-                  مجموع درآمد کل ثبت‌شده از تمامی کانال‌های فروش.
-                </p>
-                <div className="flex items-center justify-between pt-1.5 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--brand-primary)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-                  <span>{formatNumber(filteredSalesRecords.length)} روز ثبت فروش</span>
-                  <span className="flex items-center gap-0.5 text-[var(--brand-primary)]">
-                    گزارش کامل
-                    <ArrowUpRight className="h-3 w-3" />
-                  </span>
-                </div>
+              <div className="flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--brand-primary)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+                <span>{formatNumber(filteredSalesRecords.length)} روز ثبت فروش</span>
+                <span className="flex items-center gap-0.5 text-[var(--brand-primary)]">
+                  گزارش کامل
+                  <ArrowUpRight className="h-3 w-3" />
+                </span>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* COGS */}
+        {/* COGS (بهای مواد اولیه) */}
         <motion.div variants={fadeInUpItem} whileHover={cardHover.whileHover} transition={cardHover.transition} className="h-full">
           <Card
             onClick={() => setActiveKpiModal('cogs')}
-            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-amber-500/60 dark:hover:border-amber-500/60 hover:shadow-lg transition-all h-full flex flex-col justify-between min-h-[165px] cursor-pointer group relative overflow-hidden"
+            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-amber-500/60 dark:hover:border-amber-500/60 hover:shadow-md transition-all h-full flex flex-col justify-between cursor-pointer group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between pb-1.5">
+            <CardHeader className="flex flex-row items-center justify-between pb-1">
               <CardTitle className="text-xs font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">بهای تمام شده مواد اولیه</CardTitle>
               <div className="rounded-full bg-[#FEF8EC] dark:bg-amber-950/50 p-2 text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)] shrink-0 group-hover:scale-110 transition-transform">
                 <ShoppingBag className="h-4 w-4" />
@@ -497,17 +505,12 @@ export const PnLDashboard: React.FC = () => {
                 {formatToman(filteredCOGS).text}
               </div>
 
-              <div className="space-y-1">
-                <p className="text-[11px] font-medium text-[var(--text-secondary)] dark:text-[var(--text-secondary)] leading-snug">
-                  هزینه مستقیم مواد اولیه مصرفی بر اساس رسپی منو.
-                </p>
-                <div className="flex items-center justify-between pt-1.5 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--status-warning-text)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-                  <span>درصد مواد: {toPersianDigits(roundCurrency(filteredFoodCostPercent))}٪</span>
-                  <span className="flex items-center gap-0.5 text-[var(--status-warning-text)]">
-                    گزارش کامل
-                    <ArrowUpRight className="h-3 w-3" />
-                  </span>
-                </div>
+              <div className="flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--status-warning-text)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+                <span>نسبت مواد: {toPersianDigits(roundCurrency(filteredFoodCostPercent))}٪</span>
+                <span className="flex items-center gap-0.5 text-[var(--status-warning-text)]">
+                  گزارش کامل
+                  <ArrowUpRight className="h-3 w-3" />
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -517,10 +520,10 @@ export const PnLDashboard: React.FC = () => {
         <motion.div variants={fadeInUpItem} whileHover={cardHover.whileHover} transition={cardHover.transition} className="h-full">
           <Card
             onClick={() => setActiveKpiModal('overhead_waste')}
-            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-[var(--brand-primary)]/60 dark:hover:border-[var(--brand-primary)]/60 hover:shadow-lg transition-all h-full flex flex-col justify-between min-h-[165px] cursor-pointer group relative overflow-hidden"
+            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-[var(--brand-primary)]/60 dark:hover:border-[var(--brand-primary)]/60 hover:shadow-md transition-all h-full flex flex-col justify-between cursor-pointer group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-rose-500 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between pb-1.5">
+            <CardHeader className="flex flex-row items-center justify-between pb-1">
               <CardTitle className="text-xs font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">سربار و ضایعات دوره</CardTitle>
               <div className="rounded-full bg-[var(--brand-primary-subtle)] dark:bg-[var(--brand-primary)]/20 p-2 text-[var(--brand-primary)] shrink-0 group-hover:scale-110 transition-transform">
                 <Trash2 className="h-4 w-4" />
@@ -531,17 +534,12 @@ export const PnLDashboard: React.FC = () => {
                 {formatToman(filteredPeriodOverhead + filteredTotalWaste).text}
               </div>
 
-              <div className="space-y-1">
-                <p className="text-[11px] font-medium text-[var(--text-secondary)] dark:text-[var(--text-secondary)] leading-snug">
-                  مجموع هزینه‌های ثابت جاری و ارزش ضایعات.
-                </p>
-                <div className="flex items-center justify-between pt-1.5 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--brand-primary)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-                  <span>سربار: {formatToman(filteredPeriodOverhead).text}</span>
-                  <span className="flex items-center gap-0.5 text-[var(--brand-primary)]">
-                    گزارش کامل
-                    <ArrowUpRight className="h-3 w-3" />
-                  </span>
-                </div>
+              <div className="flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--brand-primary)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+                <span>سربار: {formatToman(filteredPeriodOverhead).text}</span>
+                <span className="flex items-center gap-0.5 text-[var(--brand-primary)]">
+                  گزارش کامل
+                  <ArrowUpRight className="h-3 w-3" />
+                </span>
               </div>
             </CardContent>
           </Card>
@@ -551,10 +549,10 @@ export const PnLDashboard: React.FC = () => {
         <motion.div variants={fadeInUpItem} whileHover={cardHover.whileHover} transition={cardHover.transition} className="h-full">
           <Card
             onClick={() => setActiveKpiModal('net_profit')}
-            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-emerald-500/60 dark:hover:border-emerald-500/60 hover:shadow-lg transition-all h-full flex flex-col justify-between min-h-[165px] cursor-pointer group relative overflow-hidden"
+            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-emerald-500/60 dark:hover:border-emerald-500/60 hover:shadow-md transition-all h-full flex flex-col justify-between cursor-pointer group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-emerald-500 to-green-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="flex flex-row items-center justify-between pb-1.5">
+            <CardHeader className="flex flex-row items-center justify-between pb-1">
               <CardTitle className="text-xs font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">سود خالص دوره</CardTitle>
               <div className={`rounded-full p-2 shrink-0 group-hover:scale-110 transition-transform ${filteredNetProfitToman.isNegative ? 'bg-rose-50 dark:bg-rose-950/50 text-[var(--status-error-text)] dark:text-[var(--status-error-text)]' : 'bg-[var(--status-success-bg)] dark:bg-emerald-950/50 text-[var(--status-success-text)] dark:text-[var(--status-success-text)]'}`}>
                 {filteredNetProfitToman.isNegative ? <TrendingDown className="h-4 w-4" /> : <TrendingUp className="h-4 w-4" />}
@@ -565,22 +563,160 @@ export const PnLDashboard: React.FC = () => {
                 {filteredNetProfitToman.text}
               </div>
 
-              <div className="space-y-1">
-                <p className="text-[11px] font-medium text-[var(--text-secondary)] dark:text-[var(--text-secondary)] leading-snug">
-                  سود نهایی پس از کسر تمامی هزینه‌ها و ضایعات.
-                </p>
-                <div className="flex items-center justify-between pt-1.5 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--status-success-text)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-                  <span>حاشیه سود: {toPersianDigits(roundCurrency(filteredNetMarginPercent))}٪</span>
-                  <span className="flex items-center gap-0.5 text-[var(--status-success-text)]">
-                    گزارش کامل
-                    <ArrowUpRight className="h-3 w-3" />
-                  </span>
-                </div>
+              <div className="flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--status-success-text)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+                <span>حاشیه سود: {toPersianDigits(roundCurrency(filteredNetMarginPercent))}٪</span>
+                <span className="flex items-center gap-0.5 text-[var(--status-success-text)]">
+                  گزارش کامل
+                  <ArrowUpRight className="h-3 w-3" />
+                </span>
               </div>
             </CardContent>
           </Card>
         </motion.div>
       </motion.div>
+
+      {/* Dedicated Section: بهای اولیه تولید و هزینه‌های مستقیم */}
+      <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] overflow-hidden">
+        <CardHeader className="border-b border-[var(--border-subtle)]/60 dark:border-[var(--border-subtle)] pb-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-[var(--bg-base)] dark:bg-stone-800 text-[var(--text-primary)] shrink-0 border border-[var(--border-subtle)]">
+                <Layers className="h-4.5 w-4.5 text-[var(--brand-primary)]" />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">
+                  بهای اولیه تولید و هزینه‌های مستقیم
+                </CardTitle>
+                <p className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)] mt-0.5">
+                  پایش نسبت هزینه مواد مصرفی و دستمزد به درآمد فروش • {filterTitle}
+                </p>
+              </div>
+            </div>
+
+            <Badge
+              variant={filteredPrimeCostPercent <= 65 ? 'success' : 'warning'}
+              className="font-bold px-3 py-1 self-start sm:self-auto text-xs"
+            >
+              {filteredPrimeCostPercent <= 65 ? 'وضعیت بهینه (زیر ۶۵٪ هدف)' : 'بالاتر از سقف استاندارد'}
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <CardContent className="pt-5 space-y-4">
+          {/* 3 Clean Metric Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            {/* 1. Food Cost */}
+            <div className="p-4 rounded-2xl bg-[var(--bg-base)]/70 dark:bg-stone-900/40 border border-[var(--border-subtle)] flex flex-col justify-between space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[var(--text-secondary)]">سهم مواد اولیه</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-200/80 dark:bg-stone-800 text-[var(--text-primary)]">
+                  مواد مصرفی
+                </span>
+              </div>
+              <div>
+                <div className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
+                  {toPersianDigits(roundCurrency(filteredFoodCostPercent))}٪
+                </div>
+                <div className="text-xs font-bold text-[var(--text-secondary)] mt-0.5">
+                  مبلغ مواد: {formatToman(filteredCOGS).text}
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Labor Cost */}
+            <div className="p-4 rounded-2xl bg-[var(--bg-base)]/70 dark:bg-stone-900/40 border border-[var(--border-subtle)] flex flex-col justify-between space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[var(--text-secondary)]">سهم هزینه نیروی کار</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-200/80 dark:bg-stone-800 text-[var(--text-primary)]">
+                  دستمزد
+                </span>
+              </div>
+              <div>
+                <div className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
+                  {toPersianDigits(roundCurrency(filteredLaborCostPercent))}٪
+                </div>
+                <div className="text-xs font-bold text-[var(--text-secondary)] mt-0.5">
+                  مبلغ دستمزد: {formatToman(filteredLaborCost).text}
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Total Prime Cost */}
+            <div className="p-4 rounded-2xl bg-[var(--bg-base)]/70 dark:bg-stone-900/40 border border-[var(--border-subtle)] flex flex-col justify-between space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[var(--text-secondary)]">بهای اولیه کل (مواد + دستمزد)</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-200/80 dark:bg-stone-800 text-[var(--text-primary)]">
+                  هدف: ۵۵٪ تا ۶۵٪
+                </span>
+              </div>
+              <div>
+                <div className="text-2xl font-black text-[var(--text-primary)] tracking-tight">
+                  {toPersianDigits(roundCurrency(filteredPrimeCostPercent))}٪
+                </div>
+                <div className="text-xs font-bold text-[var(--text-secondary)] mt-0.5">
+                  مجموع بهای مستقیم: {formatToman(filteredCOGS + filteredLaborCost).text}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Visual Revenue Share Strip with Restored Colors */}
+          <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-3">
+            <div className="flex items-center justify-between text-xs font-extrabold text-[var(--text-primary)]">
+              <span>تفکیک سهم هزینه‌های مستقیم از درآمد فروش:</span>
+              <span className="text-[var(--text-secondary)] font-bold">{formatToman(filteredRevenue).text}</span>
+            </div>
+
+            {/* Segmented Progress Track with Clear Distinct Colors */}
+            <div className="h-4 w-full rounded-full bg-stone-200 dark:bg-stone-800 flex overflow-hidden p-0.5 border border-[var(--border-subtle)]">
+              {filteredRevenue > 0 ? (
+                <>
+                  <div
+                    style={{ width: `${Math.min(100, filteredFoodCostPercent)}%` }}
+                    className="h-full bg-amber-500 rounded-r-full transition-all shadow-xs"
+                    title={`مواد اولیه: ${roundCurrency(filteredFoodCostPercent)}٪`}
+                  />
+                  <div
+                    style={{ width: `${Math.min(Math.max(0, 100 - filteredFoodCostPercent), filteredLaborCostPercent)}%` }}
+                    className="h-full bg-blue-500 transition-all shadow-xs"
+                    title={`نیروی کار: ${roundCurrency(filteredLaborCostPercent)}٪`}
+                  />
+                  <div
+                    style={{ width: `${Math.max(0, 100 - filteredPrimeCostPercent)}%` }}
+                    className="h-full bg-emerald-500 rounded-l-full transition-all shadow-xs"
+                    title={`مانده ناخالص باقیمانده: ${roundCurrency(Math.max(0, 100 - filteredPrimeCostPercent))}٪`}
+                  />
+                </>
+              ) : (
+                <div className="h-full w-full bg-stone-300 dark:bg-stone-700 rounded-full" />
+              )}
+            </div>
+
+            {/* Visual Legend with Matching Colors */}
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs pt-1">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0 shadow-2xs" />
+                <span className="font-bold text-[var(--text-secondary)]">مواد اولیه:</span>
+                <span className="font-black text-amber-700 dark:text-amber-400">{toPersianDigits(roundCurrency(filteredFoodCostPercent))}٪</span>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0 shadow-2xs" />
+                <span className="font-bold text-[var(--text-secondary)]">نیروی کار:</span>
+                <span className="font-black text-blue-700 dark:text-blue-400">{toPersianDigits(roundCurrency(filteredLaborCostPercent))}٪</span>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 shadow-2xs" />
+                <span className="font-bold text-[var(--text-secondary)]">مانده ناخالص پس از بهای اولیه:</span>
+                <span className="font-black text-emerald-700 dark:text-emerald-400">
+                  {toPersianDigits(roundCurrency(Math.max(0, 100 - filteredPrimeCostPercent)))}٪
+                </span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Itemized PnL Financial Statement Card */}
       <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)]">
@@ -1045,6 +1181,7 @@ export const PnLDashboard: React.FC = () => {
         metrics={{
           totalRevenue: filteredRevenue,
           totalCOGS: filteredCOGS,
+          totalLaborCost: filteredLaborCost,
           loggedWaste: filteredLoggedWaste,
           salesWaste: filteredSalesWaste,
           totalWaste: filteredTotalWaste,
@@ -1052,6 +1189,8 @@ export const PnLDashboard: React.FC = () => {
           grossProfit: filteredGrossProfit,
           netProfit: filteredNetProfit,
           foodCostPercent: filteredFoodCostPercent,
+          laborCostPercent: filteredLaborCostPercent,
+          primeCostPercent: filteredPrimeCostPercent,
           netMarginPercent: filteredNetMarginPercent,
           periodDaysCount,
         }}

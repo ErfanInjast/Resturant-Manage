@@ -173,13 +173,15 @@ export const MenuManager: React.FC = () => {
 
   const totalMaterialCost = recipeIngredients.reduce((acc, curr) => acc + (curr.cost || 0), 0);
   const wasteCost = roundCurrency(totalMaterialCost * (numWastePercent / 100));
-  const primeCost = roundCurrency(totalMaterialCost + wasteCost + numLaborCost + numPackagingCost);
+  const foodCost = roundCurrency(totalMaterialCost + wasteCost);
+  const portionCost = roundCurrency(foodCost + numLaborCost + numPackagingCost);
+  const primeCost = portionCost;
   
-  // Target Price = Prime Cost / (Target Food Cost % / 100)
+  // Target Price = Pure Food Cost / (Target Food Cost % / 100)
   const targetFoodCostRatio = (settings.targetFoodCostPercent || 35) / 100;
-  const targetPrice = targetFoodCostRatio > 0 ? roundCurrency(primeCost / targetFoodCostRatio) : 0;
+  const targetPrice = targetFoodCostRatio > 0 ? roundCurrency(foodCost / targetFoodCostRatio) : 0;
   
-  const grossProfit = roundCurrency(numSellingPrice - primeCost);
+  const grossProfit = roundCurrency(numSellingPrice - portionCost);
   const marginPercent = numSellingPrice > 0 ? roundCurrency((grossProfit / numSellingPrice) * 100) : 0;
 
   const handleSave = async (e: React.FormEvent) => {
@@ -220,6 +222,8 @@ export const MenuManager: React.FC = () => {
         laborCost: numLaborCost,
         packagingCost: numPackagingCost,
         totalMaterialCost,
+        foodCost,
+        portionCost,
         primeCost,
         targetPrice,
         grossProfit,
@@ -296,8 +300,8 @@ export const MenuManager: React.FC = () => {
     let valB = b[sortField as keyof MenuItem];
 
     if (sortField === 'grossProfit') {
-      valA = a.sellingPrice - a.primeCost;
-      valB = b.sellingPrice - b.primeCost;
+      valA = a.grossProfit ?? (a.sellingPrice - (a.foodCost ?? a.totalMaterialCost ?? a.primeCost));
+      valB = b.grossProfit ?? (b.sellingPrice - (b.foodCost ?? b.totalMaterialCost ?? b.primeCost));
     }
 
     if (typeof valA === 'string' && typeof valB === 'string') {
@@ -323,9 +327,9 @@ export const MenuManager: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">آنالیز و قیمت‌گذاری منو</h2>
+          <h2 className="text-xl font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)]">منو و قیمت‌گذاری</h2>
           <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium mt-0.5">
-            محاسبه بهای تمام شده، فرمول ساخت و قیمت پیشنهادی بر اساس {formatNumber(settings.targetFoodCostPercent)}٪ فود کاست هدف (نمایش لیست صفحه‌ای)
+            محاسبه بهای تمام‌شده، فرمول ساخت (رسپی) و تعیین قیمت بر اساس {formatNumber(settings.targetFoodCostPercent)}٪ فود کاست هدف
           </p>
         </div>
 
@@ -483,7 +487,7 @@ export const MenuManager: React.FC = () => {
                           {formatToman(item.targetPrice).text}
                         </td>
                         <td className="p-3.5 font-bold text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]">
-                          {formatToman(item.primeCost).text}
+                          {formatToman(item.foodCost ?? item.totalMaterialCost ?? item.primeCost).text}
                         </td>
                         <td className="p-3.5 font-black">
                           <span className={item.grossProfit >= 0 ? 'text-[#00A650] dark:text-[var(--status-success-text)]' : 'text-[var(--status-error-text)] dark:text-[var(--status-error-text)]'}>
@@ -582,7 +586,7 @@ export const MenuManager: React.FC = () => {
                         <div className="space-y-0.5 pt-1 border-t border-[var(--border-subtle)]/40 dark:border-stone-800">
                           <span className="text-[10px] text-[var(--text-secondary)] font-bold">بهای تمام‌شده هر پرس:</span>
                           <div className="text-xs font-bold text-[var(--status-warning-text)]">
-                            {formatToman(item.primeCost).text}
+                            {formatToman(item.foodCost ?? item.totalMaterialCost ?? item.primeCost).text}
                           </div>
                         </div>
 
@@ -802,23 +806,23 @@ export const MenuManager: React.FC = () => {
               </div>
 
               {/* Financial Calculation Live Card */}
-              <div className="rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] p-4 space-y-2.5 shadow-2xs transition-colors">
+              <div className="rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] p-4 space-y-2 shadow-2xs transition-colors">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-extrabold">مواد خام:</span>
-                  <span className="font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">{formatToman(totalMaterialCost).text}</span>
+                  <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-extrabold">هزینه مواد اولیه (فودکاست خالص):</span>
+                  <span className="font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">{formatToman(foodCost).text}</span>
                 </div>
-                {(wasteCost > 0 || numLaborCost > 0 || numPackagingCost > 0) && (
+                {(numLaborCost > 0 || numPackagingCost > 0) && (
                   <div className="flex justify-between items-center text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
-                    <span>جانبی (ضایعات + دستمزد + بسته‌بندی):</span>
-                    <span className="font-bold text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]">{formatToman(wasteCost + numLaborCost + numPackagingCost).text}</span>
+                    <span>دستمزد و بسته‌بندی هر پرس:</span>
+                    <span className="font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)]">{formatToman(numLaborCost + numPackagingCost).text}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-extrabold">بهای تمام شده کل (کاست هر پرس):</span>
-                  <span className="font-black text-[var(--brand-primary)] dark:text-[var(--status-warning-text)]">{formatToman(primeCost).text}</span>
+                  <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-extrabold">بهای تمام‌شده هر پرس:</span>
+                  <span className="font-black text-[var(--brand-primary)] dark:text-[var(--status-warning-text)]">{formatToman(portionCost).text}</span>
                 </div>
-                <div className="flex justify-between items-center text-xs pt-2.5 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-                  <span className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-black">قیمت پیشنهادی ({formatNumber(settings.targetFoodCostPercent)}٪ فودکاست):</span>
+                <div className="flex justify-between items-center text-xs pt-2 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+                  <span className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-black">قیمت پیشنهادی (فودکاست {formatNumber(settings.targetFoodCostPercent)}٪):</span>
                   <span className="font-black text-[var(--status-success-text)] dark:text-[var(--status-success-text)] text-sm">{formatToman(targetPrice).text}</span>
                 </div>
               </div>

@@ -54,13 +54,15 @@ export interface MenuItem {
   sellingPrice: number;     // Current selling price (Toman)
   wastePercent: number;     // Estimated waste % (e.g., 5%)
   ingredients: RecipeIngredient[];
-  laborCost: number;        // Additional labor cost per portion
-  packagingCost: number;    // Packaging cost per portion
-  totalMaterialCost: number; // Raw materials cost sum
-  primeCost: number;        // COGS = Material Cost + Waste + Labor + Packaging
-  targetPrice: number;      // Calculated target price at desired Food Cost % (e.g. Total Material / 0.35)
-  marginPercent: number;    // ((Selling Price - Prime Cost) / Selling Price) * 100
-  grossProfit: number;      // Selling Price - Prime Cost
+  laborCost: number;        // Direct labor cost per portion (تولید/آماده‌سازی هر پرس)
+  packagingCost: number;    // Packaging cost per portion (هزینه بسته‌بندی)
+  totalMaterialCost: number; // Raw materials cost sum (هزینه خام مواد)
+  foodCost: number;         // Pure Food Cost = Material Cost + Waste (ماده اولیه + ضایعات)
+  portionCost: number;      // Total Portion Cost = Food Cost + Direct Labor + Packaging (بهای تمام‌شده هر پرس)
+  primeCost?: number;       // Backward compatibility alias for portionCost
+  targetPrice: number;      // Calculated target price based on pure Food Cost (Food Cost / targetFoodCostRatio)
+  marginPercent: number;    // ((Selling Price - Portion Cost) / Selling Price) * 100
+  grossProfit: number;      // Selling Price - Portion Cost
   popularityScore?: number; // Calculated matrix popularity (Sales volume)
   salesVolume30Days?: number;
   matrixCategory?: 'star' | 'workhorse' | 'puzzle' | 'underperformer';
@@ -72,9 +74,11 @@ export interface DailySalesItem {
   menuItemName: string;
   quantity: number;
   unitSellingPrice: number;
-  unitCost: number;
+  unitCost: number;         // Unit Food Cost (مواد اولیه)
+  unitLaborCost?: number;   // Unit Direct Labor Cost (دستمزد مستقیم هر پرس)
   totalRevenue: number;
-  totalCost: number;
+  totalCost: number;        // Total Food Cost (COGS)
+  totalLaborCost?: number;  // Total Direct Labor Cost
 }
 
 export interface DailySalesRecord {
@@ -82,7 +86,8 @@ export interface DailySalesRecord {
   date: string;             // Jalali ISO or formatted YYYY-MM-DD
   items: DailySalesItem[];
   totalRevenue: number;
-  totalCOGS: number;
+  totalCOGS: number;        // Pure Food Cost from sold items
+  totalLaborCost?: number;  // Direct labor sum from sold items
   totalWasteCost: number;
   netProfit: number;
   notes?: string;

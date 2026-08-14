@@ -137,7 +137,7 @@ export const AnalyticsManager: React.FC = () => {
       <div>
         <h2 className="text-xl font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">تحلیل و مهندسی سودآوری منو</h2>
         <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium mt-0.5">
-          دسته‌بندی هوشمند محصولات بر اساس شاخص‌های سودآوری و محبوبیت در بازار (ماتریس ۴ بخش)
+          دسته‌بندی هوشمند محصولات بر اساس شاخص‌های سودآوری و محبوبیت در بازار
         </p>
       </div>
 

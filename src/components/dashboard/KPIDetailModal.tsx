@@ -81,29 +81,29 @@ export const KPIDetailModal: React.FC<KPIDetailModalProps> = ({
     switch (metricType) {
       case 'revenue':
         return {
-          title: 'گزارش جامع فروش و درآمد کل',
-          description: `تحلیل ریز درآمد و میانگین عملکرد در ${filterTitle}`,
+          title: 'گزارش فروش و درآمد',
+          description: `تحلیل فروش و عملکرد در ${filterTitle}`,
           icon: <TrendingUp className="h-5 w-5 text-[var(--status-success-text)] dark:text-[var(--status-success-text)]" />,
           badgeColor: 'success' as const,
         };
       case 'cogs':
         return {
-          title: 'گزارش جامع بهای تمام‌شده مواد اولیه',
-          description: `تحلیل هزینه‌های مستقیم مصرف مواد، فرمول ساخت و حاشیه سود ناخالص در ${filterTitle}`,
+          title: 'گزارش بهای تمام‌شده مواد',
+          description: `تحلیل هزینه مواد اولیه و مصرف منو در ${filterTitle}`,
           icon: <ShoppingBag className="h-5 w-5 text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]" />,
           badgeColor: 'warning' as const,
         };
       case 'overhead_waste':
         return {
-          title: 'گزارش جامع هزینه‌های سربار و ضایعات',
-          description: `تفکیک کامل هزینه‌های ثابت جاری، قبوض، حقوق و تلفات مواد در ${filterTitle}`,
+          title: 'گزارش سربار و ضایعات',
+          description: `تفکیک هزینه‌های جاری و تلفات مواد در ${filterTitle}`,
           icon: <Trash2 className="h-5 w-5 text-[var(--brand-primary)]" />,
           badgeColor: 'primary' as const,
         };
       case 'net_profit':
         return {
-          title: 'گزارش جامع سود خالص و سودآوری نهایی',
-          description: `تحلیل جریان سودآوری، نقطه سربه سر و ساختار درآمد و هزینه در ${filterTitle}`,
+          title: 'گزارش سود خالص',
+          description: `تحلیل سودآوری و ساختار مالی در ${filterTitle}`,
           icon: netProfit >= 0 ? <TrendingUp className="h-5 w-5 text-[var(--status-success-text)]" /> : <TrendingDown className="h-5 w-5 text-[var(--status-error-text)]" />,
           badgeColor: netProfit >= 0 ? ('success' as const) : ('danger' as const),
         };
@@ -119,43 +119,43 @@ export const KPIDetailModal: React.FC<KPIDetailModalProps> = ({
         <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-2">
           <div className="flex items-center gap-2">
             <Info className="h-4 w-4 text-[var(--brand-primary)] shrink-0" />
-            <h4 className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">
-              {metricType === 'revenue' && 'تعریف و فرمول «فروش و درآمد دوره»:'}
-              {metricType === 'cogs' && 'تعریف و فرمول «بهای تمام‌شده مواد اولیه»:'}
-              {metricType === 'overhead_waste' && 'تعریف و فرمول «سربار و ضایعات دوره»:'}
-              {metricType === 'net_profit' && 'تعریف و فرمول «سود خالص دوره»:'}
+            <h4 className="text-xs font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)]">
+              {metricType === 'revenue' && 'فرمول درآمد دوره'}
+              {metricType === 'cogs' && 'فرمول بهای تمام‌شده مواد'}
+              {metricType === 'overhead_waste' && 'فرمول سربار و ضایعات'}
+              {metricType === 'net_profit' && 'فرمول سود خالص'}
             </h4>
           </div>
-          <p className="text-xs leading-relaxed text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium">
+          <p className="text-xs leading-relaxed text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
             {metricType === 'revenue' && (
               <>
-                <strong>مجموع درآمد حاصل از فروش تمامی فاکتورها:</strong> این شاخص شامل جمع کل فروش ثبت‌شده در سیستم (از کلیه سفارشات ثبت‌شده) در بازه زمانی انتخاب‌شده است. 
+                مجموع فروش ثبت‌شده از کلیه فاکتورها در این دوره.
                 <span className="block mt-1 font-bold text-[var(--status-success-text)] dark:text-[var(--status-success-text)]">
-                  فرمول: درآمد کل = مجموع قیمت کل تمام سفارشات ثبت‌شده در دوره
+                  فرمول: درآمد کل = مجموع مبالغ فاکتورهای فروش دوره
                 </span>
               </>
             )}
             {metricType === 'cogs' && (
               <>
-                <strong>بهای کالا و مواد اولیه فروخته‌شده:</strong> ارزش تومانی دقیق تمام مواد اولیه‌ای که بر اساس رسپی (دستور ساخت) آیتم‌های فروش‌رفته، مصرف شده‌اند.
+                ارزش مواد اولیه‌ مصرف‌شده بر اساس رسپی آیتم‌های فروش‌رفته.
                 <span className="block mt-1 font-bold text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]">
-                  فرمول: بهای تمام‌شده مواد = مجموع (تعداد فروش هر آیتم × هزینه مواد اولیه آن آیتم بر اساس رسپی)
+                  فرمول: بهای مواد = مجموع (تعداد فروش هر آیتم × هزینه مواد رسپی)
                 </span>
               </>
             )}
             {metricType === 'overhead_waste' && (
               <>
-                <strong>هزینه‌های جاری عملیاتی و تلفات مواد:</strong> شامل سهم هزینه‌های ثابت ماهانه (اجاره، حقوق پرسنل، قبوض آب و برق و گاز، هزینه پیک، تعمیرات) متناسب با تعداد روزهای دوره، به‌علاوه ارزش تومانی مواد ضایعات‌شده.
+                سهم هزینه‌های ثابت (اجاره، حقوق، قبوض) به‌علاوه ارزش ضایعات ثبت‌شده.
                 <span className="block mt-1 font-bold text-[var(--brand-primary)]">
-                  فرمول: سربار و ضایعات = (سربار روزانه × تعداد روزهای دوره) + مجموع ارزش تومانی ضایعات ثبت‌شده
+                  فرمول: سربار و ضایعات = (سربار روزانه × روزهای دوره) + ارزش ضایعات
                 </span>
               </>
             )}
             {metricType === 'net_profit' && (
               <>
-                <strong>سود نهایی باقی‌مانده برای مجموعه:</strong> مبلغ خالصی که پس از کسر تمامی هزینه‌های مستقیم (مواد اولیه) و هزینه‌های غیرمستقیم (سربار و ضایعات) از کل درآمد حاصل می‌شود.
+                سود نهایی باقی‌مانده پس از کسر کلیه هزینه‌های مستقیم، سربار و ضایعات.
                 <span className="block mt-1 font-bold text-[var(--status-success-text)] dark:text-[var(--status-success-text)]">
-                  فرمول: سود خالص = درآمد کل - بهای تمام‌شده مواد اولیه - هزینه‌های سربار - ضایعات
+                  فرمول: سود خالص = درآمد کل - بهای مواد - سربار - ضایعات
                 </span>
               </>
             )}
@@ -330,7 +330,7 @@ export const KPIDetailModal: React.FC<KPIDetailModalProps> = ({
                     ) : (
                       menuItems.map((m) => {
                         const itemPrice = m.sellingPrice || 0;
-                        const itemCogs = m.primeCost || m.totalMaterialCost || 0;
+                        const itemCogs = m.foodCost ?? m.totalMaterialCost ?? 0;
                         const itemFc = itemPrice > 0 ? Math.round((itemCogs / itemPrice) * 100) : 0;
                         return (
                           <tr key={m.id} className="border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] hover:bg-[var(--bg-base)] hover:bg-[var(--bg-base)]">

@@ -24,19 +24,19 @@ export const Header: React.FC = () => {
     }
     switch (activeTab) {
       case 'dashboard':
-        return 'صورت سود و زیان و عملکرد';
+        return 'صورت سود و زیان';
       case 'inventory':
-        return 'انبارداری و مدیریت مواد اولیه';
+        return 'مدیریت انبار';
       case 'menu':
-        return 'آنالیز و قیمت‌گذاری منو';
+        return 'منو و قیمت‌گذاری';
       case 'sales':
-        return 'ثبت فروش و ضایعات';
+        return 'فروش و ضایعات';
       case 'analytics':
-        return 'تحلیل سودآوری و پیش‌بینی';
+        return 'تحلیل سودآوری';
       case 'settings':
-        return 'تنظیمات و پشتیبان‌گیری';
+        return 'تنظیمات';
       case 'guide':
-        return 'راهنمای جامع و آموزش کاربردی سیستم';
+        return 'راهنما و آموزش';
       default:
         return 'مدیریت مالی رستوران';
     }
@@ -111,26 +111,6 @@ export const Header: React.FC = () => {
             <span className="hidden md:inline">
               {isSimpleMode ? "نمای کامل و پیشرفته" : "نمای ساده و سریع"}
             </span>
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            className="text-[var(--text-primary)] hover:text-[var(--brand-primary)] hover:bg-[var(--bg-base)] rounded-xl px-2.5 transition-colors"
-            title={theme === 'dark' ? 'حالت روز (روشن)' : 'حالت شب (تاریک)'}
-          >
-            {theme === 'dark' ? (
-              <div className="flex items-center gap-1.5 text-[var(--status-warning-text)] font-bold text-xs">
-                <Sun className="h-4 w-4 text-[var(--status-warning-text)]" />
-                <span className="hidden sm:inline">روز</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 text-[var(--text-primary)] font-bold text-xs">
-                <Moon className="h-4 w-4 text-[var(--text-primary)]" />
-                <span className="hidden sm:inline">شب</span>
-              </div>
-            )}
           </Button>
         </div>
       </div>

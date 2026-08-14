@@ -310,7 +310,9 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
     // 3. Write new user menu items
     for (const item of menuList) {
       const matCost = 0;
-      const primeCost = matCost;
+      const foodCost = matCost;
+      const portionCost = foodCost;
+      const primeCost = portionCost;
       await db.menuItems.add({
         name: item.name,
         category: item.category,
@@ -320,10 +322,12 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
         laborCost: 0,
         packagingCost: 0,
         totalMaterialCost: matCost,
+        foodCost,
+        portionCost,
         primeCost,
-        targetPrice: Math.round(primeCost / (targetFoodCostPercent / 100)),
-        grossProfit: item.sellingPrice - primeCost,
-        marginPercent: Math.round(((item.sellingPrice - primeCost) / item.sellingPrice) * 100),
+        targetPrice: targetFoodCostPercent > 0 ? Math.round(foodCost / (targetFoodCostPercent / 100)) : 0,
+        grossProfit: item.sellingPrice - portionCost,
+        marginPercent: item.sellingPrice > 0 ? Math.round(((item.sellingPrice - portionCost) / item.sellingPrice) * 100) : 0,
         salesVolume30Days: 0,
         updatedAt: new Date().toISOString(),
       });

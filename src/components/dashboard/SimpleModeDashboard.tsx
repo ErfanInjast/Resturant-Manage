@@ -211,7 +211,7 @@ export const SimpleModeDashboard: React.FC = () => {
       const id = parseInt(menuItemIdStr, 10);
       const mi = menuItems.find((m) => Number(m.id) === id);
       const unitPrice = mi?.sellingPrice || 0;
-      const unitCost = mi?.primeCost || mi?.totalMaterialCost || 0;
+      const unitCost = mi?.foodCost ?? mi?.totalMaterialCost ?? 0;
       return {
         menuItemId: id,
         menuItemName: mi?.name || 'محصول',

@@ -18,7 +18,7 @@ export class RestaurantDatabase extends Dexie {
     super('RestaurantFinancialDB');
     this.version(1).stores({
       ingredients: '++id, name, category, unit, currentStock',
-      menuItems: '++id, name, category, sellingPrice, primeCost',
+      menuItems: '++id, name, category, sellingPrice, portionCost, primeCost',
       dailySales: '++id, date, totalRevenue, createdAt',
       wasteLogs: '++id, date, itemName, createdAt',
       settings: 'id',
@@ -26,7 +26,7 @@ export class RestaurantDatabase extends Dexie {
 
     this.version(2).stores({
       ingredients: '++id, name, category, unit, currentStock',
-      menuItems: '++id, name, category, sellingPrice, primeCost',
+      menuItems: '++id, name, category, sellingPrice, portionCost, primeCost',
       dailySales: '++id, date, totalRevenue, createdAt',
       wasteLogs: '++id, date, itemName, createdAt',
       settings: 'id',
@@ -100,16 +100,19 @@ export async function syncAndRecalculateAllData(): Promise<void> {
     });
 
     const wasteCost = roundCurrency(materialCost * ((item.wastePercent || 0) / 100));
-    const primeCost = roundCurrency(materialCost + wasteCost + (item.laborCost || 0) + (item.packagingCost || 0));
-    const targetPrice = targetFoodCostPercent > 0 ? roundCurrency(primeCost / (targetFoodCostPercent / 100)) : primeCost;
-    const grossProfit = item.sellingPrice - primeCost;
-    const marginPercent = item.sellingPrice > 0 ? ((item.sellingPrice - primeCost) / item.sellingPrice) * 100 : 0;
+    const foodCost = roundCurrency(materialCost + wasteCost);
+    const portionCost = roundCurrency(foodCost + (item.laborCost || 0) + (item.packagingCost || 0));
+    const targetPrice = targetFoodCostPercent > 0 ? roundCurrency(foodCost / (targetFoodCostPercent / 100)) : foodCost;
+    const grossProfit = roundCurrency(item.sellingPrice - portionCost);
+    const marginPercent = item.sellingPrice > 0 ? ((item.sellingPrice - portionCost) / item.sellingPrice) * 100 : 0;
 
     updatedMenuItems.push({
       ...item,
       ingredients: updatedIngredients,
       totalMaterialCost: materialCost,
-      primeCost,
+      foodCost,
+      portionCost,
+      primeCost: portionCost,
       targetPrice,
       grossProfit,
       marginPercent,
@@ -121,7 +124,7 @@ export async function syncAndRecalculateAllData(): Promise<void> {
     await db.menuItems.bulkPut(updatedMenuItems);
   }
 
-  // Recalculate Daily Sales records with updated COGS and actual waste cost from wasteLogs
+  // Recalculate Daily Sales records with updated COGS (pure food cost) and direct labor tracking
   const menuItemMap = new Map<number, MenuItem>();
   updatedMenuItems.forEach((mi) => {
     if (mi.id !== undefined) menuItemMap.set(Number(mi.id), mi);
@@ -140,6 +143,7 @@ export async function syncAndRecalculateAllData(): Promise<void> {
   for (const sale of dailySales) {
     let totalRevenue = 0;
     let totalCOGS = 0;
+    let totalLaborCost = 0;
     const updatedItems = (sale.items || []).map((sItem) => {
       const miId = Number(sItem.menuItemId);
       let mi = menuItemMap.get(miId);
@@ -147,18 +151,25 @@ export async function syncAndRecalculateAllData(): Promise<void> {
         mi = updatedMenuItems.find((m) => m.name.trim().toLowerCase() === sItem.menuItemName.trim().toLowerCase());
       }
 
-      const unitCost = mi ? mi.primeCost : sItem.unitCost;
+      // COGS is pure Food Cost (materials + recipe waste)
+      const unitCost = mi ? (mi.foodCost ?? mi.totalMaterialCost ?? sItem.unitCost) : sItem.unitCost;
+      const unitLaborCost = mi ? (mi.laborCost || 0) : (sItem.unitLaborCost || 0);
       const totalRev = roundCurrency(sItem.quantity * sItem.unitSellingPrice);
       const totalCost = roundCurrency(sItem.quantity * unitCost);
+      const totalLabor = roundCurrency(sItem.quantity * unitLaborCost);
+
       totalRevenue += totalRev;
       totalCOGS += totalCost;
+      totalLaborCost += totalLabor;
 
       return {
         ...sItem,
         menuItemId: mi?.id || miId,
         unitCost,
+        unitLaborCost,
         totalRevenue: totalRev,
         totalCost,
+        totalLaborCost: totalLabor,
       };
     });
 
@@ -171,6 +182,7 @@ export async function syncAndRecalculateAllData(): Promise<void> {
       items: updatedItems,
       totalRevenue,
       totalCOGS,
+      totalLaborCost,
       totalWasteCost,
       netProfit,
     });
@@ -266,7 +278,7 @@ function validateMenuItemRecord(item: any, index: number): void {
   if (!isNonEmptyString(item.name)) {
     throw new Error(`نام آیتم منو در رکورد شماره ${index + 1} خالی یا نامعتبر است.`);
   }
-  const numFields = ['sellingPrice', 'wastePercent', 'laborCost', 'packagingCost', 'totalMaterialCost', 'primeCost', 'targetPrice', 'marginPercent', 'grossProfit'];
+  const numFields = ['sellingPrice', 'wastePercent', 'laborCost', 'packagingCost', 'totalMaterialCost', 'foodCost', 'portionCost', 'primeCost', 'targetPrice', 'marginPercent', 'grossProfit'];
   for (const field of numFields) {
     if (item[field] !== undefined && !isValidNumber(item[field])) {
       throw new Error(`فیلد عددی ${field} در آیتم منو "${item.name}" نامعتبر است.`);
@@ -619,7 +631,8 @@ export async function seedDemoData(): Promise<void> {
     // Item 1: چلو کباب کوبیده مخصوص
     // Recipe: 0.25kg گوشت (162,500), 0.25kg برنج (35,000), 0.05kg پیاز (1,250), 0.02kg کره (7,600) = 206,350 Toman material
     const item1MatCost = 0.25 * 650000 + 0.25 * 140000 + 0.05 * 25000 + 0.02 * 380000; // 206,350
-    const item1Prime = item1MatCost + item1MatCost * 0.05 + 15000 + 10000; // + 5% waste + labor 15k + pack 10k = 241,667 Toman
+    const item1FoodCost = item1MatCost + item1MatCost * 0.05; // 216,668 Toman pure food cost
+    const item1PortionCost = item1FoodCost + 15000 + 10000; // + labor 15k + pack 10k = 241,667 Toman
     const item1Price = 380000; // Selling price: 380,000 Toman
 
     await db.menuItems.add({
@@ -636,10 +649,12 @@ export async function seedDemoData(): Promise<void> {
       laborCost: 15000,
       packagingCost: 10000,
       totalMaterialCost: Math.round(item1MatCost),
-      primeCost: Math.round(item1Prime),
-      targetPrice: Math.round(item1Prime / 0.35),
-      grossProfit: Math.round(item1Price - item1Prime),
-      marginPercent: Math.round(((item1Price - item1Prime) / item1Price) * 100),
+      foodCost: Math.round(item1FoodCost),
+      portionCost: Math.round(item1PortionCost),
+      primeCost: Math.round(item1PortionCost),
+      targetPrice: Math.round(item1FoodCost / 0.35),
+      grossProfit: Math.round(item1Price - item1PortionCost),
+      marginPercent: Math.round(((item1Price - item1PortionCost) / item1Price) * 100),
       popularityScore: 85,
       salesVolume30Days: 420,
       matrixCategory: 'star',
@@ -648,7 +663,8 @@ export async function seedDemoData(): Promise<void> {
 
     // Item 2: پاستا آلفردو با مرغ
     const item2MatCost = 0.15 * 220000 + 0.1 * 280000 + 0.05 * 35000; // 33000 + 28000 + 1750 = 62,750 Toman
-    const item2Prime = item2MatCost + item2MatCost * 0.03 + 12000 + 8000; // = 84,632 Toman
+    const item2FoodCost = item2MatCost + item2MatCost * 0.03; // 64,632 Toman pure food cost
+    const item2PortionCost = item2FoodCost + 12000 + 8000; // = 84,632 Toman
     const item2Price = 240000; // 240,000 Toman
 
     await db.menuItems.add({
@@ -664,10 +680,12 @@ export async function seedDemoData(): Promise<void> {
       laborCost: 12000,
       packagingCost: 8000,
       totalMaterialCost: Math.round(item2MatCost),
-      primeCost: Math.round(item2Prime),
-      targetPrice: Math.round(item2Prime / 0.35),
-      grossProfit: Math.round(item2Price - item2Prime),
-      marginPercent: Math.round(((item2Price - item2Prime) / item2Price) * 100),
+      foodCost: Math.round(item2FoodCost),
+      portionCost: Math.round(item2PortionCost),
+      primeCost: Math.round(item2PortionCost),
+      targetPrice: Math.round(item2FoodCost / 0.35),
+      grossProfit: Math.round(item2Price - item2PortionCost),
+      marginPercent: Math.round(((item2Price - item2PortionCost) / item2Price) * 100),
       popularityScore: 78,
       salesVolume30Days: 310,
       matrixCategory: 'star',
@@ -676,7 +694,8 @@ export async function seedDemoData(): Promise<void> {
 
     // Item 3: کاپوچینو دوبل
     const item3MatCost = 0.02 * 1200000 + 0.15 * 35000; // 24000 + 5250 = 29,250 Toman
-    const item3Prime = item3MatCost + 5000 + 3000; // = 37,250 Toman
+    const item3FoodCost = item3MatCost;
+    const item3PortionCost = item3FoodCost + 5000 + 3000; // = 37,250 Toman
     const item3Price = 85000; // 85,000 Toman
 
     await db.menuItems.add({
@@ -691,10 +710,12 @@ export async function seedDemoData(): Promise<void> {
       laborCost: 5000,
       packagingCost: 3000,
       totalMaterialCost: Math.round(item3MatCost),
-      primeCost: Math.round(item3Prime),
-      targetPrice: Math.round(item3Prime / 0.35),
-      grossProfit: Math.round(item3Price - item3Prime),
-      marginPercent: Math.round(((item3Price - item3Prime) / item3Price) * 100),
+      foodCost: Math.round(item3FoodCost),
+      portionCost: Math.round(item3PortionCost),
+      primeCost: Math.round(item3PortionCost),
+      targetPrice: Math.round(item3FoodCost / 0.35),
+      grossProfit: Math.round(item3Price - item3PortionCost),
+      marginPercent: Math.round(((item3Price - item3PortionCost) / item3Price) * 100),
       popularityScore: 92,
       salesVolume30Days: 650,
       matrixCategory: 'workhorse',
@@ -703,7 +724,8 @@ export async function seedDemoData(): Promise<void> {
 
     // Item 4: اسپرسو سینگل
     const item4MatCost = 0.01 * 1200000; // 12,000 Toman
-    const item4Prime = item4MatCost + 3000 + 1500; // 16,500 Toman
+    const item4FoodCost = item4MatCost;
+    const item4PortionCost = item4FoodCost + 3000 + 1500; // 16,500 Toman
     const item4Price = 55000;
 
     await db.menuItems.add({
@@ -717,10 +739,12 @@ export async function seedDemoData(): Promise<void> {
       laborCost: 3000,
       packagingCost: 1500,
       totalMaterialCost: Math.round(item4MatCost),
-      primeCost: Math.round(item4Prime),
-      targetPrice: Math.round(item4Prime / 0.35),
-      grossProfit: Math.round(item4Price - item4Prime),
-      marginPercent: Math.round(((item4Price - item4Prime) / item4Price) * 100),
+      foodCost: Math.round(item4FoodCost),
+      portionCost: Math.round(item4PortionCost),
+      primeCost: Math.round(item4PortionCost),
+      targetPrice: Math.round(item4FoodCost / 0.35),
+      grossProfit: Math.round(item4Price - item4PortionCost),
+      marginPercent: Math.round(((item4Price - item4PortionCost) / item4Price) * 100),
       popularityScore: 60,
       salesVolume30Days: 190,
       matrixCategory: 'puzzle',
@@ -740,29 +764,35 @@ export async function seedDemoData(): Promise<void> {
       const q4 = Math.floor(12 + Math.random() * 18);
 
       const rev1 = q1 * item1Price;
-      const cogs1 = q1 * item1Prime;
+      const cogs1 = q1 * Math.round(item1FoodCost);
+      const labor1 = q1 * 15000;
       const rev2 = q2 * item2Price;
-      const cogs2 = q2 * item2Prime;
+      const cogs2 = q2 * Math.round(item2FoodCost);
+      const labor2 = q2 * 12000;
       const rev3 = q3 * item3Price;
-      const cogs3 = q3 * item3Prime;
+      const cogs3 = q3 * Math.round(item3FoodCost);
+      const labor3 = q3 * 5000;
       const rev4 = q4 * item4Price;
-      const cogs4 = q4 * item4Prime;
+      const cogs4 = q4 * Math.round(item4FoodCost);
+      const labor4 = q4 * 3000;
 
       const totalRevenue = rev1 + rev2 + rev3 + rev4;
       const totalCOGS = cogs1 + cogs2 + cogs3 + cogs4;
+      const totalLaborCost = labor1 + labor2 + labor3 + labor4;
       const totalWasteCost = Math.round(totalRevenue * 0.02);
       const netProfit = totalRevenue - totalCOGS - totalWasteCost - 4500000; // daily overhead ~4.5M
 
       await db.dailySales.add({
         date: formattedDate,
         items: [
-          { menuItemId: 1, menuItemName: 'چلو کباب کوبیده مخصوص', quantity: q1, unitSellingPrice: item1Price, unitCost: item1Prime, totalRevenue: rev1, totalCost: cogs1 },
-          { menuItemId: 2, menuItemName: 'پاستا آلفردو مرغ', quantity: q2, unitSellingPrice: item2Price, unitCost: item2Prime, totalRevenue: rev2, totalCost: cogs2 },
-          { menuItemId: 3, menuItemName: 'کاپوچینو دوبل اسپشالیتی', quantity: q3, unitSellingPrice: item3Price, unitCost: item3Prime, totalRevenue: rev3, totalCost: cogs3 },
-          { menuItemId: 4, menuItemName: 'اسپرسو سینگل سینگل اورجین', quantity: q4, unitSellingPrice: item4Price, unitCost: item4Prime, totalRevenue: rev4, totalCost: cogs4 },
+          { menuItemId: 1, menuItemName: 'چلو کباب کوبیده مخصوص', quantity: q1, unitSellingPrice: item1Price, unitCost: Math.round(item1FoodCost), unitLaborCost: 15000, totalRevenue: rev1, totalCost: cogs1, totalLaborCost: labor1 },
+          { menuItemId: 2, menuItemName: 'پاستا آلفردو مرغ', quantity: q2, unitSellingPrice: item2Price, unitCost: Math.round(item2FoodCost), unitLaborCost: 12000, totalRevenue: rev2, totalCost: cogs2, totalLaborCost: labor2 },
+          { menuItemId: 3, menuItemName: 'کاپوچینو دوبل اسپشالیتی', quantity: q3, unitSellingPrice: item3Price, unitCost: Math.round(item3FoodCost), unitLaborCost: 5000, totalRevenue: rev3, totalCost: cogs3, totalLaborCost: labor3 },
+          { menuItemId: 4, menuItemName: 'اسپرسو سینگل سینگل اورجین', quantity: q4, unitSellingPrice: item4Price, unitCost: Math.round(item4FoodCost), unitLaborCost: 3000, totalRevenue: rev4, totalCost: cogs4, totalLaborCost: labor4 },
         ],
         totalRevenue,
         totalCOGS,
+        totalLaborCost,
         totalWasteCost,
         netProfit,
         notes: `فروش ثبت شده روزانه - ${formattedDate}`,

@@ -12,6 +12,7 @@ const buttonVariants = cva(
         outline: 'border border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-base)] hover:border-[var(--border-functional)] shadow-2xs',
         ghost: 'text-[var(--text-primary)] hover:bg-[var(--bg-base)] hover:text-[var(--text-primary)]',
         danger: 'bg-[var(--status-error-text)] text-white hover:opacity-90 shadow-2xs focus-visible:ring-[var(--status-error-text)]',
+        warning: 'bg-amber-600 dark:bg-amber-500 text-white hover:bg-amber-700 dark:hover:bg-amber-600 shadow-2xs focus-visible:ring-amber-500',
         success: 'bg-[var(--status-success-text)] text-white hover:opacity-90 shadow-2xs focus-visible:ring-[var(--status-success-text)]',
         soft: 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] hover:opacity-80 font-bold border border-[var(--brand-primary)]/20',
       },

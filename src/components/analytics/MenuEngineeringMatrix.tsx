@@ -6,7 +6,6 @@ import {
   HelpCircle,
   ShieldAlert,
   Search,
-  Grid,
   ChevronDown,
   ChevronUp,
   TrendingUp,
@@ -17,7 +16,6 @@ import {
   PieChart,
   Table as TableIcon,
   Target,
-  Lightbulb,
   CheckCircle2,
   Eye,
   BarChart3,
@@ -170,7 +168,7 @@ const MENU_CATEGORIES: string[] = [
   'سایر',
 ];
 
-type MainViewMode = 'table' | 'matrix' | 'scatter' | 'strategy';
+type MainViewMode = 'table' | 'scatter';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -359,39 +357,6 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
     return filteredAndSortedItems.slice(start, start + itemsPerPage);
   }, [filteredAndSortedItems, validPage, itemsPerPage]);
 
-  // Group items into the 4 Quadrants
-  const quadrantData = useMemo(() => {
-    const totalProcessedVolume = processedItems.reduce((sum, i) => sum + i.computedVolume, 0) || 1;
-    const totalProcessedProfit = processedItems.reduce((sum, i) => sum + i.monthlyGrossProfitContribution, 0) || 1;
-
-    const keys: MatrixCategory[] = ['star', 'workhorse', 'puzzle', 'underperformer'];
-
-    return keys.map((key) => {
-      const config = QUADRANT_CONFIGS[key];
-      const items = filteredAndSortedItems.filter((i) => i.matrixCategoryCalculated === key);
-      const allCategoryItems = processedItems.filter((i) => i.matrixCategoryCalculated === key);
-
-      const qVolume = allCategoryItems.reduce((acc, i) => acc + i.computedVolume, 0);
-      const qProfit = allCategoryItems.reduce((acc, i) => acc + i.monthlyGrossProfitContribution, 0);
-
-      const volumeSharePct = (qVolume / totalProcessedVolume) * 100;
-      const profitSharePct = (qProfit / totalProcessedProfit) * 100;
-      const menuSharePct = processedItems.length > 0 ? (allCategoryItems.length / processedItems.length) * 100 : 0;
-
-      return {
-        ...config,
-        items,
-        totalItemsCount: allCategoryItems.length,
-        filteredCount: items.length,
-        qVolume,
-        qProfit,
-        volumeSharePct,
-        profitSharePct,
-        menuSharePct,
-      };
-    });
-  }, [filteredAndSortedItems, processedItems]);
-
   // Scatter chart data
   const scatterData = useMemo(() => {
     return processedItems.map((item) => {
@@ -428,7 +393,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
-                سودآوری و تحلیل منو (مهندسی ۴ بخش)
+                سودآوری و تحلیل منو
               </h3>
               <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium mt-0.5">
                 طبقه‌بندی هوشمند غذاها و نوشیدنی‌ها جهت تصمیم‌گیری درباره قیمت‌گذاری و ترکیب منو
@@ -444,7 +409,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 mainView === 'table'
                   ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs'
-                  : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               <TableIcon className="h-3.5 w-3.5" />
@@ -453,41 +418,15 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
 
             <button
               type="button"
-              onClick={() => setMainView('matrix')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                mainView === 'matrix'
-                  ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs'
-                  : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              <Grid className="h-3.5 w-3.5" />
-              <span>ماتریس ۴ گانه</span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => setMainView('scatter')}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 mainView === 'scatter'
                   ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs'
-                  : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               <Target className="h-3.5 w-3.5" />
               <span>نقشه بصری</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setMainView('strategy')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                mainView === 'strategy'
-                  ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs'
-                  : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              <Lightbulb className="h-3.5 w-3.5" />
-              <span>راهنمای استراتژیک</span>
             </button>
           </div>
         </div>
@@ -536,8 +475,8 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
           </div>
         </div>
 
-        {/* 3. Quadrant & Category Filters (Visible in Table and Matrix Views) */}
-        {(mainView === 'table' || mainView === 'matrix') && (
+        {/* 3. Quadrant & Category Filters (Visible in Table View) */}
+        {mainView === 'table' && (
           <div className="space-y-3 pt-2 border-t border-[#F4F0EB] dark:border-[var(--border-subtle)]">
             {/* Quadrant Quick Filter Tabs */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
@@ -662,7 +601,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                     className="p-3.5 cursor-pointer hover:text-[var(--text-primary)] group transition-colors"
                   >
                     <div className="flex items-center gap-1.5">
-                      <span>بهای تمام‌شده (COGS)</span>
+                      <span>بهای تمام‌شده مواد</span>
                       {renderSortIcon('primeCost')}
                     </div>
                   </th>
@@ -743,7 +682,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                           </td>
 
                           <td className="p-3.5 font-bold text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]">
-                            {formatToman(item.primeCost).text}
+                            {formatToman(item.foodCost ?? item.totalMaterialCost ?? item.primeCost).text}
                           </td>
 
                           <td className="p-3.5 font-black">
@@ -840,7 +779,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                               فروش: {formatToman(item.sellingPrice).text}
                             </div>
                             <div className="text-[11px] font-bold text-[var(--text-secondary)]">
-                              بها (COGS): {formatToman(item.primeCost).text}
+                              بهای مواد: {formatToman(item.foodCost ?? item.totalMaterialCost ?? item.primeCost).text}
                             </div>
                             <div className="text-[11px] font-black text-[var(--status-success-text)] mt-0.5">
                               سود: {formatToman(item.grossProfit || 0).text} <span className="text-[9px] font-bold">({formatNumber(item.marginPercent)}٪)</span>
@@ -896,122 +835,14 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
         </Card>
       )}
 
-      {/* VIEW 2: 4 QUADRANTS GRID VIEW */}
-      {mainView === 'matrix' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {quadrantData.map((data) => {
-            const IconComp = data.icon;
-            return (
-              <div
-                key={data.key}
-                className={`rounded-3xl border transition-all duration-200 bg-white dark:bg-[var(--bg-card)] overflow-hidden shadow-2xs flex flex-col ${data.borderColor}`}
-              >
-                {/* Quadrant Header */}
-                <div className={`p-4 ${data.headerBg} border-b ${data.borderColor} flex items-center justify-between`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-2xl ${data.iconBg} ${data.iconColor}`}>
-                      <IconComp className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">
-                          {data.title}
-                        </h4>
-                        <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase">
-                          ({data.englishTitle})
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium mt-0.5">
-                        {data.subTitle}
-                      </p>
-                    </div>
-                  </div>
-
-                  <Badge variant={data.badgeVariant}>
-                    {formatNumber(data.totalItemsCount)} آیتم
-                  </Badge>
-                </div>
-
-                {/* Metrics Row */}
-                <div className="grid grid-cols-3 gap-1 p-3 bg-[var(--bg-base)]/60 dark:bg-[var(--bg-card)] border-b border-[#F4F0EB] dark:border-[var(--border-subtle)] text-[11px]">
-                  <div className="text-center px-2 py-1 bg-white dark:bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)]/50 dark:border-[var(--border-subtle)]">
-                    <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] text-[10px] font-bold block">سهم منو</span>
-                    <span className="font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">
-                      {formatNumber(roundCurrency(data.menuSharePct))}٪
-                    </span>
-                  </div>
-                  <div className="text-center px-2 py-1 bg-white dark:bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)]/50 dark:border-[var(--border-subtle)]">
-                    <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] text-[10px] font-bold block">سهم فروش</span>
-                    <span className="font-extrabold text-[#2563EB] dark:text-[var(--status-info-text)]">
-                      {formatNumber(roundCurrency(data.volumeSharePct))}٪
-                    </span>
-                  </div>
-                  <div className="text-center px-2 py-1 bg-white dark:bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)]/50 dark:border-[var(--border-subtle)]">
-                    <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] text-[10px] font-bold block">سهم سودکل</span>
-                    <span className="font-extrabold text-[var(--status-success-text)] dark:text-[var(--status-success-text)]">
-                      {formatNumber(roundCurrency(data.profitSharePct))}٪
-                    </span>
-                  </div>
-                </div>
-
-                {/* Strategy Summary & Product List */}
-                <div className="p-3.5 text-xs space-y-3 flex-1 flex flex-col justify-between">
-                  <div className="p-2.5 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)]/80 dark:border-[var(--border-subtle)] flex items-start gap-2">
-                    <Info className={`h-4 w-4 shrink-0 mt-0.5 ${data.iconColor}`} />
-                    <p className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium leading-relaxed">
-                      {data.strategy}
-                    </p>
-                  </div>
-
-                  {/* Items Container */}
-                  <div className="space-y-2 max-h-60 overflow-y-auto pr-0.5 scrollbar-thin">
-                    {data.items.length === 0 ? (
-                      <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)] py-3 text-center font-medium">
-                        هیچ محصولی در این دسته‌بندی با فیلتر فعلی وجود ندارد.
-                      </p>
-                    ) : (
-                      data.items.map((item) => (
-                        <div
-                          key={item.id}
-                          onClick={() => setSelectedDetailItem(item)}
-                          className="group p-2.5 rounded-2xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-[var(--bg-base)]/50 dark:bg-[var(--bg-card)] hover:bg-white hover:bg-[var(--bg-base)] transition-all cursor-pointer shadow-2xs flex items-center justify-between gap-2"
-                        >
-                          <div>
-                            <span className="font-extrabold text-xs text-[var(--text-primary)] dark:text-[var(--text-primary)] group-hover:text-[var(--brand-primary)] transition-colors block">
-                              {item.name}
-                            </span>
-                            <span className="text-[10px] text-[var(--text-secondary)] font-medium">
-                              فروش: {formatNumber(item.computedVolume)} پرس
-                            </span>
-                          </div>
-
-                          <div className="text-left dir-ltr">
-                            <span className="text-xs font-black text-[var(--status-success-text)] dark:text-[var(--status-success-text)] block">
-                              {formatToman(item.grossProfit || 0).text}
-                            </span>
-                            <span className="text-[10px] text-[var(--text-secondary)] font-bold block">
-                              قیمت: {formatToman(item.sellingPrice).text}
-                            </span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* VIEW 3: VISUAL SCATTER MATRIX CHART */}
+      {/* VIEW 2: VISUAL SCATTER MATRIX CHART */}
       {mainView === 'scatter' && (
         <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
           <div className="p-4 sm:p-5 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h4 className="text-sm font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
                 <Target className="h-4 w-4 text-[var(--brand-primary)]" />
-                نقشه فضایی محصولات (ماتریس مهندسی منو)
+                نقشه فضایی محصولات
               </h4>
               <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium mt-0.5">
                 موقعیت هر محصول در دو محور میزان فروش (افقی) و سود ناخالص هر پرس (عمودی). خطوط نقطه‌چین نشان‌دهنده میانگین‌های منو هستند.
@@ -1095,72 +926,6 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
         </Card>
       )}
 
-      {/* VIEW 4: STRATEGIC ACTION CENTER */}
-      {mainView === 'strategy' && (
-        <div className="space-y-4">
-          <div className="bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-3xl p-5 space-y-2">
-            <h4 className="text-sm font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-[var(--brand-primary)]" />
-              نقشه راه و راهکارهای عملیاتی برای بهینه‌سازی سودآوری منو
-            </h4>
-            <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)] leading-relaxed font-medium">
-              بر اساس فرمول‌های استاندارد مهندسی منو (Menu Engineering)، برای هر یک از گروه محصولات می‌توانید از دستورالعمل‌های زیر جهت افزایش سودآوری کل رستوران استفاده کنید:
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {(['star', 'workhorse', 'puzzle', 'underperformer'] as MatrixCategory[]).map((key) => {
-              const conf = QUADRANT_CONFIGS[key];
-              const IconComp = conf.icon;
-              const itemsCount = processedItems.filter((i) => i.matrixCategoryCalculated === key).length;
-
-              return (
-                <div
-                  key={key}
-                  className={`rounded-3xl border p-5 space-y-3 bg-white dark:bg-[var(--bg-card)] ${conf.borderColor}`}
-                >
-                  <div className="flex items-center justify-between pb-3 border-b border-[#F4F0EB] dark:border-[var(--border-subtle)]">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-2xl ${conf.iconBg} ${conf.iconColor}`}>
-                        <IconComp className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h5 className="text-sm font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">
-                          {conf.title}
-                        </h5>
-                        <p className="text-[11px] text-[var(--text-secondary)] font-medium">
-                          {conf.subTitle}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge variant={conf.badgeVariant}>
-                      {formatNumber(itemsCount)} محصول
-                    </Badge>
-                  </div>
-
-                  <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-bold leading-relaxed">
-                    {conf.strategy}
-                  </p>
-
-                  <div className="space-y-2 pt-1">
-                    <span className="text-[11px] font-black text-[var(--text-secondary)] dark:text-[var(--text-secondary)] block">
-                      گام‌های کلیدی اجرای استراتژی:
-                    </span>
-                    <ul className="space-y-1.5 text-xs text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-medium pr-4 list-disc">
-                      {conf.detailedSteps.map((step, idx) => (
-                        <li key={idx} className="leading-relaxed">
-                          {step}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       {/* ITEM ENGINEERING PASSPORT MODAL */}
       {selectedDetailItem && detailItemMetrics && (
         <Modal
@@ -1205,9 +970,9 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
               </div>
 
               <div className="bg-[var(--bg-base)] dark:bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-xs">
-                <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-bold block mb-0.5">بهای تمام شده (COGS)</span>
+                <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-bold block mb-0.5">بهای تمام شده مواد</span>
                 <span className="text-sm font-black text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]">
-                  {formatToman(detailItemMetrics.primeCost).text}
+                  {formatToman(detailItemMetrics.foodCost ?? detailItemMetrics.totalMaterialCost ?? detailItemMetrics.primeCost).text}
                 </span>
               </div>
 

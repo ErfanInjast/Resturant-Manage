@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   BookOpen,
   CheckCircle2,
@@ -18,6 +18,7 @@ import {
   TrendingUp,
   ShieldCheck,
   ChevronDown,
+  Layers,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
@@ -26,22 +27,22 @@ import { Badge } from '../ui/Badge';
 import { SmartMoneyInput } from '../ui/SmartMoneyInput';
 import { formatToman, toPersianDigits } from '../../lib/utils';
 
-type GuideChapterId = 'all' | 'setup' | 'inventory' | 'menu' | 'sales' | 'analytics' | 'backup' | 'calculator';
+type GuideChapterId = 'setup' | 'inventory' | 'menu' | 'sales' | 'analytics' | 'backup' | 'calculator' | 'faq';
 
 interface ChapterDef {
   id: GuideChapterId;
   title: string;
   shortDesc: string;
   icon: React.ComponentType<{ className?: string }>;
-  badge?: string;
-  color: string;
+  badge: string;
+  badgeVariant?: 'primary' | 'success' | 'warning' | 'info' | 'purple' | 'danger';
 }
 
 export const GuideManager: React.FC = () => {
   const { setActiveTab } = useAppStore();
-  const [activeChapter, setActiveChapter] = useState<GuideChapterId>('all');
+  const [activeChapter, setActiveChapter] = useState<GuideChapterId>('setup');
   const [searchQuery, setSearchQuery] = useState('');
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   // Interactive Calculator State
   const [calcCost, setCalcCost] = useState<number>(500000); // 500k Toman per kg
@@ -59,74 +60,75 @@ export const GuideManager: React.FC = () => {
 
   const chapters: ChapterDef[] = [
     {
-      id: 'all',
-      title: 'همه مباحث و آموزش‌ها',
-      shortDesc: 'دیدن تمامی راهنماها و آموزش‌های سیستم به صورت یکجا',
-      icon: BookOpen,
-      color: 'bg-stone-800 text-white dark:bg-stone-200 dark:text-[var(--text-primary)]',
-    },
-    {
       id: 'setup',
-      title: '۱. تنظیمات اولیه و هزینه‌های ثابت',
-      shortDesc: 'فرمول دقیق محاسبه هزینه‌های ثابت ماهانه (اجاره، حقوق، بیمه، قبوض) و نرخ هر دقیقه',
+      title: '۱. تنظیمات و هزینه ثابت',
+      shortDesc: 'محاسبه هزینه اجاره، حقوق، قبوض و نرخ سرانه هر دقیقه',
       icon: Settings,
-      badge: 'پایه و الزامی',
-      color: 'bg-blue-600 text-white',
+      badge: 'پایه',
+      badgeVariant: 'info',
     },
     {
       id: 'inventory',
-      title: '۲. انبارداری و درصد افت مواد اولیه',
-      shortDesc: 'تعریف مواد اولیه، واحد سنجش، درصد ضایعات پاک‌کردن و هشدار کمبود موجودی',
+      title: '۲. انبار و درصد افت',
+      shortDesc: 'مدیریت موجودی، واحد سنجش و درصد دورریز مواد اولیه',
       icon: Boxes,
-      badge: 'کنترل موجودی',
-      color: 'bg-amber-600 text-white',
+      badge: 'انبارداری',
+      badgeVariant: 'warning',
     },
     {
       id: 'menu',
-      title: '۳. آنالیز دستور پخت و قیمت‌گذاری منو',
-      shortDesc: 'فرمول‌نویسی دستور پخت، محاسبه دقیق هزینه مواد اولیه و قیمت پیشنهادی علمی',
+      title: '۳. رسپی و قیمت‌گذاری',
+      shortDesc: 'تعریف دستور پخت، بهای مواد و قیمت‌گذاری علمی',
       icon: UtensilsCrossed,
-      badge: 'قیمت‌گذاری علمی',
-      color: 'bg-emerald-600 text-white',
+      badge: 'هسته سیستم',
+      badgeVariant: 'success',
     },
     {
       id: 'sales',
-      title: '۴. ثبت فروش روزانه و ضایعات انبار',
-      shortDesc: 'کسر هوشمند موجودی انبار هنگام فروش، ثبت ضایعات و خسارت با کسر لحظه‌ای',
+      title: '۴. ثبت فروش و ضایعات',
+      shortDesc: 'کسر خودکار انبار، ثبت فروش روزانه و ضایعات ریالی',
       icon: Receipt,
-      badge: 'تراکنش‌های روزانه',
-      color: 'bg-indigo-600 text-white',
+      badge: 'روزانه',
+      badgeVariant: 'primary',
     },
     {
       id: 'analytics',
-      title: '۵. صورت سود و زیان و ماتریس منو',
-      shortDesc: 'تحلیل محصولات طلایی، پرفروش‌های محبوب، فرصت‌های رشد و آیتم‌های کم‌بازده',
+      title: '۵. تحلیل سود و منو',
+      shortDesc: 'سود و زیان، بهای اولیه (زیر ۶۵٪) و ماتریس مهندسی منو',
       icon: PieChart,
-      badge: 'مدیریت مالی',
-      color: 'bg-purple-600 text-white',
+      badge: 'گزارشات',
+      badgeVariant: 'purple',
     },
     {
       id: 'backup',
-      title: '۶. پشتیبان‌گیری و امنیت ۱۰۰٪ آفلاین',
-      shortDesc: 'ذخیره‌سازی اطلاعات محلی روی مرورگر، دریافت فایل خروجی پشتیبان و بازیابی',
+      title: '۶. امنیت و پشتیبان',
+      shortDesc: 'ذخیره ۱۰۰٪ آفلاین در مرورگر و دریافت فایل پشتیبان',
       icon: ShieldCheck,
       badge: 'امنیت داده',
-      color: 'bg-rose-600 text-white',
+      badgeVariant: 'danger',
     },
     {
       id: 'calculator',
-      title: '۷. ماشین‌حساب تعاملی و شبیه‌ساز',
-      shortDesc: 'تست زنده فرمول‌های هزینه مواد اولیه، درصد افت و سود ناخالص آیتم‌ها',
+      title: '۷. ماشین‌حساب زنده',
+      shortDesc: 'شبیه‌ساز آنی محاسبه قیمت تمام‌شده، افت و سود',
       icon: Calculator,
-      badge: 'ابزار تعاملی',
-      color: 'bg-[var(--brand-primary)] text-white',
+      badge: 'تعاملی',
+      badgeVariant: 'primary',
+    },
+    {
+      id: 'faq',
+      title: '۸. پرسش‌های متداول',
+      shortDesc: 'پاسخ به سوالات پرتکرار و نکات کلیدی نرم‌افزار',
+      icon: HelpCircle,
+      badge: 'راهنما',
+      badgeVariant: 'info',
     },
   ];
 
   const faqs = [
     {
       q: 'آیا برای استفاده از این سیستم نیاز به اتصال به اینترنت دارم؟',
-      a: 'خیر! تمامی اطلاعات، انبار، قیمت‌گذاری و گزارش‌های مالی شما ۱۰۰٪ به صورت محلی در حافظه امن مرورگرتان ذخیره می‌شوند. هیچ داده‌ای به سرور خارجی ارسال نمی‌شود و حتی در حالت قطعی کامل اینترنت، نرم‌افزار بدون هیچ مشکلی کار می‌کند.',
+      a: 'خیر! تمامی اطلاعات، انبار، قیمت‌گذاری و گزارش‌های مالی شما ۱۰۰٪ به صورت محلی در حافظه امن مرورگرتان ذخیره می‌شوند. هیچ داده‌ای به سرور خارجی ارسال نمی‌شود و حتی در حالت آفلاین کامل، سیستم بدون هیچ نقصی کار می‌کند.',
     },
     {
       q: 'درصد افت و ضایعات پاک‌کردن ماده اولیه چیست و چرا اهمیت دارد؟',
@@ -134,341 +136,314 @@ export const GuideManager: React.FC = () => {
     },
     {
       q: 'تفاوت هزینه مواد اولیه و سود ناخالص چیست؟',
-      a: 'هزینه مواد اولیه یعنی مجموع هزینه ریالی مواد اولیه مصرف‌شده در یک پرس غذا. اگر هزینه مواد اولیه پیتزا ۵۰ هزار تومان باشد و آن را ۱۵۰ هزار تومان بفروشید، سود ناخالص شما ۱۰۰ هزار تومان (درصد هزینه مواد اولیه ۳۳.۳٪) است.',
+      a: 'هزینه مواد اولیه یعنی مجموع هزینه ریالی مواد اولیه مصرف‌شده در یک پرس غذا. اگر هزینه مواد پیتزا ۵۰ هزار تومان باشد و آن را ۱۵۰ هزار تومان بفروشید، سود ناخالص شما ۱۰۰ هزار تومان (درصد هزینه مواد ۳۳.۳٪) است.',
     },
     {
-      q: 'هزینه‌های ثابت ماهانه چگونه روی قیمت هر پرس غذا تاثیر می‌گذارند؟',
-      a: 'هزینه‌هایی مانند اجاره، حقوق پرسنل، قبوض و استهلاک در طول ماه ثابت هستند. سیستم با تقسیم کل این هزینه‌ها بر تعداد روزها و ساعات کاری، سهم هزینه ثابت هر دقیقه را به دست می‌آورد تا بدانید علاوه بر مواد اولیه، چقدر هزینه سربار برای هر سفارش داده‌اید.',
+      q: 'بهای اولیه تولید (Prime Cost) چیست و استاندارد آن چقدر است؟',
+      a: 'بهای اولیه حاصل‌جمع دو مؤلفه مستقیم است: هزینه مواد اولیه مصرفی + هزینه نیروی کار و دستمزد. در رستوران‌داری مدرن، مجموع این دو نسبت به درآمد فروش باید زیر ۶۵٪ (ایده‌آل بین ۵۵٪ تا ۶۰٪) باشد تا پوشش هزینه‌های ثابت و سود خالص تضمین گردد.',
     },
     {
       q: 'اگر مرورگر را پاک کنم یا ویندوز تعویض شود چه اتفاقی برای داده‌ها می‌افتد؟',
-      a: 'چون داده‌ها در مرورگر ذخیره می‌شوند، حتماً هفته‌ای یک‌بار از بخش «تنظیمات و پشتیبان‌گیری» گزینه «دانلود فایل پشتیبان» را بزنید. فایل دانلود شده را در فلش یا سیستم خود نگه دارید تا در صورت تعویض سیستم، با یک کلیک تمام اطلاعات را بازیابی کنید.',
+      a: 'چون داده‌ها در مرورگر ذخیره می‌شوند، حتماً هفتگی از بخش «تنظیمات» گزینه «دانلود فایل پشتیبان» را بزنید. در صورت تعویض سیستم، با کلیک روی بازیابی پشتیبان، تمام اطلاعات بلافاصله بازمی‌گردند.',
     },
   ];
 
-  return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12 font-['IRANYekan','iranyekan',sans-serif] text-[var(--text-primary)]">
-      {/* Hero Header - Light & High Contrast Design with Primary Blur Background */}
-      <div className="relative overflow-hidden rounded-3xl bg-[var(--brand-primary-subtle)]/40 backdrop-blur-xl p-6 sm:p-8 md:p-10 shadow-xs border border-[var(--brand-primary)]/20 transition-all">
-        {/* Soft Primary Glow Accents */}
-        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[var(--brand-primary)]/15 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-60 h-60 rounded-full bg-[var(--brand-primary)]/10 blur-2xl pointer-events-none" />
+  // Filter chapters based on search query if entered
+  const filteredChapters = chapters.filter(
+    (c) =>
+      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.shortDesc.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-        <div className="relative z-10 space-y-4 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--brand-primary)]/10 border border-[var(--brand-primary)]/30 text-[var(--brand-primary)] text-xs font-black">
-            <Sparkles className="h-4 w-4" />
-            <span>راهنمای جامع و استاندارد مهندسی منو</span>
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto pb-8 font-['IRANYekan','iranyekan',sans-serif] text-[var(--text-primary)]">
+      {/* Header Banner - Compact & Minimalist */}
+      <div className="rounded-3xl bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] p-5 sm:p-6 shadow-2xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="p-3 rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] shrink-0">
+              <BookOpen className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-base sm:text-lg font-black text-[var(--text-primary)]">
+                راهنمای جامع و مدیریت مالی رستوران
+              </h1>
+              <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">
+                راهنمای گام‌به‌گام و ابزارهای تحلیلی برای قیمت‌گذاری علمی و کنترل بهای تمام‌شده
+              </p>
+            </div>
           </div>
 
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[var(--text-primary)] leading-tight tracking-tight">
-            آموزش کامل کار با سیستم مدیریت مالی و قیمت‌گذاری رستوران
-          </h1>
-
-          <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-medium leading-relaxed">
-            این راهنما به شما یاد می‌دهد چگونه مانند یک مدیر حرفه‌ای، قیمت تمام‌شده هر پرس غذا را محاسبه کنید، افت انبار را کنترل نمایید، سود خالص واقعی را به‌دست آورید و از ضررهای پنهان رستوران جلوگیری کنید.
-          </p>
-
-          {/* Search Bar */}
-          <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
-            <div className="relative w-full sm:max-w-md">
-              <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="جستجو در موضوعات (مثلاً: مواد اولیه، افت، ضایعات، پشتیبان)..."
-                className="w-full h-11 pr-10 pl-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] placeholder-[var(--text-secondary)]/60 focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)] transition-all shadow-2xs"
-              />
-            </div>
-            {searchQuery && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSearchQuery('')}
-                className="text-xs font-bold border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--bg-base)]"
-              >
-                پاک‌سازی جستجو
-              </Button>
-            )}
+          {/* Quick Search */}
+          <div className="relative w-full md:w-72">
+            <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="جستجو در سرفصل‌ها..."
+              className="w-full h-10 pr-9 pl-4 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900 border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)] transition-all"
+            />
           </div>
         </div>
       </div>
 
-      {/* Chapters Navigation Badges */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-        {chapters.map((ch) => {
+      {/* Chapters Horizontal Tab Navigation */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        {filteredChapters.map((ch) => {
           const Icon = ch.icon;
           const isActive = activeChapter === ch.id;
           return (
             <button
               key={ch.id}
               onClick={() => setActiveChapter(ch.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black transition-all shrink-0 cursor-pointer border ${
+              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-2xl text-xs font-black transition-all shrink-0 cursor-pointer border ${
                 isActive
-                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs scale-102'
-                  : 'bg-[var(--bg-card)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-[var(--bg-base)]'
+                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-2xs'
+                  : 'bg-white dark:bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)]'
               }`}
             >
               <Icon className="h-4 w-4" />
-              <span>{ch.title.split('.')[0] === 'همه مباحث و آموزش‌ها' ? ch.title : ch.title.split('.')[0] + '. ' + ch.title.split(' ')[1]}</span>
+              <span>{ch.title}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Main Content Area based on selected chapter */}
-      <div className="space-y-8">
+      {/* Active Chapter Content - Structured & Clean */}
+      <div className="space-y-6">
         {/* Chapter 1: Setup & Fixed Costs */}
-        {(activeChapter === 'all' || activeChapter === 'setup') && (
-          <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-3xl shadow-sm overflow-hidden bg-white dark:bg-[var(--bg-card)]">
-            <div className="p-5 sm:p-7 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-blue-50/60 dark:bg-blue-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="p-3 rounded-2xl bg-blue-600 text-white shadow-md">
-                  <Settings className="h-6 w-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-[var(--status-info-text)] dark:text-[var(--status-info-text)]">گام {toPersianDigits(1)}</span>
-                    <Badge variant="info">پیکربندی پایه</Badge>
+        {activeChapter === 'setup' && (
+          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                    <Settings className="h-5 w-5" />
                   </div>
-                  <h2 className="text-base sm:text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] mt-0.5">
-                    {toPersianDigits('۱. تنظیمات اولیه و فرمول دقیق هزینه‌های ثابت ماهانه')}
-                  </h2>
+                  <div>
+                    <CardTitle className="text-base font-black text-[var(--text-primary)]">
+                      تنظیمات اولیه و فرمول دقیق هزینه‌های ثابت ماهانه
+                    </CardTitle>
+                    <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">
+                      محاسبه دقیق نرخ سرانه هر دقیقه کاری جهت اعمال سربار بر هر سفارش
+                    </p>
+                  </div>
                 </div>
+                <Button
+                  size="sm"
+                  onClick={() => setActiveTab('settings')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shrink-0"
+                >
+                  <span>ورود به تنظیمات</span>
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                </Button>
               </div>
-              <Button
-                size="sm"
-                onClick={() => setActiveTab('settings')}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl shrink-0"
-              >
-                <span>ورود به تنظیمات</span>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </div>
+            </CardHeader>
 
-            <CardContent className="p-5 sm:p-7 space-y-6 text-xs sm:text-sm text-[var(--text-primary)] dark:text-[var(--text-secondary)] leading-relaxed font-medium">
-              <p>
-                نخستین قدم برای مدیریت مالی علمی در هر رستوران، کافه یا فست‌فود، ثبت تمامی هزینه‌های غیرمستقیم است. اگر هزینه‌های ثابت را نادیده بگیرید، ممکن است تصور کنید سود خوبی دارید اما در پایان ماه با کسری بودجه مواجه شوید.
-              </p>
-
+            <CardContent className="p-5 sm:p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-2">
-                  <h4 className="font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] text-xs flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-[var(--status-info-text)]" />
-                    <span>اقلام تشکیل‌دهنده هزینه‌های ثابت</span>
+                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-2.5">
+                  <h4 className="font-black text-xs text-[var(--text-primary)] flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-blue-600" />
+                    <span>اقلام تشکیل‌دهنده هزینه‌های ثابت:</span>
                   </h4>
-                  <ul className="list-disc list-inside text-[var(--text-secondary)] dark:text-[var(--text-secondary)] space-y-1 pr-2 text-xs">
-                    <li>اجاره‌بهای ماهانه ملک رستوران</li>
-                    <li>حقوق، دستمزد و مزایای پرسنل آشپزخانه و سالن</li>
-                    <li>بیمه، مالیات و عوارض شهرداری</li>
-                    <li>قبوض آب، برق، گاز، تلفن و اینترنت</li>
-                    <li>استهلاک تجهیزات و ظروف آشپزخانه</li>
-                    <li>هزینه‌های بازاریابی و بسته‌بندی ثابت</li>
+                  <ul className="space-y-1.5 text-xs text-[var(--text-secondary)] font-medium">
+                    <li className="flex items-center gap-2">• اجاره‌بهای ماهانه ملک رستوران یا کافه</li>
+                    <li className="flex items-center gap-2">• حقوق و دستمزد ثابت پرسنل، بیمه و مزایا</li>
+                    <li className="flex items-center gap-2">• قبوض آب، برق، گاز، تلفن و اینترنت</li>
+                    <li className="flex items-center gap-2">• استهلاک تجهیزات، تعمیرات و تبلیغات مستمر</li>
                   </ul>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-[var(--status-info-text)]/30 dark:border-[var(--status-info-text)]/30 space-y-2">
-                  <h4 className="font-black text-blue-950 dark:text-blue-200 text-xs flex items-center gap-2">
-                    <Calculator className="h-4 w-4 text-[var(--status-info-text)]" />
-                    <span>فرمول محاسبه نرخ سربار هر دقیقه</span>
+                <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/50 space-y-2.5">
+                  <h4 className="font-black text-xs text-blue-900 dark:text-blue-300 flex items-center gap-2">
+                    <Calculator className="h-4 w-4 text-blue-600" />
+                    <span>فرمول نرخ سربار هر دقیقه کاری:</span>
                   </h4>
-                  <p className="text-xs text-blue-900 dark:text-blue-300">
-                    سیستم هزینه‌های ماهانه شما را به نرخ دقیقه تبدیل می‌کند:
-                  </p>
-                  <div className="p-3 rounded-xl bg-white dark:bg-[var(--bg-card)] text-[11px] font-bold text-[var(--status-info-text)] dark:text-blue-300 border border-[var(--status-info-text)]/30 dark:border-[var(--status-info-text)]/30 text-center">
-                    هزینه سربار دقیقه = کل هزینه‌های ماهانه ÷ (روزهای کاری × ساعات کاری روزانه × {toPersianDigits(60)})
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[var(--bg-card)] text-[11px] font-black text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/50 text-center">
+                    نرخ دقیقه = کل هزینه‌های ماهانه ÷ (روزهای کاری × ساعات روزانه × ۶۰)
                   </div>
-                  <p className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
-                    مثال: {toPersianDigits(50)} میلیون هزینه ماهانه ÷ ({toPersianDigits(26)} روز × {toPersianDigits(10)} ساعت × {toPersianDigits(60)} دقیقه) = حدود {toPersianDigits('3,205')} تومان هزینه ثابت در هر دقیقه کاری.
+                  <p className="text-[11px] text-[var(--text-secondary)] font-medium">
+                    مثال: ۵۰ میلیون هزینه ÷ (۲۶ روز × ۱۰ ساعت × ۶۰) = ۳,۲۰۵ تومان در هر دقیقه.
                   </p>
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]/30 flex items-start gap-3 text-[var(--status-warning-text)] dark:text-amber-200 text-xs font-bold">
-                <Lightbulb className="h-5 w-5 text-[var(--status-warning-text)] shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-black text-[var(--status-warning-text)] dark:text-amber-100 block mb-1">نکته کاربردی:</span>
-                  تعداد روزهای کاری ماهانه (مثلاً {toPersianDigits(26)} یا {toPersianDigits(30)} روز) را در بخش تنظیمات به دقت وارد کنید. اگر مجموعه {toPersianDigits(4)} روز در ماه تعطیل باشد، هزینه‌های ثابت بین {toPersianDigits(26)} روز تقسیم می‌شوند و نرخ دقیق‌تری به‌دست می‌آید.
-                </div>
+              <div className="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 flex items-start gap-2.5 text-xs text-amber-900 dark:text-amber-300">
+                <Lightbulb className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                <p className="font-medium">
+                  <strong>نکته کاربردی:</strong> روزهای کاری واقعی ماه را در تنظیمات دقیق وارد کنید تا هزینه به ازای ساعات واقعی فعالیت محاسبه شود.
+                </p>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Chapter 2: Inventory & Yield/Waste */}
-        {(activeChapter === 'all' || activeChapter === 'inventory') && (
-          <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-3xl shadow-sm overflow-hidden bg-white dark:bg-[var(--bg-card)]">
-            <div className="p-5 sm:p-7 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-amber-50/60 dark:bg-amber-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="p-3 rounded-2xl bg-amber-600 text-white shadow-md">
-                  <Boxes className="h-6 w-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]">گام {toPersianDigits(2)}</span>
-                    <Badge variant="warning">مدیریت انبار</Badge>
+        {/* Chapter 2: Inventory & Waste */}
+        {activeChapter === 'inventory' && (
+          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+                    <Boxes className="h-5 w-5" />
                   </div>
-                  <h2 className="text-base sm:text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] mt-0.5">
-                    {toPersianDigits('۲. انبارداری، واحد سنجش و درصد افت مواد اولیه')}
-                  </h2>
+                  <div>
+                    <CardTitle className="text-base font-black text-[var(--text-primary)]">
+                      انبارداری، واحد سنجش و درصد افت مواد اولیه
+                    </CardTitle>
+                    <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">
+                      محاسبه قیمت واقعی مصرفی پس از کسر ضایعات و دورریز پاک‌کردن
+                    </p>
+                  </div>
                 </div>
+                <Button
+                  size="sm"
+                  onClick={() => setActiveTab('inventory')}
+                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shrink-0"
+                >
+                  <span>ورود به انبار</span>
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                </Button>
               </div>
-              <Button
-                size="sm"
-                onClick={() => setActiveTab('inventory')}
-                className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white text-xs font-black rounded-xl shrink-0 transition-colors"
-              >
-                <span>ورود به انبار</span>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </div>
+            </CardHeader>
 
-            <CardContent className="p-5 sm:p-7 space-y-6 text-xs sm:text-sm text-[var(--text-primary)] dark:text-[var(--text-secondary)] leading-relaxed font-medium">
-              <p>
-                در انبارداری رستورانی، قیمت خرید فاکتور با قیمت واقعی مصرفی متفاوت است! به این تفاوت «درصد افت یا ضایعات پاک‌کردن» گفته می‌شود.
-              </p>
-
-              {/* Formula Callout in Light Aesthetic */}
-              <div className="p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]/30 space-y-3">
-                <div className="flex items-center gap-2 text-[var(--status-warning-text)] dark:text-amber-200 font-black text-xs">
-                  <TrendingUp className="h-4 w-4 text-[var(--status-warning-text)]" />
-                  <span>فرمول دقیق محاسبه قیمت واقعی هر گرم پس از کسر افت:</span>
+            <CardContent className="p-5 sm:p-6 space-y-5">
+              <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 space-y-2.5">
+                <div className="flex items-center gap-2 text-amber-900 dark:text-amber-300 font-black text-xs">
+                  <TrendingUp className="h-4 w-4 text-amber-600" />
+                  <span>فرمول قیمت واقعی هر گرم پس از کسر افت:</span>
                 </div>
-                <div className="p-3 rounded-xl bg-white dark:bg-[var(--bg-card)] text-[var(--status-warning-text)] dark:text-amber-200 font-bold text-xs text-center border border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]/30">
-                  قیمت واقعی هر گرم = (قیمت خرید هر کیلوگرم ÷ ((۱۰۰ - درصد افت) ÷ ۱۰۰)) ÷ ۱۰۰۰
+                <div className="p-2.5 rounded-xl bg-white dark:bg-[var(--bg-card)] text-amber-800 dark:text-amber-300 font-bold text-xs text-center border border-amber-200 dark:border-amber-900/40">
+                  قیمت هر گرم خالص = (قیمت خرید هر کیلو ÷ ((۱۰۰ - درصد افت) ÷ ۱۰۰)) ÷ ۱۰۰۰
                 </div>
-                <p className="text-xs text-[var(--text-primary)] dark:text-[var(--text-secondary)] leading-relaxed">
-                  <strong>مثال عملی:</strong> فرض کنید {toPersianDigits(1)} کیلوگرم گوشت پاک‌نشده را {toPersianDigits('500,000')} تومان می‌خرید. پس از پاک‌کردن و گرفتن چربی، {toPersianDigits(20)}٪ آن دورریز می‌شود ({toPersianDigits(800)} گرم خالص می‌ماند). قیمت واقعی هر کیلو گوشت خالص می‌شود {toPersianDigits('625,000')} تومان (یعنی {toPersianDigits(625)} تومان به ازای هر گرم).
+                <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
+                  <strong>مثال عملی:</strong> ۱ کیلوگرم گوشت به قیمت ۵۰۰,۰۰۰ تومان با ۲۰٪ دورریز پاک‌کردن، قیمت خالص واقعی آن ۶۲۵,۰۰۰ تومان در هر کیلو (۶۲۵ تومان در هر گرم) است.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
-                  <span className="text-[11px] font-bold text-[var(--text-secondary)]">{toPersianDigits(1)}. ثبت قیمت و خرید</span>
-                  <p className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">ثبت فاکتورهای جدید خرید مواد اولیه</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="p-3 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-1">
+                  <span className="text-[10px] font-bold text-[var(--text-secondary)]">۱. ثبت خرید</span>
+                  <p className="font-bold text-[var(--text-primary)]">ثبت فاکتورهای جدید با کسر خودکار</p>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
-                  <span className="text-[11px] font-bold text-[var(--status-warning-text)]">{toPersianDigits(2)}. میانگین موزون (WAC)</span>
-                  <p className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">محاسبه خودکار بهای تمام‌شده بر اساس خریدهای متوالی</p>
+                <div className="p-3 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-1">
+                  <span className="text-[10px] font-bold text-amber-600">۲. میانگین موزون</span>
+                  <p className="font-bold text-[var(--text-primary)]">محاسبه نرخ متوسط خریدها (WAC)</p>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
-                  <span className="text-[11px] font-bold text-[var(--status-info-text)]">{toPersianDigits(3)}. نمودار نوسان قیمت</span>
-                  <p className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">تحلیل تغییرات نرخ خرید و ویرایش ریز فاکتورها</p>
+                <div className="p-3 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-1">
+                  <span className="text-[10px] font-bold text-blue-600">۳. تاریخچه قیمت</span>
+                  <p className="font-bold text-[var(--text-primary)]">پایش نموداری نوسانات قیمت تامین</p>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
-                  <span className="text-[11px] font-bold text-[var(--status-success-text)]">{toPersianDigits(4)}. نقطه سفارش</span>
-                  <p className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">دریافت هشدار خودکار در صورت کمبود موجودی</p>
+                <div className="p-3 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-1">
+                  <span className="text-[10px] font-bold text-emerald-600">۴. هشدار کمبود</span>
+                  <p className="font-bold text-[var(--text-primary)]">آلارم رسیدن به حداقل نقطه سفارش</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Chapter 3: Recipe Costing & Pricing */}
-        {(activeChapter === 'all' || activeChapter === 'menu') && (
-          <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-3xl shadow-sm overflow-hidden bg-white dark:bg-[var(--bg-card)]">
-            <div className="p-5 sm:p-7 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-emerald-50/60 dark:bg-emerald-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="p-3 rounded-2xl bg-emerald-600 text-white shadow-md">
-                  <UtensilsCrossed className="h-6 w-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-[var(--status-success-text)] dark:text-[var(--status-success-text)]">گام {toPersianDigits(3)}</span>
-                    <Badge variant="success">آنالیز و قیمت‌گذاری</Badge>
+        {/* Chapter 3: Recipe & Pricing */}
+        {activeChapter === 'menu' && (
+          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                    <UtensilsCrossed className="h-5 w-5" />
                   </div>
-                  <h2 className="text-base sm:text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] mt-0.5">
-                    {toPersianDigits('۳. آنالیز دستور پخت و قیمت‌گذاری منو')}
-                  </h2>
+                  <div>
+                    <CardTitle className="text-base font-black text-[var(--text-primary)]">
+                      آنالیز دستور پخت و قیمت‌گذاری منو
+                    </CardTitle>
+                    <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">
+                      فرمول‌نویسی رسپی، بهای مواد اولیه و قیمت‌گذاری بر اساس حاشیه سود هدف
+                    </p>
+                  </div>
                 </div>
+                <Button
+                  size="sm"
+                  onClick={() => setActiveTab('menu')}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shrink-0"
+                >
+                  <span>آنالیز منو</span>
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                </Button>
               </div>
-              <Button
-                size="sm"
-                onClick={() => setActiveTab('menu')}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl shrink-0"
-              >
-                <span>آنالیز و قیمت‌گذاری</span>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </div>
+            </CardHeader>
 
-            <CardContent className="p-5 sm:p-7 space-y-6 text-xs sm:text-sm text-[var(--text-primary)] dark:text-[var(--text-secondary)] leading-relaxed font-medium">
-              <p>
-                قلب تپنده این نرم‌افزار، بخش قیمت‌گذاری علمی منو است. شما برای هر آیتم غذا یا نوشیدنی، یک دستور پخت (رسپی) دقیق تعریف می‌کنید.
-              </p>
-
+            <CardContent className="p-5 sm:p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-[var(--status-success-text)]/30 dark:border-[var(--status-success-text)]/30 space-y-2">
-                  <h4 className="font-black text-emerald-950 dark:text-emerald-200 text-xs flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-[var(--status-success-text)]" />
-                    <span>محاسبه هزینه کل مواد اولیه</span>
+                <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 space-y-2">
+                  <h4 className="font-black text-xs text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-emerald-600" />
+                    <span>محاسبه خودکار بهای مواد (Food Cost)</span>
                   </h4>
-                  <p className="text-xs text-emerald-900 dark:text-emerald-300">
-                    سیستم هزینه تمام مواد اولیه تشکیل‌دهنده را بر اساس مقدار مصرفی (گرم/سی‌سی) جمع زده و هزینه مواد اولیه کل پرس را محاسبه می‌کند.
+                  <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
+                    سیستم هزینه هر یک از مواد اولیه را بر اساس مقدار مصرفی (گرم یا سی‌سی) در دستور پخت ضرب کرده و بهای تمام‌شده هر پرس را لحظه‌ای محاسبه می‌کند.
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-2">
-                  <h4 className="font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] text-xs flex items-center gap-2">
-                    <Calculator className="h-4 w-4 text-[var(--status-success-text)]" />
+                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-2">
+                  <h4 className="font-black text-xs text-[var(--text-primary)] flex items-center gap-2">
+                    <Calculator className="h-4 w-4 text-emerald-600" />
                     <span>قیمت پیشنهادی بر اساس درصد هدف</span>
                   </h4>
-                  <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
-                    استاندارد جهانی درصد هزینه مواد اولیه بین {toPersianDigits(25)}٪ تا {toPersianDigits(35)}٪ است. قیمت پیشنهادی برابر است با:
-                  </p>
-                  <div className="p-2.5 rounded-xl bg-white dark:bg-[var(--bg-card)] text-[11px] font-bold text-[var(--status-success-text)] dark:text-[var(--status-success-text)] border border-[var(--status-success-text)]/30 dark:border-[var(--status-success-text)]/30 text-center">
-                    قیمت پیشنهادی = هزینه کل مواد اولیه ÷ (درصد هدف ÷ {toPersianDigits(100)})
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[var(--bg-card)] text-[11px] font-black text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/40 text-center">
+                    قیمت پیشنهادی = هزینه کل مواد ÷ (درصد هدف فودکاست ÷ ۱۰۰)
                   </div>
+                  <p className="text-[11px] text-[var(--text-secondary)] font-medium">
+                    استاندارد جهانی درصد بهای مواد بین ۲۸٪ تا ۳۵٪ است.
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Chapter 4: Sales & Waste Logs */}
-        {(activeChapter === 'all' || activeChapter === 'sales') && (
-          <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-3xl shadow-sm overflow-hidden bg-white dark:bg-[var(--bg-card)]">
-            <div className="p-5 sm:p-7 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-indigo-50/60 dark:bg-indigo-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="p-3 rounded-2xl bg-indigo-600 text-white shadow-md">
-                  <Receipt className="h-6 w-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-indigo-600 dark:text-indigo-400">گام {toPersianDigits(4)}</span>
-                    <Badge variant="outline">عملیات روزانه</Badge>
+        {/* Chapter 4: Sales & Daily Logs */}
+        {activeChapter === 'sales' && (
+          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
+                    <Receipt className="h-5 w-5" />
                   </div>
-                  <h2 className="text-base sm:text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] mt-0.5">
-                    {toPersianDigits('۴. ثبت فروش روزانه و مدیریت ضایعات انبار')}
-                  </h2>
+                  <div>
+                    <CardTitle className="text-base font-black text-[var(--text-primary)]">
+                      ثبت فروش روزانه و مدیریت ضایعات
+                    </CardTitle>
+                    <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">
+                      کسر هوشمند انبار در هنگام فروش و ثبت خسارات ریالی ضایعات
+                    </p>
+                  </div>
                 </div>
+                <Button
+                  size="sm"
+                  onClick={() => setActiveTab('sales')}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shrink-0"
+                >
+                  <span>ثبت فروش</span>
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                </Button>
               </div>
-              <Button
-                size="sm"
-                onClick={() => setActiveTab('sales')}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black rounded-xl shrink-0"
-              >
-                <span>ثبت فروش و ضایعات</span>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </div>
+            </CardHeader>
 
-            <CardContent className="p-5 sm:p-7 space-y-6 text-xs sm:text-sm text-[var(--text-primary)] dark:text-[var(--text-secondary)] leading-relaxed font-medium">
-              <p>
-                در پایان هر شیفت یا روز کاری، فاکتورهای فروش و گزارش ضایعات را وارد کنید. سیستم به صورت دقیق و لحظه‌ای انبار را بروزرسانی می‌کند.
-              </p>
-
+            <CardContent className="p-5 sm:p-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-2">
-                  <h4 className="font-black text-indigo-600 dark:text-indigo-400 text-xs">ثبت فاکتورهای فروش</h4>
-                  <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
-                    با ثبت فروش {toPersianDigits(10)} عدد پیتزا، سیستم به صورت خودکار به مقدار لازم از موجودی خمیر، پنیر، سس و ترکیبات انبار کسر می‌کند.
+                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-1.5">
+                  <h4 className="font-black text-xs text-indigo-600">ثبت فاکتورهای فروش روزانه</h4>
+                  <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
+                    با ثبت فروش هر محصول، مواد اولیه تشکیل‌دهنده آن بر اساس رسپی به طور خودکار از موجودی انبار کسر می‌شوند.
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-[var(--status-error-text)]/30 dark:border-[var(--status-error-text)]/30 space-y-2">
-                  <h4 className="font-black text-[var(--status-error-text)] dark:text-[var(--status-error-text)] text-xs">ثبت ضایعات و خسارت</h4>
-                  <p className="text-xs text-rose-950 dark:text-rose-200">
-                    اگر {toPersianDigits(5)} لیتر شیر فاسد شد یا {toPersianDigits(2)} عدد غذا سوخت، آن را در بخش ضایعات ثبت کنید تا هم موجودی اصلاح شود و هم خسارت ریالی در صورت سود و زیان محاسبه گردد.
+                <div className="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 space-y-1.5">
+                  <h4 className="font-black text-xs text-[var(--status-error-text)]">ثبت ضایعات و خسارت</h4>
+                  <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
+                    مواد فاسد شده، سوخته یا آسیب‌دیده را در بخش ضایعات ثبت کنید تا اثر ریالی آن در سود و زیان محاسبه شود.
                   </p>
                 </div>
               </div>
@@ -476,126 +451,131 @@ export const GuideManager: React.FC = () => {
           </Card>
         )}
 
-        {/* Chapter 5: P&L & Menu Matrix */}
-        {(activeChapter === 'all' || activeChapter === 'analytics') && (
-          <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-3xl shadow-sm overflow-hidden bg-white dark:bg-[var(--bg-card)]">
-            <div className="p-5 sm:p-7 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-purple-50/60 dark:bg-purple-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="p-3 rounded-2xl bg-purple-600 text-white shadow-md">
-                  <PieChart className="h-6 w-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-[var(--status-purple-text)] dark:text-[var(--status-purple-text)]">گام {toPersianDigits(5)}</span>
-                    <Badge variant="purple">تحلیل مدیریت</Badge>
+        {/* Chapter 5: Analytics & Menu Matrix */}
+        {activeChapter === 'analytics' && (
+          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
+                    <PieChart className="h-5 w-5" />
                   </div>
-                  <h2 className="text-base sm:text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] mt-0.5">
-                    {toPersianDigits('۵. صورت سود و زیان و ماتریس تحلیل منو')}
-                  </h2>
+                  <div>
+                    <CardTitle className="text-base font-black text-[var(--text-primary)]">
+                      تحلیل صورت سود و زیان و ماتریس ۴ گانه منو
+                    </CardTitle>
+                    <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">
+                      طبقه‌بندی علمی غذاها جهت استراتژی قیمت‌گذاری و حذف اقلام کم‌بازده
+                    </p>
+                  </div>
                 </div>
+                <Button
+                  size="sm"
+                  onClick={() => setActiveTab('analytics')}
+                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shrink-0"
+                >
+                  <span>ماتریس سودآوری</span>
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                </Button>
               </div>
-              <Button
-                size="sm"
-                onClick={() => setActiveTab('analytics')}
-                className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-black rounded-xl shrink-0"
-              >
-                <span>تحلیل سودآوری منو</span>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </div>
+            </CardHeader>
 
-            <CardContent className="p-5 sm:p-7 space-y-6 text-xs sm:text-sm text-[var(--text-primary)] dark:text-[var(--text-secondary)] leading-relaxed font-medium">
-              <p>
-                سیستم با ماتریس مهندسی منو، تمامی آیتم‌های غذایی شما را در {toPersianDigits(4)} دسته استاندارد تحلیل و دسته‌بندی می‌کند:
-              </p>
+            <CardContent className="p-5 sm:p-6 space-y-5">
+              {/* Prime Cost Highlight */}
+              <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 space-y-1.5">
+                <h4 className="font-black text-xs text-amber-900 dark:text-amber-300 flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-amber-600" />
+                  <span>استاندارد بهای اولیه تولید (Prime Cost):</span>
+                </h4>
+                <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
+                  بهای اولیه = سهم مواد مصرفی + دستمزد پرسنل. مجموع این دو شاخص باید همواره <strong>زیر ۶۵٪ درآمد فروش</strong> باشد تا پوشش هزینه‌های ثابت (اجاره، قبوض) و سود خالص مجموعه تضمین گردد.
+                </p>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="p-4 rounded-2xl bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]/30 space-y-1">
-                  <span className="text-xs font-black text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]">🌟 محصولات طلایی</span>
-                  <p className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">سود ناخالص بالا + محبوبیت و فروش بالا. محصولات پرچمدار و ستون اصلی سودآوری مجموعه شما هستند.</p>
+              {/* 4 Quadrants Summary */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 space-y-1">
+                  <span className="font-black text-amber-800 dark:text-amber-300">🌟 محصولات طلایی</span>
+                  <p className="text-[11px] text-[var(--text-secondary)]">سود بالا + فروش بالا. ستون اصلی سودآوری و پرچمدار منو.</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-[var(--status-info-bg)] border border-[var(--status-info-text)]/30 dark:border-[var(--status-info-text)]/30 space-y-1">
-                  <span className="text-xs font-black text-[var(--status-info-text)] dark:text-blue-300">🔥 پرفروش‌های محبوب</span>
-                  <p className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">فروش و محبوبیت بالا + سود ناخالص متوسط یا پایین. نیازمند بهینه‌سازی هزینه مواد اولیه یا تعدیل قیمت.</p>
+                <div className="p-3.5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 space-y-1">
+                  <span className="font-black text-blue-800 dark:text-blue-300">🔥 پرفروش‌های محبوب</span>
+                  <p className="text-[11px] text-[var(--text-secondary)]">فروش بالا + حاشیه سود کمتر. نیازمند تعدیل فودکاست یا قیمت.</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-[var(--status-purple-bg)] border border-[var(--status-purple-text)]/30 dark:border-[var(--status-purple-text)]/30 space-y-1">
-                  <span className="text-xs font-black text-[var(--status-purple-text)] dark:text-purple-300">💡 فرصت‌های رشد</span>
-                  <p className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">سود ناخالص فوق‌العاده + فروش پایین. نیازمند بازاریابی، تغییر موقعیت منو و پیشنهاد ویژه.</p>
+                <div className="p-3.5 rounded-2xl bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40 space-y-1">
+                  <span className="font-black text-purple-800 dark:text-purple-300">💡 فرصت‌های رشد</span>
+                  <p className="text-[11px] text-[var(--text-secondary)]">سود فوق‌العاده + فروش کم. نیازمند معرفی بیشتر و پروموشن.</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-[var(--status-error-bg)] border border-[var(--status-error-text)]/30 dark:border-[var(--status-error-text)]/30 space-y-1">
-                  <span className="text-xs font-black text-[var(--status-error-text)] dark:text-rose-300">⚠️ نیازمند بهینه‌سازی</span>
-                  <p className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">فروش پایین + سود پایین. نیازمند بازنگری رسپی، جایگزینی یا حذف از منو.</p>
+                <div className="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 space-y-1">
+                  <span className="font-black text-rose-800 dark:text-rose-300">⚠️ نیازمند بهینه‌سازی</span>
+                  <p className="text-[11px] text-[var(--text-secondary)]">سود کم + فروش کم. منبع خواب سرمایه انبار و نیازمند اصلاح یا حذف.</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Chapter 6: Backup & Data Safety */}
-        {(activeChapter === 'all' || activeChapter === 'backup') && (
-          <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-3xl shadow-sm overflow-hidden bg-white dark:bg-[var(--bg-card)]">
-            <div className="p-5 sm:p-7 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-rose-50/60 dark:bg-rose-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="p-3 rounded-2xl bg-rose-600 text-white shadow-md">
-                  <ShieldCheck className="h-6 w-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-[var(--status-error-text)] dark:text-[var(--status-error-text)]">گام {toPersianDigits(6)}</span>
-                    <Badge variant="danger">پشتیبان‌گیری و امنیت</Badge>
+        {/* Chapter 6: Backup & Offline Security */}
+        {activeChapter === 'backup' && (
+          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
+                    <ShieldCheck className="h-5 w-5" />
                   </div>
-                  <h2 className="text-base sm:text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] mt-0.5">
-                    {toPersianDigits('۶. پشتیبان‌گیری و ذخیره آفلاین داده‌ها')}
-                  </h2>
+                  <div>
+                    <CardTitle className="text-base font-black text-[var(--text-primary)]">
+                      پشتیبان‌گیری و ذخیره ۱۰۰٪ آفلاین
+                    </CardTitle>
+                    <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">
+                      اطلاعات شما بدون نیاز به اینترنت در مرورگرتان حفظ و قابل خروجی‌گیری است
+                    </p>
+                  </div>
                 </div>
+                <Button
+                  size="sm"
+                  onClick={() => setActiveTab('settings')}
+                  className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white text-xs font-bold rounded-xl shrink-0"
+                >
+                  <span>ورود به پشتیبان‌گیری</span>
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                </Button>
               </div>
-              <Button
-                size="sm"
-                onClick={() => setActiveTab('settings')}
-                className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white text-xs font-black rounded-xl shrink-0 transition-colors"
-              >
-                <span>پشتیبان‌گیری در تنظیمات</span>
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </div>
+            </CardHeader>
 
-            <CardContent className="p-5 sm:p-7 space-y-4 text-xs sm:text-sm text-[var(--text-primary)] dark:text-[var(--text-secondary)] leading-relaxed font-medium">
+            <CardContent className="p-5 sm:p-6 space-y-3 text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
               <p>
-                داده‌های شما فقط در رایانه شخصی خودتان قرار دارد. جهت حفظ سوابق، حتماً هر هفته یک نسخه خروجی پشتیبان دریافت کرده و در جای امن نگهداری نمایید.
+                تمامی سوابق مالی، انبار و منو در مرورگر شما ذخیره می‌شود. جهت پیشگیری از حذف ناخواسته، هفتگی از بخش «تنظیمات» فایل پشتیبان دریافت کنید.
               </p>
             </CardContent>
           </Card>
         )}
 
-        {/* Chapter 7: Interactive Calculator Simulator - Clean Light Design System */}
-        {(activeChapter === 'all' || activeChapter === 'calculator') && (
-          <Card className="border border-[var(--brand-primary)]/30 dark:border-[var(--brand-primary)]/50 rounded-3xl shadow-sm overflow-hidden bg-white dark:bg-[var(--bg-card)]">
-            <div className="p-5 sm:p-7 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-[var(--bg-base)] dark:bg-[var(--bg-card)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="p-3 rounded-2xl bg-[var(--brand-primary)] text-white shadow-md">
-                  <Calculator className="h-6 w-6" />
+        {/* Chapter 7: Interactive Simulator */}
+        {activeChapter === 'calculator' && (
+          <Card className="border border-[var(--brand-primary)]/30 rounded-3xl overflow-hidden bg-white dark:bg-[var(--bg-card)] shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-[var(--brand-primary)] text-white shrink-0">
+                  <Calculator className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-[var(--brand-primary)]">شبیه‌ساز زنده</span>
-                    <Badge variant="primary">ابزار تعاملی</Badge>
-                  </div>
-                  <h2 className="text-base sm:text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] mt-0.5">
-                    {toPersianDigits('۷. ماشین‌حساب تعاملی فرمول‌های هزینه مواد اولیه و درصد افت')}
-                  </h2>
+                  <CardTitle className="text-base font-black text-[var(--text-primary)]">
+                    ماشین‌حساب تعاملی فرمول‌های فودکاست و درصد افت
+                  </CardTitle>
+                  <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">
+                    تست زنده تاثیر درصد افت و وزن مصرفی بر قیمت تمام‌شده و سود ناخالص غذا
+                  </p>
                 </div>
               </div>
-            </div>
+            </CardHeader>
 
-            <CardContent className="p-5 sm:p-7 space-y-6">
-              <p className="text-xs sm:text-sm text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium">
-                ارقام زیر را تغییر دهید تا تاثیر مستقیم درصد افت و میزان مصرف بر هزینه مواد اولیه و سود ناخالص غذا را زنده مشاهده کنید:
-              </p>
-
+            <CardContent className="p-5 sm:p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Inputs with SmartMoneyInput & Persian Digits */}
-                <div className="space-y-4 p-5 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-                  <h4 className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
+                {/* Inputs */}
+                <div className="space-y-4 p-4.5 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)]">
+                  <h4 className="text-xs font-black text-[var(--text-primary)] flex items-center gap-2">
                     <Settings className="h-4 w-4 text-[var(--brand-primary)]" />
                     <span>ورودی‌های فرضی آیتم</span>
                   </h4>
@@ -609,7 +589,7 @@ export const GuideManager: React.FC = () => {
                   />
 
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">
+                    <label className="block text-xs font-bold text-[var(--text-primary)]">
                       درصد افت و ضایعات پاک‌کردن:
                     </label>
                     <div className="flex items-center gap-3">
@@ -621,7 +601,7 @@ export const GuideManager: React.FC = () => {
                         onChange={(e) => setCalcWaste(Number(e.target.value))}
                         className="flex-1 accent-[var(--brand-primary)]"
                       />
-                      <span className="text-xs font-black w-12 text-center py-1.5 px-2 rounded-xl bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-[var(--text-primary)] dir-rtl">
+                      <span className="text-xs font-black w-12 text-center py-1 px-2 rounded-xl bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)]">
                         ٪{toPersianDigits(calcWaste)}
                       </span>
                     </div>
@@ -644,44 +624,44 @@ export const GuideManager: React.FC = () => {
                   />
                 </div>
 
-                {/* Real-time Calculated Outputs in High-Contrast Light Box */}
-                <div className="space-y-4 p-5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)] flex flex-col justify-between">
-                  <div className="space-y-4">
-                    <h4 className="text-xs font-black text-[var(--status-warning-text)] dark:text-amber-200 flex items-center gap-2">
+                {/* Outputs */}
+                <div className="space-y-4 p-4.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 flex flex-col justify-between">
+                  <div className="space-y-3.5">
+                    <h4 className="text-xs font-black text-amber-900 dark:text-amber-300 flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-[var(--brand-primary)]" />
-                      <span>خروجی و محاسبات هوشمند سیستم</span>
+                      <span>خروجی محاسبات زنده سیستم</span>
                     </h4>
 
-                    <div className="space-y-3 text-xs">
-                      <div className="flex justify-between items-center pb-2 border-b border-[var(--status-warning-text)] dark:border-[var(--status-warning-text)]/30">
-                        <span className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-medium">قیمت واقعی ماده اولیه پاک‌شده (هر کیلو):</span>
-                        <span className="font-bold text-[var(--status-warning-text)] dark:text-amber-200">{formatToman(netCostPerKg).text}</span>
+                    <div className="space-y-2.5 text-xs">
+                      <div className="flex justify-between items-center pb-2 border-b border-amber-200 dark:border-amber-900/40">
+                        <span className="text-[var(--text-secondary)] font-medium">قیمت واقعی ماده اولیه پاک‌شده (هر کیلو):</span>
+                        <span className="font-bold text-amber-900 dark:text-amber-200">{formatToman(netCostPerKg).text}</span>
                       </div>
 
-                      <div className="flex justify-between items-center pb-2 border-b border-[var(--status-warning-text)] dark:border-[var(--status-warning-text)]/30">
-                        <span className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-medium">قیمت خالص هر گرم:</span>
-                        <span className="font-bold text-[var(--status-warning-text)] dark:text-amber-200">{formatToman(netCostPerGram).text}</span>
+                      <div className="flex justify-between items-center pb-2 border-b border-amber-200 dark:border-amber-900/40">
+                        <span className="text-[var(--text-secondary)] font-medium">قیمت خالص هر گرم:</span>
+                        <span className="font-bold text-amber-900 dark:text-amber-200">{formatToman(netCostPerGram).text}</span>
                       </div>
 
-                      <div className="flex justify-between items-center pb-2 border-b border-[var(--status-warning-text)] dark:border-[var(--status-warning-text)]/30">
-                        <span className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-medium">هزینه مواد اولیه این پرس ({toPersianDigits(calcWeightGrams)} گرم):</span>
-                        <span className="font-black text-[var(--status-error-text)] dark:text-[var(--status-error-text)] text-sm">{formatToman(recipeFoodCost).text}</span>
+                      <div className="flex justify-between items-center pb-2 border-b border-amber-200 dark:border-amber-900/40">
+                        <span className="text-[var(--text-secondary)] font-medium">بهای تمام‌شده این پرس ({toPersianDigits(calcWeightGrams)} گرم):</span>
+                        <span className="font-black text-[var(--status-error-text)] text-sm">{formatToman(recipeFoodCost).text}</span>
                       </div>
 
-                      <div className="flex justify-between items-center pb-2 border-b border-[var(--status-warning-text)] dark:border-[var(--status-warning-text)]/30">
-                        <span className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-medium">درصد واقعی هزینه مواد اولیه:</span>
-                        <span className="font-black text-[var(--status-success-text)] dark:text-[var(--status-success-text)] text-sm">٪{toPersianDigits(foodCostPercentage)}</span>
+                      <div className="flex justify-between items-center pb-2 border-b border-amber-200 dark:border-amber-900/40">
+                        <span className="text-[var(--text-secondary)] font-medium">درصد واقعی بهای مواد:</span>
+                        <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm">٪{toPersianDigits(foodCostPercentage)}</span>
                       </div>
 
                       <div className="flex justify-between items-center">
-                        <span className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-medium">سود ناخالص هر پرس:</span>
-                        <span className="font-black text-[var(--status-success-text)] dark:text-emerald-300 text-sm">{formatToman(grossProfit).text}</span>
+                        <span className="text-[var(--text-secondary)] font-medium">سود ناخالص هر پرس:</span>
+                        <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm">{formatToman(grossProfit).text}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-white dark:bg-[var(--bg-card)] border border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]/30 text-[11px] text-[var(--text-primary)] dark:text-[var(--text-primary)] font-medium leading-relaxed mt-4">
-                    💡 <strong>تحلیل ماشینی:</strong> درصد هزینه مواد اولیه این غذا <strong>٪{toPersianDigits(foodCostPercentage)}</strong> است. اگر این عدد بالاتر از {toPersianDigits(35)}٪ باشد، سودآوری ضعیف است و باید یا قیمت فروش را افزایش دهید یا ضایعات و مقدار مصرف را کاهش دهید.
+                  <div className="p-3 rounded-xl bg-white dark:bg-[var(--bg-card)] border border-amber-200 dark:border-amber-900/40 text-[11px] text-[var(--text-primary)] font-medium leading-relaxed">
+                    💡 درصد بهای مواد این غذا <strong>٪{toPersianDigits(foodCostPercentage)}</strong> است. (هدف استاندارد: زیر ۳۵٪).
                   </div>
                 </div>
               </div>
@@ -689,68 +669,55 @@ export const GuideManager: React.FC = () => {
           </Card>
         )}
 
-        {/* FAQ Section */}
-        <Card className="border border-[var(--border-subtle)] rounded-3xl shadow-xs overflow-hidden bg-[var(--bg-card)]">
-          <CardHeader className="border-b border-[var(--border-subtle)] bg-[var(--bg-base)]">
-            <CardTitle className="text-base font-black text-[var(--text-primary)] flex items-center gap-2">
-              <HelpCircle className="h-5 w-5 text-[var(--brand-primary)]" />
-              <span>پرسش‌های متداول و نکته‌های کلیدی کاربران</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-5 sm:p-7 space-y-3.5">
-            {faqs.map((faq, index) => {
-              const isOpen = openFaq === index;
-              return (
-                <div
-                  key={index}
-                  className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
-                    isOpen
-                      ? 'border-[var(--brand-primary)]/40 shadow-xs'
-                      : 'border-[var(--border-subtle)] hover:border-[var(--border-functional)]'
-                  }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaq(isOpen ? null : index)}
-                    className="w-full p-4.5 sm:p-5 text-right flex items-center justify-between gap-3 text-xs sm:text-sm font-black text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
+        {/* Chapter 8: FAQs */}
+        {activeChapter === 'faq' && (
+          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+              <CardTitle className="text-base font-black text-[var(--text-primary)] flex items-center gap-2">
+                <HelpCircle className="h-5 w-5 text-[var(--brand-primary)]" />
+                <span>پرسش‌های متداول و پاسخ‌های کاربردی</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 sm:p-6 space-y-3">
+              {faqs.map((faq, index) => {
+                const isOpen = openFaq === index;
+                return (
+                  <div
+                    key={index}
+                    className={`rounded-2xl border transition-all overflow-hidden ${
+                      isOpen
+                        ? 'border-[var(--brand-primary)]/40 shadow-2xs'
+                        : 'border-[var(--border-subtle)] hover:border-[var(--border-functional)]'
+                    }`}
                   >
-                    <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-[var(--brand-primary)] shrink-0 opacity-80" />
-                      <span>{faq.q}</span>
-                    </span>
-                    <ChevronDown
-                      className={`h-4 w-4 text-[var(--text-secondary)] shrink-0 transition-transform duration-200 ${
-                        isOpen ? 'rotate-180 text-[var(--brand-primary)]' : ''
-                      }`}
-                    />
-                  </button>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="border-t border-[var(--border-subtle)] bg-[var(--brand-primary-subtle)]/25 p-5 sm:p-6"
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(isOpen ? null : index)}
+                      className="w-full p-4 text-right flex items-center justify-between gap-3 text-xs sm:text-sm font-black text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] shrink-0 mt-0.5">
-                          <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
-                        </div>
-                        <div className="space-y-1.5 flex-1">
-                          <span className="inline-flex items-center gap-1 text-[11px] font-black text-[var(--brand-primary)] tracking-wide">
-                            پاسخ کاربردی سیستم:
-                          </span>
-                          <p className="text-xs sm:text-sm text-[var(--text-primary)] leading-relaxed font-medium">
-                            {faq.a}
-                          </p>
-                        </div>
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[var(--brand-primary)] shrink-0" />
+                        <span>{faq.q}</span>
+                      </span>
+                      <ChevronDown
+                        className={`h-4 w-4 text-[var(--text-secondary)] shrink-0 transition-transform ${
+                          isOpen ? 'rotate-180 text-[var(--brand-primary)]' : ''
+                        }`}
+                      />
+                    </button>
+                    {isOpen && (
+                      <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-base)]/50 p-4 sm:p-5">
+                        <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-medium">
+                          {faq.a}
+                        </p>
                       </div>
-                    </motion.div>
-                  )}
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+                    )}
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

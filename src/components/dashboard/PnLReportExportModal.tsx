@@ -32,6 +32,7 @@ interface PnLReportExportModalProps {
   metrics: {
     totalRevenue: number;
     totalCOGS: number;
+    totalLaborCost?: number;
     loggedWaste: number;
     salesWaste: number;
     totalWaste: number;
@@ -39,6 +40,8 @@ interface PnLReportExportModalProps {
     grossProfit: number;
     netProfit: number;
     foodCostPercent: number;
+    laborCostPercent?: number;
+    primeCostPercent?: number;
     netMarginPercent: number;
     periodDaysCount: number;
   };
@@ -201,44 +204,64 @@ export const PnLReportExportModal: React.FC<PnLReportExportModalProps> = ({
           </div>
 
           {/* Key Metric Summary Boxes */}
-          <div className="grid grid-cols-4 gap-3 mb-6">
-            <div className="p-3 bg-emerald-50/60 rounded-xl border border-[var(--status-success-text)]/30">
-              <div className="text-[10px] font-bold text-[var(--status-success-text)]">فروش و درآمد کل</div>
-              <div className="text-sm font-black text-emerald-950 mt-1">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-6">
+            <div className="p-2.5 bg-emerald-50/60 rounded-xl border border-[var(--status-success-text)]/30">
+              <div className="text-[9px] font-bold text-[var(--status-success-text)]">فروش و درآمد کل</div>
+              <div className="text-xs font-black text-emerald-950 mt-1">
                 {formatToman(metrics.totalRevenue).text}
               </div>
-              <div className="text-[10px] text-[var(--status-success-text)] mt-1 font-bold">
-                تعداد فاکتور: {toPersianDigits(filteredSalesRecords.length)} روز ثبت
+              <div className="text-[9px] text-[var(--status-success-text)] mt-1 font-bold">
+                {toPersianDigits(filteredSalesRecords.length)} روز ثبت
               </div>
             </div>
 
-            <div className="p-3 bg-amber-50/60 rounded-xl border border-[var(--status-warning-text)]/30">
-              <div className="text-[10px] font-bold text-[var(--status-warning-text)]">بهای تمام شده مواد اولیه</div>
-              <div className="text-sm font-black text-[var(--status-warning-text)] mt-1">
+            <div className="p-2.5 bg-amber-50/60 rounded-xl border border-[var(--status-warning-text)]/30">
+              <div className="text-[9px] font-bold text-[var(--status-warning-text)]">بهای مواد اولیه</div>
+              <div className="text-xs font-black text-[var(--status-warning-text)] mt-1">
                 {formatToman(metrics.totalCOGS).text}
               </div>
-              <div className="text-[10px] text-[var(--status-warning-text)] mt-1 font-bold">
-                درصد مواد اولیه: {toPersianDigits(roundCurrency(metrics.foodCostPercent))}٪
+              <div className="text-[9px] text-[var(--status-warning-text)] mt-1 font-bold">
+                درصد مواد: {toPersianDigits(roundCurrency(metrics.foodCostPercent))}٪
               </div>
             </div>
 
-            <div className="p-3 bg-rose-50/60 rounded-xl border border-[var(--status-error-text)]/30">
-              <div className="text-[10px] font-bold text-[var(--status-error-text)]">ضایعات و سربار دوره</div>
-              <div className="text-sm font-black text-rose-950 mt-1">
+            <div className="p-2.5 bg-blue-50/60 rounded-xl border border-blue-200">
+              <div className="text-[9px] font-bold text-blue-700">هزینه نیروی کار</div>
+              <div className="text-xs font-black text-blue-950 mt-1">
+                {toPersianDigits(roundCurrency(metrics.laborCostPercent ?? 0))}٪
+              </div>
+              <div className="text-[9px] text-blue-700 mt-1 font-bold">
+                مبلغ: {formatToman(metrics.totalLaborCost ?? 0).text}
+              </div>
+            </div>
+
+            <div className="p-2.5 bg-violet-50/60 rounded-xl border border-violet-200">
+              <div className="text-[9px] font-bold text-violet-700">بهای اولیه تولید</div>
+              <div className="text-xs font-black text-violet-950 mt-1">
+                {toPersianDigits(roundCurrency(metrics.primeCostPercent ?? 0))}٪
+              </div>
+              <div className="text-[9px] text-violet-700 mt-1 font-bold">
+                هدف: ۵۵٪ تا ۶۵٪
+              </div>
+            </div>
+
+            <div className="p-2.5 bg-rose-50/60 rounded-xl border border-[var(--status-error-text)]/30">
+              <div className="text-[9px] font-bold text-[var(--status-error-text)]">ضایعات و سربار</div>
+              <div className="text-xs font-black text-rose-950 mt-1">
                 {formatToman(metrics.periodOverhead + metrics.totalWaste).text}
               </div>
-              <div className="text-[10px] text-[var(--status-error-text)] mt-1 font-bold">
+              <div className="text-[9px] text-[var(--status-error-text)] mt-1 font-bold">
                 ضایعات: {formatToman(metrics.totalWaste).text}
               </div>
             </div>
 
-            <div className={`p-3 rounded-xl border ${netProfitToman.isNegative ? 'bg-rose-50/80 border-[var(--status-error-text)]/30' : 'bg-emerald-50/80 border-[var(--status-success-text)]/30'}`}>
-              <div className={`text-[10px] font-bold ${netProfitToman.isNegative ? 'text-[var(--status-error-text)]' : 'text-[var(--status-success-text)]'}`}>سود خالص دوره</div>
-              <div className={`text-sm font-black mt-1 ${netProfitToman.isNegative ? 'text-[var(--status-error-text)]' : 'text-[var(--status-success-text)]'}`}>
+            <div className={`p-2.5 rounded-xl border ${netProfitToman.isNegative ? 'bg-rose-50/80 border-[var(--status-error-text)]/30' : 'bg-emerald-50/80 border-[var(--status-success-text)]/30'}`}>
+              <div className={`text-[9px] font-bold ${netProfitToman.isNegative ? 'text-[var(--status-error-text)]' : 'text-[var(--status-success-text)]'}`}>سود خالص دوره</div>
+              <div className={`text-xs font-black mt-1 ${netProfitToman.isNegative ? 'text-[var(--status-error-text)]' : 'text-[var(--status-success-text)]'}`}>
                 {netProfitToman.text}
               </div>
-              <div className={`text-[10px] mt-1 font-bold ${netProfitToman.isNegative ? 'text-[var(--status-error-text)]' : 'text-[var(--status-success-text)]'}`}>
-                حاشیه سود: {toPersianDigits(roundCurrency(metrics.netMarginPercent))}٪
+              <div className={`text-[9px] mt-1 font-bold ${netProfitToman.isNegative ? 'text-[var(--status-error-text)]' : 'text-[var(--status-success-text)]'}`}>
+                حاشیه: {toPersianDigits(roundCurrency(metrics.netMarginPercent))}٪
               </div>
             </div>
           </div>

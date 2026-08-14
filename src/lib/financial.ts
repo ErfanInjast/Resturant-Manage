@@ -22,16 +22,19 @@ const DATE_STRING_REGEX = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export interface FinancialMetrics {
   totalRevenue: number;
-  totalCOGS: number;
+  totalCOGS: number;        // Pure Food Cost (مواد اولیه مصرفی)
+  totalLaborCost: number;   // Total Labor Cost in period (دستمزد و حقوق)
   loggedWaste: number;
   salesWaste: number;
   totalWaste: number;
-  grossProfit: number;
+  grossProfit: number;      // Revenue - COGS
   dailyOverhead: number;
   periodOverhead: number;
-  netProfit: number;
-  foodCostPercent: number;
-  netMarginPercent: number;
+  netProfit: number;        // Gross Profit - Overhead - Waste
+  foodCostPercent: number;  // (COGS / Revenue) * 100
+  laborCostPercent: number; // (Labor / Revenue) * 100
+  primeCostPercent: number; // ((COGS + Labor) / Revenue) * 100
+  netMarginPercent: number; // (Net Profit / Revenue) * 100
   periodDaysCount: number;
   filterTitle: string;
   filterSubtitle: string;
@@ -333,22 +336,31 @@ export function calculateFinancialMetrics(config: FinancialMetricsConfig): Finan
 
   const totalRevenue = filteredSales.reduce((accumulator, record) => accumulator + (record.totalRevenue || 0), 0);
   const totalCOGS = filteredSales.reduce((accumulator, record) => accumulator + (record.totalCOGS || 0), 0);
+  const directLaborFromSales = filteredSales.reduce((accumulator, record) => accumulator + (record.totalLaborCost || 0), 0);
   const loggedWaste = filteredWaste.reduce((accumulator, log) => accumulator + (log.cost || 0), 0);
   // salesWaste is set to 0 because record.totalWasteCost on daily sales records is populated directly from wasteLogs in syncAndRecalculateAllData.
   // Summing both loggedWaste and salesWaste causes double-counting of the exact same waste logs.
   const salesWaste = 0;
   const totalWaste = loggedWaste;
 
+  // Compute fixed labor portion for period
+  const monthlySalaries = settings.monthlyFixedCosts?.salaries || 0;
+  const periodSalaries = roundCurrency((monthlySalaries / Math.max(1, workingDays)) * periodDaysCount);
+  const totalLaborCost = periodSalaries + directLaborFromSales;
+
   const grossProfit = totalRevenue - totalCOGS;
   const periodOverhead = roundCurrency(dailyOverhead * periodDaysCount);
   const netProfit = grossProfit - periodOverhead - totalWaste;
 
   const foodCostPercent = totalRevenue > 0 ? roundCurrency((totalCOGS / totalRevenue) * 100) : 0;
+  const laborCostPercent = totalRevenue > 0 ? roundCurrency((totalLaborCost / totalRevenue) * 100) : 0;
+  const primeCostPercent = totalRevenue > 0 ? roundCurrency(((totalCOGS + totalLaborCost) / totalRevenue) * 100) : 0;
   const netMarginPercent = totalRevenue > 0 ? roundCurrency((netProfit / totalRevenue) * 100) : 0;
 
   return {
     totalRevenue,
     totalCOGS,
+    totalLaborCost,
     loggedWaste,
     salesWaste,
     totalWaste,
@@ -357,6 +369,8 @@ export function calculateFinancialMetrics(config: FinancialMetricsConfig): Finan
     periodOverhead,
     netProfit,
     foodCostPercent,
+    laborCostPercent,
+    primeCostPercent,
     netMarginPercent,
     periodDaysCount,
     filterTitle,

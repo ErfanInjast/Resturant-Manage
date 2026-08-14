@@ -36,39 +36,39 @@ export const Sidebar: React.FC = () => {
   const navItems: NavItem[] = [
     {
       id: 'dashboard',
-      label: 'صورت سود و زیان',
+      label: 'سود و زیان',
       icon: LayoutDashboard,
     },
     {
       id: 'inventory',
-      label: 'انبار و مواد اولیه',
+      label: 'مدیریت انبار',
       icon: Boxes,
       badge: lowStockCount > 0 ? `${lowStockCount} کمبود` : undefined,
     },
     {
       id: 'menu',
-      label: 'آنالیز و قیمت‌گذاری',
+      label: 'منو و قیمت‌گذاری',
       icon: UtensilsCrossed,
       badge: menuItemsCount > 0 ? `${menuItemsCount} آیتم` : undefined,
     },
     {
       id: 'sales',
-      label: 'ثبت فروش و ضایعات',
+      label: 'فروش و ضایعات',
       icon: Receipt,
     },
     {
       id: 'analytics',
-      label: 'تحلیل سودآوری منو',
+      label: 'تحلیل سودآوری',
       icon: PieChart,
     },
     {
       id: 'settings',
-      label: 'تنظیمات و پشتیبان‌گیری',
+      label: 'تنظیمات',
       icon: Settings,
     },
     {
       id: 'guide',
-      label: 'راهنمای جامع و آموزش',
+      label: 'راهنما و آموزش',
       icon: BookOpen,
     },
   ];
@@ -76,8 +76,8 @@ export const Sidebar: React.FC = () => {
   return (
     <aside className="hidden lg:flex flex-col w-64 shrink-0 border-l border-[var(--border-subtle)] bg-[var(--bg-base)]/80 backdrop-blur-md min-h-[calc(100vh-4rem)] p-4 select-none transition-colors">
       <div className="flex-1 space-y-1.5">
-        <p className="px-3 text-[11px] font-black tracking-wider text-[var(--text-secondary)] uppercase mb-3 flex items-center justify-between">
-          <span>منوی اصلی سیستم</span>
+        <p className="px-3 text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase mb-3 flex items-center justify-between">
+          <span>منوی اصلی</span>
           <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-primary)]"></span>
         </p>
 

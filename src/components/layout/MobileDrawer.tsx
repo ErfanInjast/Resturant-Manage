@@ -103,29 +103,6 @@ export const MobileDrawer: React.FC = () => {
           )}
         </AnimatePresence>
       </Dialog.Root>
-
-      {/* Mobile Bottom Navigation Bar (Hidden in Simple Mode) */}
-      {!isSimpleMode && (
-        <nav className="fixed bottom-0 inset-x-0 z-40 flex h-16 bg-[var(--bg-card)] border-t border-[var(--border-subtle)] lg:hidden shadow-lg justify-around items-center px-2">
-          {navItems.slice(0, 5).map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={cn(
-                  'flex flex-col items-center justify-center w-full h-full text-[10px] font-bold gap-1 transition-all cursor-pointer',
-                  isActive ? 'text-[var(--brand-primary)]' : 'text-[var(--text-secondary)]'
-                )}
-              >
-                <Icon className={cn('h-5 w-5', isActive ? 'text-[var(--brand-primary)]' : 'text-[var(--text-secondary)]')} />
-                <span className="truncate max-w-[64px]">{item.label.split(' ')[0]}</span>
-              </button>
-            );
-          })}
-        </nav>
-      )}
     </>
   );
 };

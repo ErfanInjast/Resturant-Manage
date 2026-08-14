@@ -167,7 +167,7 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
       0
     );
     const estimatedMonthlyCOGS = menuItems.reduce(
-      (acc, item) => acc + (item.primeCost || 0) * (item.salesVolume30Days || 30),
+      (acc, item) => acc + (item.foodCost ?? item.totalMaterialCost ?? 0) * (item.salesVolume30Days || 30),
       0
     );
     avgDailyRevenue = estimatedMonthlyRevenue / 30;
@@ -207,7 +207,7 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
         category: m.category || 'سایر',
         avgDailyQty: (m.salesVolume30Days || 30) / 30,
         unitPrice: m.sellingPrice || 0,
-        unitCost: m.primeCost || 0,
+        unitCost: m.foodCost ?? m.totalMaterialCost ?? 0,
       });
     }
   });
@@ -358,7 +358,7 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
           <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
             <span className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)] flex items-center gap-1.5">
               <PieChart className="h-3.5 w-3.5 text-[var(--status-error-text)] dark:text-[var(--status-error-text)]" />
-              بهای تمام‌شده تخمینی (COGS)
+              بهای تمام‌شده تخمینی مواد
             </span>
             <div className="text-lg font-black text-[var(--status-error-text)] dark:text-[var(--status-error-text)] tracking-tight">
               {formatToman(projectedTotalCOGS).text}

@@ -36,33 +36,33 @@ export const ConfirmDialogModal: React.FC = () => {
     switch (confirmModal.variant) {
       case 'danger':
         return {
-          icon: <AlertTriangle className="h-6 w-6 text-[var(--status-error-text)] dark:text-[var(--status-error-text)]" />,
-          iconBg: 'bg-[var(--status-error-bg)]/80 border-[var(--status-error-text)]/30 dark:border-[var(--status-error-text)] text-[var(--status-error-text)] dark:text-[var(--status-error-text)]',
-          cardBorder: 'border-[var(--status-error-text)]/30 dark:border-[var(--status-error-text)]/30 shadow-rose-950/10',
-          badgeBg: 'bg-[var(--status-error-bg)]/80 text-[var(--status-error-text)] dark:text-rose-300 border-[var(--status-error-text)]/30 dark:border-[var(--status-error-text)]/30',
+          icon: <AlertTriangle className="h-6 w-6 text-rose-600 dark:text-rose-400" />,
+          iconBg: 'bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/30 text-rose-600 dark:text-rose-400',
+          cardBorder: 'border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] shadow-2xl',
+          badgeBg: 'bg-rose-500/10 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30',
           badgeDefault: 'عملیات غیرقابل بازگشت',
-          boxBg: 'bg-rose-50/70 dark:bg-rose-950/30 border-[var(--status-error-text)]/30 dark:border-[var(--status-error-text)]/30 text-rose-950 dark:text-rose-200',
+          boxBg: 'bg-rose-50 dark:bg-rose-950/30 border border-rose-500/20 text-rose-950 dark:text-rose-100',
           btnVariant: 'danger' as const,
         };
       case 'warning':
         return {
-          icon: <AlertCircle className="h-6 w-6 text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]" />,
-          iconBg: 'bg-amber-100 dark:bg-amber-950/80 border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)] text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]',
-          cardBorder: 'border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]/30 shadow-amber-950/10',
-          badgeBg: 'bg-amber-100 dark:bg-amber-950/80 text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)] border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]/30',
+          icon: <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />,
+          iconBg: 'bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400',
+          cardBorder: 'border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] shadow-2xl',
+          badgeBg: 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30',
           badgeDefault: 'هشدار بازنشانی داده‌ها',
-          boxBg: 'bg-amber-50/70 dark:bg-amber-950/30 border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]/30 text-[var(--status-warning-text)] dark:text-amber-200',
+          boxBg: 'bg-amber-50 dark:bg-amber-950/30 border border-amber-500/20 text-amber-950 dark:text-amber-100',
           btnVariant: 'warning' as const,
         };
       case 'primary':
       default:
         return {
           icon: <HelpCircle className="h-6 w-6 text-[var(--brand-primary)]" />,
-          iconBg: 'bg-[var(--brand-primary-subtle)] border-[var(--brand-primary)]/20 text-[var(--brand-primary)]',
-          cardBorder: 'border-[var(--brand-primary)]/30 shadow-indigo-950/10',
-          badgeBg: 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border-[var(--brand-primary)]/20',
+          iconBg: 'bg-[var(--brand-primary-subtle)] border border-[var(--brand-primary)]/20 text-[var(--brand-primary)]',
+          cardBorder: 'border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] shadow-2xl',
+          badgeBg: 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border border-[var(--brand-primary)]/20',
           badgeDefault: 'تایید درخواست',
-          boxBg: 'bg-[var(--bg-base)] border-[var(--border-subtle)] text-[var(--text-primary)]',
+          boxBg: 'bg-[var(--bg-base)] border border-[var(--border-subtle)] text-[var(--text-primary)] dark:text-[var(--text-primary)]',
           btnVariant: 'primary' as const,
         };
     }
