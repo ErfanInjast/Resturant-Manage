@@ -1,6 +1,7 @@
 // netProfit = totalRevenue - totalCOGS - totalWasteCost
 // Decision: wasteCost is included as real operational expense
-// Last updated: 2026-08-09
+// Last updated: 2026-08-14
+
 import type { DailySalesRecord, WasteLog, FixedCosts, AppSettings } from '../types';
 import { roundCurrency } from './utils';
 import {
@@ -11,6 +12,13 @@ import {
   getDaysInJalaliMonth,
   calculateWorkingDays,
 } from './jalali';
+
+// Magic values/constants abstracted to UPPER_SNAKE_CASE
+const MILLISECONDS_IN_DAY = 86400000;
+const DEFAULT_PERIOD_DAYS = 1;
+const DAYS_IN_WEEK_PRESET = 7;
+const DAYS_IN_MONTH_PRESET = 30;
+const DATE_STRING_REGEX = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export interface FinancialMetrics {
   totalRevenue: number;
@@ -31,6 +39,36 @@ export interface FinancialMetrics {
 
 export type DatePreset = 'today' | 'specific' | 'last7' | 'last30' | 'currentMonth' | 'allTime';
 
+export interface FinancialMetricsConfig {
+  salesRecords: DailySalesRecord[];
+  wasteLogs: WasteLog[];
+  settings: Partial<AppSettings>;
+  datePreset?: DatePreset;
+  customSpecificDate?: string;
+  earliestRecordDate?: string;
+}
+
+interface PeriodDetails {
+  periodDaysCount: number;
+  filterTitle: string;
+  filterSubtitle: string;
+}
+
+/**
+ * Extracts and filters valid, normalized date strings from raw objects.
+ * Separated to ensure Single Responsibility Principle (SRP).
+ */
+function extractValidDates(records: Array<{ date: string }>): string[] {
+  const validDates: string[] = [];
+  for (const record of records) {
+    const normalizedDate = normalizeDateStr(record.date);
+    if (normalizedDate && parseJalaliStringToGregorianStrict(normalizedDate)) {
+      validDates.push(normalizedDate);
+    }
+  }
+  return validDates;
+}
+
 /**
  * Finds the earliest valid date across all sales and waste logs
  */
@@ -38,29 +76,26 @@ export function findEarliestRecordDate(
   salesRecords: DailySalesRecord[] = [],
   wasteLogs: WasteLog[] = []
 ): string | undefined {
-  const dates: string[] = [];
-  for (const s of salesRecords) {
-    const norm = normalizeDateStr(s.date);
-    if (norm && parseJalaliStringToGregorianStrict(norm)) {
-      dates.push(norm);
-    }
+  const allDates = [
+    ...extractValidDates(salesRecords),
+    ...extractValidDates(wasteLogs),
+  ];
+
+  if (allDates.length === 0) {
+    return undefined;
   }
-  for (const w of wasteLogs) {
-    const norm = normalizeDateStr(w.date);
-    if (norm && parseJalaliStringToGregorianStrict(norm)) {
-      dates.push(norm);
-    }
-  }
-  if (dates.length === 0) return undefined;
-  dates.sort();
-  return dates[0];
+
+  allDates.sort();
+  return allDates[0];
 }
 
 /**
  * Calculates total monthly fixed costs / overhead across all 8 cost categories
  */
 export function calculateTotalMonthlyOverhead(fixedCosts?: Partial<FixedCosts>): number {
-  if (!fixedCosts) return 0;
+  if (!fixedCosts) {
+    return 0;
+  }
   return (
     (fixedCosts.rent || 0) +
     (fixedCosts.utilities || 0) +
@@ -74,6 +109,50 @@ export function calculateTotalMonthlyOverhead(fixedCosts?: Partial<FixedCosts>):
 }
 
 /**
+ * Computes standard daily overhead from monthly fixed overhead and working days per month.
+ * Ensures consistent guard against division by zero (workingDays must be at least 1)
+ * and uses consistent currency rounding (roundCurrency).
+ */
+export function calculateDailyOverhead(monthlyOverhead: number, workingDays: number): number {
+  return roundCurrency(monthlyOverhead / Math.max(1, workingDays));
+}
+
+/**
+ * Checks if a normalized record date falls within a set number of past days from today.
+ */
+function isDateWithinPastDays(normalizedRecordDate: string, daysCount: number): boolean {
+  const gregorianDate = parseJalaliStringToGregorianStrict(normalizedRecordDate);
+  if (!gregorianDate) {
+    return false;
+  }
+
+  const todayGregorian = new Date();
+  todayGregorian.setHours(23, 59, 59, 999);
+
+  const gregorianStartDate = new Date(todayGregorian);
+  gregorianStartDate.setDate(gregorianStartDate.getDate() - (daysCount - 1));
+  gregorianStartDate.setHours(0, 0, 0, 0);
+
+  return gregorianDate >= gregorianStartDate && gregorianDate <= todayGregorian;
+}
+
+/**
+ * Checks if a normalized record date belongs to the current Jalali month.
+ */
+function isDateInCurrentJalaliMonth(normalizedRecordDate: string): boolean {
+  const match = normalizedRecordDate.match(DATE_STRING_REGEX);
+  if (!match) {
+    return false;
+  }
+
+  const todayJalali = getJalaliDate();
+  const jalaliYear = parseInt(match[1], 10);
+  const jalaliMonth = parseInt(match[2], 10);
+
+  return jalaliYear === todayJalali.jy && jalaliMonth === todayJalali.jm;
+}
+
+/**
  * Filter record helper to check if a Jalali date string falls into the active preset
  */
 export function isDateInPresetFilter(
@@ -81,133 +160,183 @@ export function isDateInPresetFilter(
   preset: DatePreset,
   customSpecificDate: string = ''
 ): boolean {
-  const normRec = normalizeDateStr(recordDateStr);
-  if (!normRec) return false;
+  const normalizedRecordDate = normalizeDateStr(recordDateStr);
+  if (!normalizedRecordDate) {
+    return false;
+  }
 
-  const todayJ = getJalaliDate();
-  const todayIso = formatJalali(new Date(), 'iso');
-  const todayGregorian = new Date();
-  todayGregorian.setHours(23, 59, 59, 999);
+  const todayIsoDate = formatJalali(new Date(), 'iso');
 
   switch (preset) {
     case 'today':
-      return normRec === normalizeDateStr(todayIso);
+      return normalizedRecordDate === normalizeDateStr(todayIsoDate);
 
     case 'specific':
-      return customSpecificDate ? normRec === normalizeDateStr(customSpecificDate) : false;
+      return customSpecificDate ? normalizedRecordDate === normalizeDateStr(customSpecificDate) : false;
 
-    case 'last7': {
-      const gDate = parseJalaliStringToGregorianStrict(normRec);
-      if (!gDate) return false;
-      const gStart = new Date(todayGregorian);
-      gStart.setDate(gStart.getDate() - 6);
-      gStart.setHours(0, 0, 0, 0);
-      return gDate >= gStart && gDate <= todayGregorian;
-    }
+    case 'last7':
+      return isDateWithinPastDays(normalizedRecordDate, DAYS_IN_WEEK_PRESET);
 
-    case 'last30': {
-      const gDate = parseJalaliStringToGregorianStrict(normRec);
-      if (!gDate) return false;
-      const gStart = new Date(todayGregorian);
-      gStart.setDate(gStart.getDate() - 29);
-      gStart.setHours(0, 0, 0, 0);
-      return gDate >= gStart && gDate <= todayGregorian;
-    }
+    case 'last30':
+      return isDateWithinPastDays(normalizedRecordDate, DAYS_IN_MONTH_PRESET);
 
-    case 'currentMonth': {
-      const match = normRec.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-      if (!match) return false;
-      const jy = parseInt(match[1], 10);
-      const jm = parseInt(match[2], 10);
-      return jy === todayJ.jy && jm === todayJ.jm;
-    }
+    case 'currentMonth':
+      return isDateInCurrentJalaliMonth(normalizedRecordDate);
 
     case 'allTime':
-      return true;
-
     default:
       return true;
   }
 }
 
 /**
- * Standardized Financial Engine for calculating all key metrics identically across the app
+ * Calculates max history days from the earliest valid record.
+ * Separated to reduce function length and maintain clean execution paths.
  */
-export function calculateFinancialMetrics(
+function calculateMaxHistoryDays(
   salesRecords: DailySalesRecord[],
   wasteLogs: WasteLog[],
-  settings: Partial<AppSettings>,
-  datePreset: DatePreset = 'currentMonth',
-  customSpecificDate: string = '',
   earliestRecordDate?: string
-): FinancialMetrics {
-  const workingDays = settings.workingDaysPerMonth || calculateWorkingDays();
-  const totalMonthlyOverhead = calculateTotalMonthlyOverhead(settings.monthlyFixedCosts);
-  const dailyOverhead = roundCurrency(totalMonthlyOverhead / Math.max(1, workingDays));
-
-  const todayJ = getJalaliDate();
-  const todayIso = formatJalali(new Date(), 'iso');
-
+): number {
   const actualEarliest = earliestRecordDate || findEarliestRecordDate(salesRecords, wasteLogs);
+  if (!actualEarliest) {
+    return Infinity;
+  }
 
-  let maxHistoryDays = Infinity;
-  if (actualEarliest) {
-    const earliestG = parseJalaliStringToGregorianStrict(actualEarliest);
-    if (earliestG) {
-      const todayZero = new Date();
-      todayZero.setHours(0, 0, 0, 0);
-      const earliestZero = new Date(earliestG);
-      earliestZero.setHours(0, 0, 0, 0);
-      const diffMs = todayZero.getTime() - earliestZero.getTime();
-      if (diffMs >= 0) {
-        maxHistoryDays = Math.floor(diffMs / 86400000) + 1;
-      } else {
-        maxHistoryDays = 1;
-      }
+  const earliestGregorianDate = parseJalaliStringToGregorianStrict(actualEarliest);
+  if (!earliestGregorianDate) {
+    return Infinity;
+  }
+
+  const todayZeroHours = new Date();
+  todayZeroHours.setHours(0, 0, 0, 0);
+
+  const earliestZeroHours = new Date(earliestGregorianDate);
+  earliestZeroHours.setHours(0, 0, 0, 0);
+
+  const differenceInMilliseconds = todayZeroHours.getTime() - earliestZeroHours.getTime();
+  if (differenceInMilliseconds < 0) {
+    return DEFAULT_PERIOD_DAYS;
+  }
+
+  return Math.floor(differenceInMilliseconds / MILLISECONDS_IN_DAY) + 1;
+}
+
+/**
+ * Core utility to decide active days and display text representing the active preset.
+ */
+function determinePeriodDetails(
+  preset: DatePreset,
+  maxHistoryDays: number,
+  workingDays: number,
+  customSpecificDate: string,
+  uniqueDatesCount: number,
+  holidaysCount: number
+): PeriodDetails {
+  const todayJalali = getJalaliDate();
+  const todayIsoDate = formatJalali(new Date(), 'iso');
+
+  switch (preset) {
+    case 'today':
+      return {
+        periodDaysCount: DEFAULT_PERIOD_DAYS,
+        filterTitle: 'گزارش امروز',
+        filterSubtitle: `تاریخ: ${todayIsoDate}`,
+      };
+
+    case 'specific':
+      return {
+        periodDaysCount: DEFAULT_PERIOD_DAYS,
+        filterTitle: `گزارش روز ${customSpecificDate}`,
+        filterSubtitle: `تاریخ انتخاب‌شده: ${customSpecificDate}`,
+      };
+
+    case 'last7':
+      return {
+        periodDaysCount: Math.min(DAYS_IN_WEEK_PRESET, maxHistoryDays),
+        filterTitle: '۷ روز اخیر',
+        filterSubtitle: '',
+      };
+
+    case 'last30':
+      return {
+        periodDaysCount: Math.min(DAYS_IN_MONTH_PRESET, maxHistoryDays),
+        filterTitle: '۳۰ روز اخیر',
+        filterSubtitle: '',
+      };
+
+    case 'currentMonth': {
+      const totalDaysInMonth = getDaysInJalaliMonth(todayJalali.jy, todayJalali.jm);
+      // We assume holidays are spread evenly: 1 holiday for every 7 calendar days, capped at total holidays.
+      const elapsedHolidays = Math.min(holidaysCount, Math.floor(todayJalali.jd / 7));
+      const actualWorkingDaysPassed = todayJalali.jd - elapsedHolidays;
+      return {
+        periodDaysCount: Math.max(DEFAULT_PERIOD_DAYS, Math.min(workingDays, actualWorkingDaysPassed)),
+        filterTitle: 'ماه جاری',
+        filterSubtitle: '',
+      };
+    }
+
+    case 'allTime':
+    default: {
+      const activeDays = maxHistoryDays === Infinity ? Math.max(DEFAULT_PERIOD_DAYS, uniqueDatesCount) : maxHistoryDays;
+      return {
+        periodDaysCount: Math.max(DEFAULT_PERIOD_DAYS, activeDays),
+        filterTitle: 'کل تاریخچه',
+        filterSubtitle: '',
+      };
     }
   }
+}
 
-  let periodDaysCount = 1;
-  let filterTitle = 'ماه جاری';
-  let filterSubtitle = '';
+/**
+ * Standardized Financial Engine for calculating all key metrics identically across the app.
+ * Refactored to accept a configuration object, improving future extensibility and scaling.
+ */
+export function calculateFinancialMetrics(config: FinancialMetricsConfig): FinancialMetrics {
+  const {
+    salesRecords = [],
+    wasteLogs = [],
+    settings,
+    datePreset = 'currentMonth',
+    customSpecificDate = '',
+    earliestRecordDate,
+  } = config;
 
-  if (datePreset === 'today') {
-    filterTitle = 'گزارش امروز';
-    filterSubtitle = `تاریخ: ${todayIso}`;
-    periodDaysCount = 1;
-  } else if (datePreset === 'specific') {
-    filterTitle = `گزارش روز ${customSpecificDate}`;
-    filterSubtitle = `تاریخ انتخاب‌شده: ${customSpecificDate}`;
-    periodDaysCount = 1;
-  } else if (datePreset === 'last7') {
-    filterTitle = '۷ روز اخیر';
-    periodDaysCount = Math.min(7, maxHistoryDays);
-  } else if (datePreset === 'last30') {
-    filterTitle = '۳۰ روز اخیر';
-    periodDaysCount = Math.min(30, maxHistoryDays);
-  } else if (datePreset === 'currentMonth') {
-    filterTitle = 'ماه جاری';
-    const totalDaysInM = getDaysInJalaliMonth(todayJ.jy, todayJ.jm);
-    const estimatedWorkingDaysPassed = Math.round((todayJ.jd / totalDaysInM) * workingDays);
-    periodDaysCount = Math.max(1, estimatedWorkingDaysPassed);
-  } else if (datePreset === 'allTime') {
-    filterTitle = 'کل تاریخچه';
-    const uniqueDates = new Set([
-      ...salesRecords.map((s) => normalizeDateStr(s.date)),
-      ...wasteLogs.map((w) => normalizeDateStr(w.date)),
-    ]);
-    periodDaysCount = Math.max(1, uniqueDates.size);
-  }
+  const holidaysCount = settings.holidaysCount !== undefined ? settings.holidaysCount : 4;
+  const workingDays = settings.workingDaysPerMonth !== undefined ? settings.workingDaysPerMonth : calculateWorkingDays(new Date(), holidaysCount);
+  const totalMonthlyOverhead = calculateTotalMonthlyOverhead(settings.monthlyFixedCosts);
+  const dailyOverhead = calculateDailyOverhead(totalMonthlyOverhead, workingDays);
 
-  // Filter records
-  const filteredSales = salesRecords.filter((r) => isDateInPresetFilter(r.date, datePreset, customSpecificDate));
-  const filteredWaste = wasteLogs.filter((w) => isDateInPresetFilter(w.date, datePreset, customSpecificDate));
+  const maxHistoryDays = calculateMaxHistoryDays(salesRecords, wasteLogs, earliestRecordDate);
 
-  // Compute sums
-  const totalRevenue = filteredSales.reduce((acc, r) => acc + (r.totalRevenue || 0), 0);
-  const totalCOGS = filteredSales.reduce((acc, r) => acc + (r.totalCOGS || 0), 0);
-  const loggedWaste = filteredWaste.reduce((acc, w) => acc + (w.cost || 0), 0);
-  const salesWaste = 0; // Set to 0 to avoid double counting with loggedWaste
+  const uniqueDatesCount = new Set([
+    ...salesRecords.map((record) => normalizeDateStr(record.date)),
+    ...wasteLogs.map((log) => normalizeDateStr(log.date)),
+  ]).size;
+
+  const { periodDaysCount, filterTitle, filterSubtitle } = determinePeriodDetails(
+    datePreset,
+    maxHistoryDays,
+    workingDays,
+    customSpecificDate,
+    uniqueDatesCount,
+    holidaysCount
+  );
+
+  const filteredSales = salesRecords.filter((record) =>
+    isDateInPresetFilter(record.date, datePreset, customSpecificDate)
+  );
+  const filteredWaste = wasteLogs.filter((log) =>
+    isDateInPresetFilter(log.date, datePreset, customSpecificDate)
+  );
+
+  const totalRevenue = filteredSales.reduce((accumulator, record) => accumulator + (record.totalRevenue || 0), 0);
+  const totalCOGS = filteredSales.reduce((accumulator, record) => accumulator + (record.totalCOGS || 0), 0);
+  const loggedWaste = filteredWaste.reduce((accumulator, log) => accumulator + (log.cost || 0), 0);
+  // salesWaste is set to 0 because record.totalWasteCost on daily sales records is populated directly from wasteLogs in syncAndRecalculateAllData.
+  // Summing both loggedWaste and salesWaste causes double-counting of the exact same waste logs.
+  const salesWaste = 0;
   const totalWaste = loggedWaste;
 
   const grossProfit = totalRevenue - totalCOGS;
@@ -234,3 +363,4 @@ export function calculateFinancialMetrics(
     filterSubtitle,
   };
 }
+

@@ -20,7 +20,7 @@ import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import type { DailySalesRecord, WasteLog, FixedCosts, MenuItem } from '../../types';
 import { formatToman, formatNumber, toPersianDigits, roundCurrency, cn } from '../../lib/utils';
-import { calculateTotalMonthlyOverhead } from '../../lib/financial';
+import { calculateTotalMonthlyOverhead, calculateDailyOverhead } from '../../lib/financial';
 import { formatJalaliReadable } from '../../lib/jalali';
 
 export type KPIMetricType = 'revenue' | 'cogs' | 'overhead_waste' | 'net_profit';
@@ -379,7 +379,7 @@ export const KPIDetailModal: React.FC<KPIDetailModalProps> = ({
               <div className="p-3.5 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                 <span className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)] block">سربار روزانه عملیاتی</span>
                 <span className="text-base sm:text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] block mt-1">
-                  {formatToman(roundCurrency(totalMonthlyOverhead / workingDays)).text}
+                  {formatToman(calculateDailyOverhead(totalMonthlyOverhead, workingDays)).text}
                 </span>
               </div>
             </div>

@@ -1,9 +1,9 @@
 // netProfit = totalRevenue - totalCOGS - totalWasteCost
 // Decision: wasteCost is included as real operational expense
-// Last updated: 2026-08-09
+// Last updated: 2026-08-14
 import Dexie, { type Table } from 'dexie';
 import type { Ingredient, MenuItem, DailySalesRecord, WasteLog, AppSettings, PurchaseLog } from '../types';
-import { formatJalali } from '../lib/jalali';
+import { formatJalali, normalizeDateStr } from '../lib/jalali';
 import { roundCurrency } from '../lib/utils';
 
 export class RestaurantDatabase extends Dexie {
@@ -130,7 +130,7 @@ export async function syncAndRecalculateAllData(): Promise<void> {
   const wasteLogs = await db.wasteLogs.toArray();
   const wasteMap = new Map<string, number>();
   wasteLogs.forEach((w) => {
-    const cleanD = (w.date || '').replace(/\//g, '-');
+    const cleanD = normalizeDateStr(w.date || '');
     wasteMap.set(cleanD, (wasteMap.get(cleanD) || 0) + (w.cost || 0));
   });
 
@@ -162,7 +162,7 @@ export async function syncAndRecalculateAllData(): Promise<void> {
       };
     });
 
-    const cleanSaleDate = (sale.date || '').replace(/\//g, '-');
+    const cleanSaleDate = normalizeDateStr(sale.date || '');
     const totalWasteCost = wasteMap.get(cleanSaleDate) || 0;
     const netProfit = roundCurrency(totalRevenue - totalCOGS - totalWasteCost);
 
@@ -275,6 +275,22 @@ function validateMenuItemRecord(item: any, index: number): void {
   if (item.ingredients !== undefined && !Array.isArray(item.ingredients)) {
     throw new Error(`لیست ترکیبات آیتم منو "${item.name}" ساختار نامعتبر دارد.`);
   }
+  if (Array.isArray(item.ingredients)) {
+    item.ingredients.forEach((ing: any, ingIdx: number) => {
+      if (!ing || typeof ing !== 'object') {
+        throw new Error(`ترکیب شماره ${ingIdx + 1} در آیتم منو "${item.name}" نامعتبر است.`);
+      }
+      if (ing.ingredientId !== undefined && !isValidNumber(ing.ingredientId)) {
+        throw new Error(`شناسه ماده اولیه در ترکیب شماره ${ingIdx + 1} آیتم منو "${item.name}" نامعتبر است.`);
+      }
+      const ingNumFields = ['quantity', 'unitCost', 'cost'];
+      for (const field of ingNumFields) {
+        if (ing[field] !== undefined && !isValidNumber(ing[field])) {
+          throw new Error(`فیلد عددی ${field} در ترکیب شماره ${ingIdx + 1} آیتم منو "${item.name}" نامعتبر است.`);
+        }
+      }
+    });
+  }
 }
 
 function validateDailySaleRecord(item: any, index: number): void {
@@ -303,6 +319,47 @@ function validateWasteLogRecord(item: any, index: number): void {
   for (const field of numFields) {
     if (item[field] !== undefined && !isValidNumber(item[field])) {
       throw new Error(`فیلد عددی ${field} در ضایعات "${item.itemName}" نامعتبر است.`);
+    }
+  }
+}
+
+function validatePurchaseLogRecord(item: any, index: number): void {
+  if (!item || typeof item !== 'object') {
+    throw new Error(`رکورد خرید شماره ${index + 1} نامعتبر است.`);
+  }
+  if (item.ingredientId === undefined || !isValidNumber(item.ingredientId)) {
+    throw new Error(`شناسه ماده اولیه در خرید شماره ${index + 1} نامعتبر است.`);
+  }
+  const numFields = ['quantity', 'totalPrice', 'unitCost'];
+  for (const field of numFields) {
+    if (item[field] === undefined || !isValidNumber(item[field])) {
+      throw new Error(`فیلد عددی ${field} در خرید شماره ${index + 1} نامعتبر یا خالی است.`);
+    }
+  }
+  if (!isNonEmptyString(item.date)) {
+    throw new Error(`تاریخ در خرید شماره ${index + 1} خالی یا نامعتبر است.`);
+  }
+}
+
+function validateSettingsRecord(item: any, index: number): void {
+  if (!item || typeof item !== 'object') {
+    throw new Error(`تنظیمات نامعتبر است.`);
+  }
+  const numFields = ['workingDaysPerMonth', 'dailyWorkHours', 'holidaysCount', 'targetFoodCostPercent', 'taxPercent', 'defaultLowStockThreshold', 'defaultRecipeWastePercent', 'highFoodCostThreshold'];
+  for (const field of numFields) {
+    if (item[field] !== undefined && !isValidNumber(item[field])) {
+      throw new Error(`فیلد عددی ${field} در تنظیمات نامعتبر است.`);
+    }
+  }
+  if (item.monthlyFixedCosts !== undefined) {
+    if (typeof item.monthlyFixedCosts !== 'object') {
+      throw new Error(`هزینه‌های ثابت ماهانه در تنظیمات نامعتبر است.`);
+    }
+    const costFields = ['rent', 'utilities', 'salaries', 'marketing', 'insurance', 'general', 'maintenance', 'delivery'];
+    for (const cField of costFields) {
+      if (item.monthlyFixedCosts[cField] !== undefined && !isValidNumber(item.monthlyFixedCosts[cField])) {
+        throw new Error(`هزینه ثابت ${cField} در تنظیمات نامعتبر است.`);
+      }
     }
   }
 }
@@ -360,6 +417,8 @@ export async function importDatabaseJSON(blob: Blob): Promise<void> {
   menuItemsToImport.forEach(validateMenuItemRecord);
   dailySalesToImport.forEach(validateDailySaleRecord);
   wasteLogsToImport.forEach(validateWasteLogRecord);
+  purchaseLogsToImport.forEach(validatePurchaseLogRecord);
+  settingsToImport.forEach(validateSettingsRecord);
 
   // Truncate key string fields to prevent excessively long strings from polluting database
   const sanitizedIngredients = ingredientsToImport.map(truncateStringFields);

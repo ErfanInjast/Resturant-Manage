@@ -11,7 +11,9 @@ export function calculateWACFromLogs(logs: PurchaseLog[]): {
   totalPurchasedQuantity: number;
   totalPurchasedPrice: number;
 } {
-  const purchaseLogs = logs.filter((log) => log.reason === 'purchase');
+  // Explicitly type-guard and filter only for 'purchase' logs, as stock adjustment logs ('adjustment')
+  // modify quantities but must never affect the historical unit cost (weighted average cost) of ingredients.
+  const purchaseLogs = logs.filter((log): log is PurchaseLog & { reason: 'purchase' } => log.reason === 'purchase');
 
   if (purchaseLogs.length === 0) {
     return { unitCost: 0, totalPurchasedQuantity: 0, totalPurchasedPrice: 0 };

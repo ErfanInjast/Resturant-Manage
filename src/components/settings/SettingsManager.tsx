@@ -31,6 +31,7 @@ import { db, DEFAULT_SETTINGS, exportDatabaseJSON, importDatabaseJSON, seedDemoD
 import type { AppSettings, FixedCosts } from '../../types';
 import { formatToman, formatNumber, roundCurrency, toPersianDigits, toEnglishDigits } from '../../lib/utils';
 import { formatJalali, getJalaliDate, PERSIAN_MONTH_NAMES, getDaysInJalaliMonth } from '../../lib/jalali';
+import { calculateDailyOverhead, calculateTotalMonthlyOverhead } from '../../lib/financial';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { SmartMoneyInput } from '../ui/SmartMoneyInput';
@@ -134,17 +135,9 @@ export const SettingsManager: React.FC = () => {
   const numHighFoodCost = parseDecimal(highFoodCostThreshold, 40);
 
   // Monthly Total Overhead Calculation
-  const totalMonthlyOverhead =
-    (fixedCosts.rent || 0) +
-    (fixedCosts.utilities || 0) +
-    (fixedCosts.salaries || 0) +
-    (fixedCosts.marketing || 0) +
-    (fixedCosts.insurance || 0) +
-    (fixedCosts.general || 0) +
-    (fixedCosts.maintenance || 0) +
-    (fixedCosts.delivery || 0);
+  const totalMonthlyOverhead = calculateTotalMonthlyOverhead(fixedCosts);
 
-  const dailyOverhead = roundCurrency(totalMonthlyOverhead / Math.max(1, numWorkingDays));
+  const dailyOverhead = calculateDailyOverhead(totalMonthlyOverhead, numWorkingDays);
   const hourlyOverhead = roundCurrency(dailyOverhead / Math.max(1, numDailyWorkHours));
 
   // Handle Save
@@ -998,17 +991,9 @@ export const SettingsManager: React.FC = () => {
         const totalCogs = monthSales.reduce((acc, s) => acc + (s.totalCOGS || 0), 0);
         const totalWasteAmt = monthWaste.reduce((acc, w) => acc + (w.cost || 0), 0);
 
-        const fixedCostsTotal =
-          (settings.monthlyFixedCosts?.rent || 0) +
-          (settings.monthlyFixedCosts?.utilities || 0) +
-          (settings.monthlyFixedCosts?.salaries || 0) +
-          (settings.monthlyFixedCosts?.marketing || 0) +
-          (settings.monthlyFixedCosts?.insurance || 0) +
-          (settings.monthlyFixedCosts?.general || 0) +
-          (settings.monthlyFixedCosts?.maintenance || 0) +
-          (settings.monthlyFixedCosts?.delivery || 0);
+        const fixedCostsTotal = calculateTotalMonthlyOverhead(settings.monthlyFixedCosts);
 
-        const dailyOverheadCost = roundCurrency(fixedCostsTotal / Math.max(1, settings.workingDaysPerMonth || 26));
+        const dailyOverheadCost = calculateDailyOverhead(fixedCostsTotal, settings.workingDaysPerMonth || 26);
         const periodOverhead = dailyOverheadCost * numDaysPassed;
 
         const grossProfit = totalRev - totalCogs;

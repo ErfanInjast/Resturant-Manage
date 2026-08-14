@@ -41,6 +41,7 @@ import {
 import {
   calculateFinancialMetrics,
   calculateTotalMonthlyOverhead,
+  calculateDailyOverhead,
   isDateInPresetFilter,
   findEarliestRecordDate,
   DatePreset,
@@ -156,17 +157,17 @@ export const PnLDashboard: React.FC = () => {
   const workingDays = settings.workingDaysPerMonth || calculateWorkingDays();
   const fixedCosts = settings.monthlyFixedCosts || DEFAULT_SETTINGS.monthlyFixedCosts;
   const totalMonthlyOverhead = calculateTotalMonthlyOverhead(fixedCosts);
-  const dailyOverhead = roundCurrency(totalMonthlyOverhead / Math.max(1, workingDays));
+  const dailyOverhead = calculateDailyOverhead(totalMonthlyOverhead, workingDays);
 
   // Compute standardized financial metrics for the active filter preset
-  const metrics = calculateFinancialMetrics(
+  const metrics = calculateFinancialMetrics({
     salesRecords,
     wasteLogs,
     settings,
-    datePreset as DatePreset,
+    datePreset: datePreset as DatePreset,
     customSpecificDate,
-    earliestRecordDate
-  );
+    earliestRecordDate,
+  });
 
   const {
     totalRevenue: filteredRevenue,
@@ -343,11 +344,11 @@ export const PnLDashboard: React.FC = () => {
         </div>
 
         {/* Filter Preset Chips */}
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-none select-none">
           <button
             type="button"
             onClick={() => setDatePreset('today')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border whitespace-nowrap ${
               datePreset === 'today'
                 ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
                 : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
@@ -359,7 +360,7 @@ export const PnLDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setDatePreset('specific')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1 border ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1 border whitespace-nowrap ${
               datePreset === 'specific'
                 ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
                 : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
@@ -372,7 +373,7 @@ export const PnLDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setDatePreset('last7')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border whitespace-nowrap ${
               datePreset === 'last7'
                 ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
                 : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
@@ -384,7 +385,7 @@ export const PnLDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setDatePreset('last30')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border whitespace-nowrap ${
               datePreset === 'last30'
                 ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
                 : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
@@ -396,7 +397,7 @@ export const PnLDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setDatePreset('currentMonth')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border whitespace-nowrap ${
               datePreset === 'currentMonth'
                 ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
                 : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'
@@ -408,7 +409,7 @@ export const PnLDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setDatePreset('allTime')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border whitespace-nowrap ${
               datePreset === 'allTime'
                 ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-sm'
                 : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-stone-850 hover:bg-stone-100 dark:hover:bg-stone-800'

@@ -60,9 +60,15 @@ export const Header: React.FC = () => {
 
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="min-w-0 flex-1">
-              <h1 className="text-xs sm:text-sm md:text-base font-black text-[var(--text-primary)] tracking-tight leading-snug">
-                {settings?.restaurantName || 'مدیریت مالی رستوران'}
-              </h1>
+              <div className="flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--status-success-text)] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--status-success-text)]"></span>
+                </span>
+                <h1 className="text-xs sm:text-sm md:text-base font-black text-[var(--text-primary)] tracking-tight leading-snug truncate">
+                  {settings?.restaurantName || 'مدیریت مالی رستوران'}
+                </h1>
+              </div>
               <p className="text-[10px] sm:text-[11px] font-bold text-[var(--text-secondary)] flex items-center gap-1.5 mt-0.5 flex-wrap">
                 <span className="text-[var(--brand-primary)] font-extrabold">{getTabTitle()}</span>
                 <span className="opacity-40">•</span>

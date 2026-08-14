@@ -197,11 +197,20 @@ export const AnalyticsManager: React.FC = () => {
 const CustomScatterTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
+    const getCategoryLabel = (cat: string) => {
+      switch (cat) {
+        case 'star': return 'محصول طلایی';
+        case 'workhorse': return 'پرفروش محبوب';
+        case 'puzzle': return 'فرصت رشد';
+        case 'underperformer': return 'نیازمند بهینه‌سازی';
+        default: return 'نامشخص';
+      }
+    };
     return (
       <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl p-3.5 shadow-xl dir-rtl text-right min-w-[200px]">
         <div className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] pb-2 border-b border-[#F4F0EB] dark:border-[var(--border-subtle)] flex items-center justify-between">
           <span>{data.name}</span>
-          <span className="text-[10px] text-[var(--text-secondary)] font-normal">({data.cat})</span>
+          <span className="text-[10px] text-[var(--text-secondary)] font-bold">({getCategoryLabel(data.cat)})</span>
         </div>
         <div className="mt-2 space-y-1 text-xs">
           <div className="flex justify-between gap-3 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">

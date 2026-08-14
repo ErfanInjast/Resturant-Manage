@@ -3,38 +3,38 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* Brand / Primary Action — فقط برای دکمهی CTA اصلی و نشانگر تب فعال */
+  /* Brand / Primary Action — فقط برای دکمه‌ی CTA اصلی و نشانگر تب فعال */
   --brand-primary: #5E6AD2;
   --brand-primary-hover: #4C58C4;
   --brand-primary-subtle: #EEF0FD;
 
   /* Neutrals */
-  --text-primary: #161616;
-  --text-secondary: #525252;
-  --bg-base: #FAFAFA;
+  --text-primary: #171717;
+  --text-secondary: #565656;
+  --bg-base: #F9FAFB;
   --bg-card: #FFFFFF;
-  --border-subtle: #E0E0E0;
-  --border-functional: #C6C6C6; /* برای input و فوکوس */
+  --border-subtle: #ECEEF1;
+  --border-functional: #D2D6DC; /* برای input و فوکوس */
 
   /* Semantic — Success / Profit */
-  --status-success-text: #198038;
-  --status-success-bg: #DEFBE6;
+  --status-success-text: #16A34A;
+  --status-success-bg: #F0FDF4;
 
   /* Semantic — Error / Cost / Danger */
-  --status-error-text: #DA1E28;
-  --status-error-bg: #FFF1F1;
+  --status-error-text: #DC2626;
+  --status-error-bg: #FEF2F2;
 
   /* Semantic — Warning / Stock */
-  --status-warning-text: #BA4E00;
-  --status-warning-bg: #FFF4E5;
+  --status-warning-text: #D97706;
+  --status-warning-bg: #FFFBEB;
 
   /* Semantic — Info / Analytics */
-  --status-info-text: #0F62FE;
-  --status-info-bg: #EDF5FF;
+  --status-info-text: #2563EB;
+  --status-info-bg: #EFF6FF;
 
   /* Semantic — Extra category (Menu Engineering) */
-  --status-purple-text: #6929C4;
-  --status-purple-bg: #F6F2FF;
+  --status-purple-text: #7C3AED;
+  --status-purple-bg: #F5F3FF;
 }
 
 .dark {

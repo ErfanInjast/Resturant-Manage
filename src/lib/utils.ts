@@ -81,9 +81,9 @@ export function formatCurrency(amount: number): string {
   return formatNumber(amount, 0);
 }
 
-// Financial precision rounding
+// Financial precision rounding (whole integer Tomans)
 export function roundCurrency(amount: number): number {
-  return Math.round((amount + Number.EPSILON) * 100) / 100;
+  return Math.round(amount);
 }
 
 /**

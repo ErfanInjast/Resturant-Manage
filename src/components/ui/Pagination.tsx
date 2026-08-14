@@ -73,16 +73,16 @@ export const Pagination: React.FC<PaginationProps> = ({
 
   return (
     <div
-      className={`p-3 bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${className}`}
+      className={`p-3 bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex flex-col md:flex-row items-center justify-between gap-3 text-xs ${className}`}
     >
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium">
+      <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 w-full md:w-auto">
+        <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium whitespace-nowrap">
           نمایش {toPersianDigits(startItem)} تا {toPersianDigits(endItem)} از{' '}
           {toPersianDigits(totalItems)} کل {itemLabel}
         </span>
 
         {onItemsPerPageChange && (
-          <div className="flex items-center gap-1.5 text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
+          <div className="flex items-center gap-1.5 text-[var(--text-secondary)] dark:text-[var(--text-secondary)] whitespace-nowrap">
             <span className="font-bold text-[11px]">تعداد در صفحه:</span>
             <div className="flex items-center gap-1">
               {itemsPerPageOptions.map((option) => (
