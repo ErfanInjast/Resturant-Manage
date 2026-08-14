@@ -147,7 +147,7 @@ export const GuideManager: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12 font-['Vazirmatn',sans-serif] text-[var(--text-primary)]">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12 font-['IRANYekan','iranyekan',sans-serif] text-[var(--text-primary)]">
       {/* Hero Header - Light & High Contrast Design with Primary Blur Background */}
       <div className="relative overflow-hidden rounded-3xl bg-[var(--brand-primary-subtle)]/40 backdrop-blur-xl p-6 sm:p-8 md:p-10 shadow-xs border border-[var(--brand-primary)]/20 transition-all">
         {/* Soft Primary Glow Accents */}

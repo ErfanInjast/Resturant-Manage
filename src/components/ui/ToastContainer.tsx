@@ -106,7 +106,7 @@ export const ToastContainer: React.FC = () => {
       dir="rtl"
       aria-live="polite"
       aria-atomic="false"
-      className="fixed top-3 inset-x-3 sm:inset-x-auto sm:left-6 sm:w-80 sm:max-w-sm z-[99999] pointer-events-none flex flex-col gap-2 font-['Vazirmatn',sans-serif]"
+      className="fixed top-3 inset-x-3 sm:inset-x-auto sm:left-6 sm:w-80 sm:max-w-sm z-[99999] pointer-events-none flex flex-col gap-2 font-['IRANYekan','iranyekan',sans-serif]"
     >
       <AnimatePresence mode="popLayout">
         {toasts.map((toast) => (

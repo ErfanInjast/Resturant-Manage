@@ -465,7 +465,7 @@ export const PnLDashboard: React.FC = () => {
 
               <div className="space-y-1">
                 <p className="text-[11px] font-medium text-[var(--text-secondary)] dark:text-[var(--text-secondary)] leading-snug">
-                  مجموع درآمد کل فروش ثبت‌شده در فاکتورها (حضوری، اسنپ‌فود، بیرون‌بر و تلفنی).
+                  مجموع درآمد کل ثبت‌شده از تمامی کانال‌های فروش.
                 </p>
                 <div className="flex items-center justify-between pt-1.5 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--brand-primary)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                   <span>{formatNumber(filteredSalesRecords.length)} روز ثبت فروش</span>
@@ -499,7 +499,7 @@ export const PnLDashboard: React.FC = () => {
 
               <div className="space-y-1">
                 <p className="text-[11px] font-medium text-[var(--text-secondary)] dark:text-[var(--text-secondary)] leading-snug">
-                  هزینه مستقیم مواد اولیه مصرف‌شده طبق رسپی (دستور ساخت) آیتم‌های منو.
+                  هزینه مستقیم مواد اولیه مصرفی بر اساس رسپی منو.
                 </p>
                 <div className="flex items-center justify-between pt-1.5 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--status-warning-text)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                   <span>درصد مواد: {toPersianDigits(roundCurrency(filteredFoodCostPercent))}٪</span>
@@ -533,7 +533,7 @@ export const PnLDashboard: React.FC = () => {
 
               <div className="space-y-1">
                 <p className="text-[11px] font-medium text-[var(--text-secondary)] dark:text-[var(--text-secondary)] leading-snug">
-                  مجموع هزینه‌های جاری ثابت (اجاره، حقوق، قبوض) به علاوه ارزش ضایعات مواد.
+                  مجموع هزینه‌های ثابت جاری و ارزش ضایعات.
                 </p>
                 <div className="flex items-center justify-between pt-1.5 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--brand-primary)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                   <span>سربار: {formatToman(filteredPeriodOverhead).text}</span>
@@ -567,7 +567,7 @@ export const PnLDashboard: React.FC = () => {
 
               <div className="space-y-1">
                 <p className="text-[11px] font-medium text-[var(--text-secondary)] dark:text-[var(--text-secondary)] leading-snug">
-                  سود نهایی باقی‌مانده پس از کسر تمامی هزینه‌های مواد، سربار ثابت و ضایعات.
+                  سود نهایی پس از کسر تمامی هزینه‌ها و ضایعات.
                 </p>
                 <div className="flex items-center justify-between pt-1.5 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--status-success-text)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                   <span>حاشیه سود: {toPersianDigits(roundCurrency(filteredNetMarginPercent))}٪</span>

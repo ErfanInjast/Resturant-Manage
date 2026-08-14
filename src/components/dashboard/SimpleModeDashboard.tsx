@@ -436,7 +436,7 @@ export const SimpleModeDashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pt-2 pb-24 dir-rtl font-['Vazirmatn',sans-serif] text-right">
+    <div className="space-y-6 pt-2 pb-24 dir-rtl font-['IRANYekan','iranyekan',sans-serif] text-right">
       {/* HEADER STATUS & FILTER BAR */}
       <div className="p-5 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/60 dark:border-stone-800 shadow-xs space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">

@@ -76,7 +76,7 @@ export const ConfirmDialogModal: React.FC = () => {
       {isOpen && (
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-50 bg-stone-950/75 backdrop-blur-md animate-in fade-in duration-150" />
-          <Dialog.Content className={`fixed left-[50%] top-[50%] z-50 w-[92vw] max-w-md translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-[var(--bg-card)] border rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-7 space-y-5 focus:outline-hidden dir-rtl text-right font-['Vazirmatn',sans-serif] ${styles.cardBorder}`}>
+          <Dialog.Content className={`fixed left-[50%] top-[50%] z-50 w-[92vw] max-w-md translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-[var(--bg-card)] border rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-7 space-y-5 focus:outline-hidden dir-rtl text-right font-['IRANYekan','iranyekan',sans-serif] ${styles.cardBorder}`}>
             {/* Top Close Button */}
             <Dialog.Close asChild>
               <button

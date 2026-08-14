@@ -25,7 +25,7 @@ export const MobileRestrictionGuard: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-4 dir-rtl text-right font-['Vazirmatn',sans-serif]">
+    <div className="fixed inset-0 z-50 bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-4 dir-rtl text-right font-['IRANYekan','iranyekan',sans-serif]">
       <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
         
         {/* Header Icon */}

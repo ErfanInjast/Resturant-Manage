@@ -103,7 +103,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] flex flex-col font-['Vazirmatn',sans-serif] dir-rtl select-none transition-colors duration-200">
+    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] flex flex-col font-['IRANYekan','iranyekan',sans-serif] dir-rtl select-none transition-colors duration-200">
       <Header />
       <div className="flex flex-1 w-full max-w-[1440px] mx-auto pb-20 lg:pb-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 gap-6">
         {!isSimpleMode && <Sidebar />}

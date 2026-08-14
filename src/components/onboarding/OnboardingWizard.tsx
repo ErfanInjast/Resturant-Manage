@@ -365,7 +365,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 font-['Vazirmatn',sans-serif] dir-rtl select-none overflow-hidden transition-colors duration-200">
+    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 font-['IRANYekan','iranyekan',sans-serif] dir-rtl select-none overflow-hidden transition-colors duration-200">
       <div className="w-full max-w-3xl bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto max-h-[96vh] transition-colors duration-200">
         
         {/* Header Bar */}
@@ -818,7 +818,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
 
       {/* Warning Confirmation Modal */}
       {showWarningModal && existingCounts && (
-        <div dir="rtl" className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md font-['Vazirmatn',sans-serif]">
+        <div dir="rtl" className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md font-['IRANYekan','iranyekan',sans-serif]">
           <div className="w-full max-w-md bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl p-5 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] pb-3">
               <h3 className="text-base font-black text-[var(--status-error-text)] dark:text-[var(--status-error-text)] flex items-center gap-2">

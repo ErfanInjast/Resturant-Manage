@@ -2,6 +2,104 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* IRANYekan Webfont definitions (Primary: Local bundled assets, Secondary: jsDelivr CDN fallback) */
+@font-face {
+  font-family: 'IRANYekan';
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url('/fonts/iranyekanwebthinfanum.woff') format('woff'),
+       url('https://cdn.jsdelivr.net/npm/@alibaba-aero/iranyekan@0.0.1/fonts/woff/iranyekanwebthinfanum.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IRANYekan';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/iranyekanweblightfanum.woff') format('woff'),
+       url('https://cdn.jsdelivr.net/npm/@alibaba-aero/iranyekan@0.0.1/fonts/woff/iranyekanweblightfanum.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IRANYekan';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/iranyekanwebregularfanum.woff') format('woff'),
+       url('https://cdn.jsdelivr.net/npm/@alibaba-aero/iranyekan@0.0.1/fonts/woff/iranyekanwebregularfanum.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IRANYekan';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/iranyekanwebmediumfanum.woff') format('woff'),
+       url('https://cdn.jsdelivr.net/npm/@alibaba-aero/iranyekan@0.0.1/fonts/woff/iranyekanwebmediumfanum.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IRANYekan';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/iranyekanwebboldfanum.woff') format('woff'),
+       url('https://cdn.jsdelivr.net/npm/@alibaba-aero/iranyekan@0.0.1/fonts/woff/iranyekanwebboldfanum.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IRANYekan';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fonts/iranyekanwebboldfanum.woff') format('woff'),
+       url('https://cdn.jsdelivr.net/npm/@alibaba-aero/iranyekan@0.0.1/fonts/woff/iranyekanwebboldfanum.woff') format('woff');
+}
+
+/* Alias font-family names for IRANYekan */
+@font-face {
+  font-family: 'iranyekan';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/iranyekanwebregularfanum.woff') format('woff'),
+       url('https://cdn.jsdelivr.net/npm/@alibaba-aero/iranyekan@0.0.1/fonts/woff/iranyekanwebregularfanum.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'iranyekan';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/iranyekanwebboldfanum.woff') format('woff'),
+       url('https://cdn.jsdelivr.net/npm/@alibaba-aero/iranyekan@0.0.1/fonts/woff/iranyekanwebboldfanum.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IranYekan';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/iranyekanwebregularfanum.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/iranyekanwebregularfanum.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'IRANSans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/iranyekanwebregularfanum.woff') format('woff');
+}
+
 :root {
   /* Brand / Primary Action — فقط برای دکمه‌ی CTA اصلی و نشانگر تب فعال */
   --brand-primary: #5E6AD2;
@@ -66,7 +164,7 @@
 }
 
 @theme {
-  --font-sans: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'IRANYekan', 'iranyekan', 'IranYekan', 'IRANYekanX', sans-serif;
   --color-brand-primary: var(--brand-primary);
   --color-brand-primary-hover: var(--brand-primary-hover);
   --color-brand-primary-subtle: var(--brand-primary-subtle);
@@ -122,13 +220,13 @@
   }
 
   * {
-    font-family: 'Vazirmatn', system-ui, sans-serif;
+    font-family: 'IRANYekan', 'iranyekan', 'IranYekan', system-ui, sans-serif;
     font-feature-settings: "ss01" 1, "cv01" 1;
     font-variant-numeric: tabular-nums;
   }
 
   input, textarea, select, button {
-    font-family: 'Vazirmatn', system-ui, sans-serif !important;
+    font-family: 'IRANYekan', 'iranyekan', 'IranYekan', system-ui, sans-serif !important;
     font-feature-settings: "ss01" 1, "cv01" 1 !important;
     font-variant-numeric: tabular-nums !important;
   }

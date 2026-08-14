@@ -1051,7 +1051,7 @@ export const SettingsManager: React.FC = () => {
 
       {/* Reset Confirmation Modal */}
       {isResetModalOpen && (
-        <div dir="rtl" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/75 backdrop-blur-md font-['Vazirmatn',sans-serif]">
+        <div dir="rtl" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/75 backdrop-blur-md font-['IRANYekan','iranyekan',sans-serif]">
           <div className="w-full max-w-md bg-white dark:bg-[var(--bg-card)] border border-[var(--status-error-text)]/30 dark:border-[var(--status-error-text)]/30 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
             {/* Top Close Button & Badge Tag */}
             <div className="flex items-center justify-between">
