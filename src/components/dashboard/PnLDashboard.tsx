@@ -462,12 +462,12 @@ export const PnLDashboard: React.FC = () => {
         <motion.div variants={fadeInUpItem} whileHover={cardHover.whileHover} transition={cardHover.transition} className="h-full">
           <Card
             onClick={() => setActiveKpiModal('revenue')}
-            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-[var(--brand-primary)]/60 dark:hover:border-[var(--brand-primary)]/60 hover:shadow-md transition-all h-full flex flex-col justify-between cursor-pointer group relative overflow-hidden"
+            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-emerald-500/60 dark:hover:border-emerald-500/60 hover:shadow-md transition-all h-full flex flex-col justify-between cursor-pointer group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="flex flex-row items-center justify-between pb-1">
               <CardTitle className="text-xs font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">فروش و درآمد دوره</CardTitle>
-              <div className="rounded-full bg-[var(--status-success-bg)] dark:bg-emerald-950/50 p-2 text-[var(--status-success-text)] dark:text-[var(--status-success-text)] shrink-0 group-hover:scale-110 transition-transform">
+              <div className="rounded-full bg-emerald-50 dark:bg-emerald-950/50 p-2 text-emerald-600 dark:text-emerald-400 shrink-0 group-hover:scale-110 transition-transform">
                 <TrendingUp className="h-4 w-4" />
               </div>
             </CardHeader>
@@ -476,9 +476,9 @@ export const PnLDashboard: React.FC = () => {
                 {formatToman(filteredRevenue).text}
               </div>
 
-              <div className="flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--brand-primary)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+              <div className="flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                 <span>{formatNumber(filteredSalesRecords.length)} روز ثبت فروش</span>
-                <span className="flex items-center gap-0.5 text-[var(--brand-primary)]">
+                <span className="flex items-center gap-0.5 text-emerald-600 dark:text-emerald-400">
                   گزارش کامل
                   <ArrowUpRight className="h-3 w-3" />
                 </span>
@@ -496,7 +496,7 @@ export const PnLDashboard: React.FC = () => {
             <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="flex flex-row items-center justify-between pb-1">
               <CardTitle className="text-xs font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">بهای تمام شده مواد اولیه</CardTitle>
-              <div className="rounded-full bg-[#FEF8EC] dark:bg-amber-950/50 p-2 text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)] shrink-0 group-hover:scale-110 transition-transform">
+              <div className="rounded-full bg-amber-50 dark:bg-amber-950/50 p-2 text-amber-600 dark:text-amber-400 shrink-0 group-hover:scale-110 transition-transform">
                 <ShoppingBag className="h-4 w-4" />
               </div>
             </CardHeader>
@@ -505,9 +505,9 @@ export const PnLDashboard: React.FC = () => {
                 {formatToman(filteredCOGS).text}
               </div>
 
-              <div className="flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--status-warning-text)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+              <div className="flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                 <span>نسبت مواد: {toPersianDigits(roundCurrency(filteredFoodCostPercent))}٪</span>
-                <span className="flex items-center gap-0.5 text-[var(--status-warning-text)]">
+                <span className="flex items-center gap-0.5 text-amber-600 dark:text-amber-400">
                   گزارش کامل
                   <ArrowUpRight className="h-3 w-3" />
                 </span>
@@ -520,12 +520,12 @@ export const PnLDashboard: React.FC = () => {
         <motion.div variants={fadeInUpItem} whileHover={cardHover.whileHover} transition={cardHover.transition} className="h-full">
           <Card
             onClick={() => setActiveKpiModal('overhead_waste')}
-            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-[var(--brand-primary)]/60 dark:hover:border-[var(--brand-primary)]/60 hover:shadow-md transition-all h-full flex flex-col justify-between cursor-pointer group relative overflow-hidden"
+            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-rose-500/60 dark:hover:border-rose-500/60 hover:shadow-md transition-all h-full flex flex-col justify-between cursor-pointer group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-rose-500 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="flex flex-row items-center justify-between pb-1">
               <CardTitle className="text-xs font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">سربار و ضایعات دوره</CardTitle>
-              <div className="rounded-full bg-[var(--brand-primary-subtle)] dark:bg-[var(--brand-primary)]/20 p-2 text-[var(--brand-primary)] shrink-0 group-hover:scale-110 transition-transform">
+              <div className="rounded-full bg-rose-50 dark:bg-rose-950/50 p-2 text-rose-600 dark:text-rose-400 shrink-0 group-hover:scale-110 transition-transform">
                 <Trash2 className="h-4 w-4" />
               </div>
             </CardHeader>
@@ -534,9 +534,9 @@ export const PnLDashboard: React.FC = () => {
                 {formatToman(filteredPeriodOverhead + filteredTotalWaste).text}
               </div>
 
-              <div className="flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--brand-primary)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+              <div className="flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                 <span>سربار: {formatToman(filteredPeriodOverhead).text}</span>
-                <span className="flex items-center gap-0.5 text-[var(--brand-primary)]">
+                <span className="flex items-center gap-0.5 text-rose-600 dark:text-rose-400">
                   گزارش کامل
                   <ArrowUpRight className="h-3 w-3" />
                 </span>
@@ -549,23 +549,48 @@ export const PnLDashboard: React.FC = () => {
         <motion.div variants={fadeInUpItem} whileHover={cardHover.whileHover} transition={cardHover.transition} className="h-full">
           <Card
             onClick={() => setActiveKpiModal('net_profit')}
-            className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:border-emerald-500/60 dark:hover:border-emerald-500/60 hover:shadow-md transition-all h-full flex flex-col justify-between cursor-pointer group relative overflow-hidden"
+            className={cn(
+              "border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] hover:shadow-md transition-all h-full flex flex-col justify-between cursor-pointer group relative overflow-hidden",
+              filteredNetProfitToman.isNegative
+                ? "hover:border-rose-500/60 dark:hover:border-rose-500/60"
+                : "hover:border-emerald-500/60 dark:hover:border-emerald-500/60"
+            )}
           >
-            <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-emerald-500 to-green-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div
+              className={cn(
+                "absolute top-0 right-0 left-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity",
+                filteredNetProfitToman.isNegative
+                  ? "bg-gradient-to-r from-rose-500 to-red-600"
+                  : "bg-gradient-to-r from-emerald-500 to-green-600"
+              )}
+            />
             <CardHeader className="flex flex-row items-center justify-between pb-1">
               <CardTitle className="text-xs font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">سود خالص دوره</CardTitle>
-              <div className={`rounded-full p-2 shrink-0 group-hover:scale-110 transition-transform ${filteredNetProfitToman.isNegative ? 'bg-rose-50 dark:bg-rose-950/50 text-[var(--status-error-text)] dark:text-[var(--status-error-text)]' : 'bg-[var(--status-success-bg)] dark:bg-emerald-950/50 text-[var(--status-success-text)] dark:text-[var(--status-success-text)]'}`}>
+              <div className={cn(
+                "rounded-full p-2 shrink-0 group-hover:scale-110 transition-transform",
+                filteredNetProfitToman.isNegative
+                  ? "bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400"
+                  : "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400"
+              )}>
                 {filteredNetProfitToman.isNegative ? <TrendingDown className="h-4 w-4" /> : <TrendingUp className="h-4 w-4" />}
               </div>
             </CardHeader>
             <CardContent className="pt-0 space-y-2">
-              <div className={cn(filteredNetProfitToman.isNegative ? 'text-[var(--status-error-text)] dark:text-[var(--status-error-text)] font-black' : 'text-[var(--status-success-text)] dark:text-[var(--status-success-text)] font-black', getResponsiveFontClass(filteredNetProfitToman.text))}>
+              <div className={cn(filteredNetProfitToman.isNegative ? 'text-rose-600 dark:text-rose-400 font-black' : 'text-emerald-600 dark:text-emerald-400 font-black', getResponsiveFontClass(filteredNetProfitToman.text))}>
                 {filteredNetProfitToman.text}
               </div>
 
-              <div className="flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--status-success-text)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+              <div className={cn(
+                "flex items-center justify-between pt-2 text-[10px] text-[var(--text-secondary)] transition-colors font-bold border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]",
+                filteredNetProfitToman.isNegative
+                  ? "group-hover:text-rose-600 dark:group-hover:text-rose-400"
+                  : "group-hover:text-emerald-600 dark:group-hover:text-emerald-400"
+              )}>
                 <span>حاشیه سود: {toPersianDigits(roundCurrency(filteredNetMarginPercent))}٪</span>
-                <span className="flex items-center gap-0.5 text-[var(--status-success-text)]">
+                <span className={cn(
+                  "flex items-center gap-0.5",
+                  filteredNetProfitToman.isNegative ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"
+                )}>
                   گزارش کامل
                   <ArrowUpRight className="h-3 w-3" />
                 </span>

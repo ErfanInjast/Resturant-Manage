@@ -97,8 +97,8 @@ export const KPIDetailModal: React.FC<KPIDetailModalProps> = ({
         return {
           title: 'گزارش سربار و ضایعات',
           description: `تفکیک هزینه‌های جاری و تلفات مواد در ${filterTitle}`,
-          icon: <Trash2 className="h-5 w-5 text-[var(--brand-primary)]" />,
-          badgeColor: 'primary' as const,
+          icon: <Trash2 className="h-5 w-5 text-rose-600 dark:text-rose-400" />,
+          badgeColor: 'danger' as const,
         };
       case 'net_profit':
         return {
@@ -146,7 +146,7 @@ export const KPIDetailModal: React.FC<KPIDetailModalProps> = ({
             {metricType === 'overhead_waste' && (
               <>
                 سهم هزینه‌های ثابت (اجاره، حقوق، قبوض) به‌علاوه ارزش ضایعات ثبت‌شده.
-                <span className="block mt-1 font-bold text-[var(--brand-primary)]">
+                <span className="block mt-1 font-bold text-rose-600 dark:text-rose-400">
                   فرمول: سربار و ضایعات = (سربار روزانه × روزهای دوره) + ارزش ضایعات
                 </span>
               </>
