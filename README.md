@@ -1,172 +1,141 @@
 <div align="center">
 
-# 🍽️ میزون | Mizoon
-### پلتفرم هوشمند تحلیل هزینه، قیمت‌گذاری و مهندسی منوی کافه و رستوران
-**Smart Cost Analysis, Food Costing & Menu Engineering Platform for Restaurants & Cafes**
+# ⚡ Mizoon | میزون
 
-[![React](https://img.shields.io/badge/React-19-blue.svg?logo=react&logoColor=white)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6.svg?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-4-38B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Vite](https://img.shields.io/badge/Vite-6-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Dexie](https://img.shields.io/badge/IndexedDB-Dexie.js-orange.svg)](https://dexie.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+### Next-Gen Restaurant Cost Intelligence & Menu Engineering
+**پلتفرم مدرن محاسبه بهای تمام‌شده (Food Cost)، مهندسی منو و تحلیل سودآوری رستوران و کافه**
 
-<p align="center">
-  <a href="#-درباره-پروژه">درباره پروژه</a> •
-  <a href="#-قابلیت‌های-کلیدی">قابلیت‌ها</a> •
-  <a href="#-تکنولوژی‌های-استفاده‌شده">تکنولوژی‌ها</a> •
-  <a href="#-نصب-و-راه‌اندازی">نصب و اجرا</a> •
-  <a href="#-معماری-پروژه">معماری</a>
-</p>
+<br />
+
+[![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript_5.8-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Vite](https://img.shields.io/badge/Vite_6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Offline First](https://img.shields.io/badge/Dexie_IndexedDB-FFA500?style=for-the-badge&logo=database&logoColor=white)](https://dexie.org/)
+[![License](https://img.shields.io/badge/License-MIT-success?style=for-the-badge)](LICENSE)
+
+<br />
+
+[✨ ویژگی‌ها](#-core-features) •
+[🚀 راه‌اندازی سریع](#-quick-start) •
+[🏗️ معماری سیستم](#-architecture) •
+[📊 مدل محاسباتی](#-costing-engine)
 
 ---
 
 </div>
 
-## 📖 درباره پروژه
+<br />
 
-**میزون (Mizoon)** یک نرم‌افزار تحت وب پیشرفته، مدرن و اختصاصی برای مدیران رستوران‌ها، کافی‌شاپ‌ها، کیترینگ‌ها و سرآشپزها است که به آن‌ها کمک می‌کند تا:
-- **بهای تمام‌شده هر غذا و نوشیدنی (Food Cost / COGS)** را با احتساب گرم و درصد ضایعات به دقت ریال محاسبه کنند.
-- منوی خود را با مدل **مهندسی منو (Menu Engineering / BCG Matrix)** تحلیل کرده و اقلام پرفروش و سودده را شناسایی کنند.
-- انبار مواد اولیه، فاکتورهای خرید، میانگین موزون قیمت خرید و تاریخ انقضا/نقطه سفارش را هوشمندانه کنترل کنند.
-- سود و زیان خالص (P&L)، هزینه‌های سربار و نقطه سر‌به‌سر (Break-even Point) را در داشبوردهای گرافیکی ارزیابی نمایند.
+## 🌟 Overview
 
----
+**میزون (Mizoon)** یک وب‌اپلیکیشن Offline-First، سریع و مدرن برای مدیران رستوران، کافه و فودکورت است که فرایند پیچیده فرمولاسیون رسپی، محاسبه دقیق بهای تمام‌شده غذا (**Food Cost / COGS**)، کسر خودکار انبار و تحلیل محبوبیت منو (**BCG Matrix**) را در قالب یک داشبورد چابک و بدون نیاز به اینترنت فراهم می‌کند.
 
-## ✨ قابلیت‌های کلیدی
+<br />
 
-### ۱. 📦 مدیریت جامع انبار و مواد اولیه (Inventory Management)
-- تعریف مواد خام با واحدهای سنجش منعطف (گرم، کیلوگرم، میلی‌لیتر، لیتر، عدد، قوطی و...)
-- ثبت فاکتورهای خرید همراه با تاریخ شمسی و محاسبه خودکار میانگین قیمت فی خرید
-- هشدار خودکار رسیدن به **نقطه سفارش (Min Stock Alert)**
-- اصلاح موجودی و انبارگردانی آسان
+## ⚡ Core Features
 
-### ۲. 🍲 فرمولاسیون و رسپی ساخت (Recipe & Food Costing)
-- فرمول‌نویسی دقیق برای تک‌تک آیتم‌های منو و نیمه‌آماده‌ها (Sub-recipes)
-- ضریب پرت و ضایعات ماده اولیه (Wastage / Yield Percentage)
-- محاسبه هزینه بسته‌بندی، دستمزد مستقیم و بهای تمام‌شده زنده (Live Cost Calculation)
-- پیشنهاد قیمت فروش هوشمند بر اساس حاشیه سود هدف (Target Margin %)
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🥘 فرمولاسیون زنده (Dynamic Costing)</h3>
+      <ul>
+        <li>محاسبه آنی بهای تمام‌شده بر اساس گرم و میلی‌لیتر</li>
+        <li>محاسبه ضریب پرت و ضایعات ماده خام (Wastage Factor)</li>
+        <li>محاسبه هزینه‌های سربار، بسته‌بندی و دستمزد مستقیم</li>
+        <li>پیشنهاد هوشمند قیمت فروش بر اساس حاشیه سود هدف</li>
+      </ul>
+    </td>
+    <td width="50%" valign="top">
+      <h3>📈 مهندسی منو (Menu Engineering)</h3>
+      <ul>
+        <li>تحلیل ۴ گانه ماتریس محبوبیت و سودآوری:
+          <br /> ⭐ <b>Stars</b> &nbsp;|&nbsp; 🐎 <b>Plowhorses</b> &nbsp;|&nbsp; ❓ <b>Puzzles</b> &nbsp;|&nbsp; 🐕 <b>Dogs</b>
+        </li>
+        <li>پیشنهاد خودکار اصلاح قیمت یا تغییر ترکیب منو</li>
+        <li>تحلیل نقطه سربه سر (Break-even Analysis)</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>📦 انبارداری و خرید (Smart Inventory)</h3>
+      <ul>
+        <li>محاسبه میانگین موزون قیمت خرید در فاکتورهای جدید</li>
+        <li>سیستم هشدار کسری و نقطه سفارش (Min Stock Alert)</li>
+        <li>تاریخچه کامل تغییرات نرخ و نمودار تورم مواد اولیه</li>
+        <li>تقویم جلالی با پاپ‌اور تعاملی و بدون وابستگی سروری</li>
+      </ul>
+    </td>
+    <td width="50%" valign="top">
+      <h3>🔒 صندوق و امنیت آفلاین (Offline-First POS)</h3>
+      <ul>
+        <li>ثبت سفارش با <b>کسر خودکار موجودی مواد خام</b></li>
+        <li>پایگاه‌داده محلی پرسرعت IndexedDB (Dexie.js)</li>
+        <li>عملکرد ۱۰۰٪ مستقل از اینترنت (Zero Downtime)</li>
+        <li>پشتیبان‌گیری و بازیابی آنی با فرمت JSON</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
-### ۳. 📊 مهندسی منو (Menu Engineering Matrix)
-- تحلیل ماتریسی محبوبیت در برابر سودآوری اقلام:
-  - ⭐ **ستاره‌ها (Stars):** سود بالا + فروش بالا
-  - 🐎 **اسب‌های کاری (Plowhorses):** سود پایین + فروش بالا
-  - ❓ **معماها (Puzzles):** سود بالا + فروش پایین
-  - 🐕 **سگ‌ها (Dogs):** سود پایین + فروش پایین
-- راهکارهای پیشنهادی هوشمند برای بهینه‌سازی قیمت و ترکیب منو
+<br />
 
-### ۴. 🧾 صندوق و مدیریت سفارشات (Sales & Live POS)
-- ثبت سریع فاکتورهای فروش روزانه
-- **کسر خودکار موجودی انبار بر اساس رسپی ساخت** (Auto Stock Deduction)
-- گزارش ریز فروش آیتم‌ها و پرفروش‌ترین روزها و ساعات
+## 🛠️ Tech Stack
 
-### ۵. 📈 گزارش سود و زیان و تحلیل مالی (P&L Analytics)
-- محاسبه درآمد ناخالص، بهای تمام‌شده کالای فروش‌رفته، هزینه‌های ثابت (اجاره، حقوق، قبوض) و سود خالص
-- نمودارهای مقایسه‌ای و روند فروش با استفاده از **Recharts**
-- تحلیل نقطه سربه سر فروش روزانه و ماهانه
+```ini
+Frontend     │ React 19 • TypeScript 5.8 • Tailwind CSS v4 • Motion
+Primitives   │ Radix UI • Lucide Icons • Recharts
+Persistence  │ Dexie.js (IndexedDB) • Zustand Store
+Localization │ Jalaali Date Engine • Persian RTL Typography
+Tooling      │ Vite 6 • ESLint
+```
 
-### ۶. 🔒 ذخیره‌سازی آفلاین و امنیت اطلاعات (Offline-First)
-- پایگاه داده سمت کلاینت با **Dexie.js (IndexedDB)** با بالاترین سرعت و عملکرد
-- بدون نیاز به اینترنت برای استفاده روزمره در محیط کاری رستوران
-- خروجی و پشتیبان‌گیری استاندارد (Export / Import JSON Backup)
+<br />
 
-### ۷. 📅 تقویم شمسی جلالی و زبان فارسی (Full RTL & Persian UX)
-- ادغام موتور تبدیل و انتخابگر اختصاصی تقویم جلالی با پاپ‌اور استاندارد
-- تبدیل خودکار ارقام به فارسی و قالب‌بندی ریالی/تومانی استاندارد
+## 🚀 Quick Start
 
----
-
-## 🛠️ تکنولوژی‌های استفاده‌شده
-
-| بخش | ابزار / کتابخانه |
-| :--- | :--- |
-| **Frontend Framework** | [React 19](https://react.dev/) |
-| **Language** | [TypeScript 5.8](https://www.typescriptlang.org/) |
-| **Styling & CSS** | [Tailwind CSS v4](https://tailwindcss.com/) |
-| **Build Tool** | [Vite 6](https://vitejs.dev/) |
-| **Client Database** | [Dexie.js](https://dexie.org/) (IndexedDB) |
-| **State Management** | [Zustand](https://github.com/pmndrs/zustand) |
-| **UI Primitives** | [Radix UI](https://www.radix-ui.com/) |
-| **Animations** | [Motion](https://motion.dev/) (Framer Motion) |
-| **Charts & Data Viz** | [Recharts](https://recharts.org/) |
-| **Icons** | [Lucide React](https://lucide.dev/) |
-| **Calendar Engine** | [Jalaali JS](https://github.com/jalaali/jalaali-js) |
-
----
-
-## 🚀 نصب و راه‌اندازی
-
-برای راه‌اندازی و اجرای محلی پروژه، مراحل زیر را طی کنید:
-
-### پیش‌نیازها
-- نصب [Node.js](https://nodejs.org/) (نسخه ۱۸ به بالا)
-- نصب مدیریت بسته `npm` یا `yarn` یا `pnpm`
-
-### مراحل اجرا
-
-۱. **کلون کردن مخزن:**
 ```bash
+# ۱. کلون مخزن
 git clone https://github.com/YOUR_USERNAME/mizoon.git
 cd mizoon
-```
 
-۲. **نصب وابستگی‌ها:**
-```bash
+# ۲. نصب پکیج‌ها
 npm install
-```
 
-۳. **اجرای نسخه توسعه (Development):**
-```bash
+# ۳. اجرای سرور توسعه
 npm run dev
-```
-برنامه در آدرس `http://localhost:3000` آماده به کار خواهد بود.
 
-۴. **بیلد پروژه برای محیط پروداکشن:**
-```bash
+# ۴. بیلد پروداکشن
 npm run build
 ```
 
----
+> پس از اجرا، برنامه روی `http://localhost:3000` در دسترس خواهد بود.
 
-## 📂 ساختار پوشه‌ها و معماری
+<br />
 
-```text
+## 🏗️ Architecture
+
+```graphql
 src/
 ├── components/
-│   ├── analytics/      # کامپوننت‌های تحلیلی و گزارشات مالی
-│   ├── dashboard/      # داشبورد مدیریتی و حالت ساده/پیشرفته
-│   ├── guide/          # راهنمای تعاملی سیستم
-│   ├── inventory/      # مدیریت انبار، خرید و اصلاح موجودی
-│   ├── layout/         # هدر، سایدبار و ناوبری اصلی
-│   ├── menu/           # مهندسی منو و فرمول ساخت (Recipes)
-│   ├── sales/          # ثبت سفارش و گزارش فروش
-│   ├── settings/       # تنظیمات، بکاپ و بازیابی اطلاعات
-│   └── ui/             # دکمه‌ها، مودال‌ها، دیت‌پیکر شمسی و المان‌های پایه
-├── db/                 # پیکربندی دیتابیس لوکال Dexie IndexedDB
-├── hooks/              # هوک‌های اختصاصی ری‌اکت
-├── lib/                # توابع کمکی، تبدیل تاریخ جلالی و فرمت پول
-├── types/              # اینترفیس‌ها و تعاریف تایپ‌اسکریپت
-├── App.tsx             # کامپوننت ریشه
-└── main.tsx            # ورودی اصلی برنامه
+│   ├── analytics/     # تحلیل مالی، سود و زیان و شاخص‌های KPI
+│   ├── dashboard/     # داشبورد مدیریت و گزارش روزانه
+│   ├── inventory/     # مدیریت مواد خام، فاکتورهای خرید و انبارگردانی
+│   ├── menu/          # فرمولاسیون رسپی، مهندسی منو و قیمت‌گذاری
+│   ├── sales/         # ثبت فاکتور فروش و کسر خودکار انبار
+│   └── ui/            # کامپوننت‌های اتمیک، تقویم جلالی و مودال‌ها
+├── db/                # اسکیما و کلاینت Dexie IndexedDB
+├── lib/               # موتور تبدیل تاریخ شمسی، محاسبات مالی و استایل
+└── types/             # مدل‌های داده و اینترفیس‌های سیستم
 ```
 
----
+<br />
 
-## 🤝 مشارکت در توسعه (Contribution)
+## 📄 License
 
-پیشنهادات و گزارش باگ‌ها صمیمانه استقبال می‌شود:
-1. پروژه را **Fork** کنید.
-2. یک Branch جدید برای قابلیت خود بسازید (`git checkout -b feature/AmazingFeature`).
-3. تغییرات خود را Commit کنید (`git commit -m 'feat: Add some AmazingFeature'`).
-4. به Branch اصلی Push کنید (`git push origin feature/AmazingFeature`).
-5. یک **Pull Request** ارسال کنید.
-
----
-
-## 📄 مجوز (License)
-
-این پروژه تحت مجوز **MIT** منتشر شده است. برای اطلاعات بیشتر فایل `LICENSE` را مطالعه کنید.
+تحت مجوز **MIT** توسعه یافته است. استفاده تجاری و شخصی با رعایت لایسنس آزاد است.
 
 <div align="center">
-  <sub>طراحی و توسعه یافته با ❤️ برای صنعت رستوران و میزبانی ایران</sub>
+  <sub>Built for precision, speed, and real-world restaurant efficiency.</sub>
 </div>
