@@ -369,6 +369,11 @@ html.dark .animate-shimmer {
     print-color-adjust: exact !important;
   }
 
+  .print-avoid-break {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
   .no-print,
   .no-print * {
     display: none !important;

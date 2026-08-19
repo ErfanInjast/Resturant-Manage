@@ -170,24 +170,24 @@ export const PnLReportExportModal: React.FC<PnLReportExportModalProps> = ({
       <div className="overflow-x-auto pb-2">
         <div
           id="pnl-report-printable-area"
-          className="mx-auto my-2 w-full max-w-[794px] bg-white text-[var(--text-primary)] p-6 sm:p-8 rounded-xl border border-[var(--border-subtle)] shadow-lg dir-rtl text-right font-sans box-border"
-          style={{ minHeight: '1050px', backgroundColor: '#ffffff', color: '#1c1917' }}
+          className="mx-auto my-2 w-full max-w-[794px] bg-white text-[var(--text-primary)] p-5 sm:p-7 rounded-xl border border-[var(--border-subtle)] shadow-lg dir-rtl text-right font-sans box-border"
+          style={{ backgroundColor: '#ffffff', color: '#1c1917' }}
         >
           {/* Document Header */}
-          <div className="flex items-start justify-between border-b-2 border-stone-800 pb-5 mb-6">
+          <div className="flex items-start justify-between border-b-2 border-stone-800 pb-3 mb-3.5">
             <div>
               <div className="flex items-center gap-2">
-                <Building2 className="h-6 w-6 text-[var(--brand-primary)]" />
-                <h1 className="text-xl font-black text-[var(--text-primary)]">{restaurantName}</h1>
+                <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-[var(--brand-primary)]" />
+                <h1 className="text-lg sm:text-xl font-black text-[var(--text-primary)]">{restaurantName}</h1>
               </div>
-              <p className="text-xs font-bold text-[var(--text-secondary)] mt-1">
+              <p className="text-[11px] sm:text-xs font-bold text-[var(--text-secondary)] mt-0.5">
                 سیستم جامع مدیریت مالی و بهای تمام شده مطبخ و کافه
               </p>
             </div>
 
-            <div className="text-left bg-[var(--bg-base)] p-3 rounded-xl border border-[var(--border-subtle)]">
-              <h2 className="text-base font-black text-[var(--brand-primary)]">صورت سود و زیان</h2>
-              <div className="text-[11px] font-bold text-[var(--text-secondary)] mt-1 space-y-0.5">
+            <div className="text-left bg-[var(--bg-base)] p-2.5 sm:p-3 rounded-xl border border-[var(--border-subtle)]">
+              <h2 className="text-sm sm:text-base font-black text-[var(--brand-primary)]">صورت سود و زیان</h2>
+              <div className="text-[10px] sm:text-[11px] font-bold text-[var(--text-secondary)] mt-0.5 space-y-0.5">
                 <div>تاریخ صدور: {issueDateStr} - ساعت {issueTimeStr}</div>
                 <div>بازه گزارش: <span className="font-extrabold text-[var(--text-primary)]">{filterTitle}</span></div>
               </div>
@@ -195,150 +195,150 @@ export const PnLReportExportModal: React.FC<PnLReportExportModalProps> = ({
           </div>
 
           {/* Subtitle Badge */}
-          <div className="mb-6 p-3 bg-amber-50/80 rounded-xl border border-[var(--status-warning-text)]/30 flex items-center justify-between text-xs font-bold text-[var(--status-warning-text)]">
+          <div className="mb-3.5 p-2 sm:p-2.5 bg-amber-50/80 rounded-xl border border-[var(--status-warning-text)]/30 flex items-center justify-between text-[11px] sm:text-xs font-bold text-[var(--status-warning-text)]">
             <span className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4 text-[var(--status-warning-text)]" />
+              <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[var(--status-warning-text)]" />
               <span>مشخصات بازه گزارش‌گیری: {filterSubtitle || filterTitle}</span>
             </span>
             <span>تعداد روزهای محاسبه‌شده: {toPersianDigits(metrics.periodDaysCount)} روز</span>
           </div>
 
           {/* Key Metric Summary Boxes */}
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-6">
-            <div className="p-2.5 bg-emerald-50/60 rounded-xl border border-[var(--status-success-text)]/30">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 mb-3.5">
+            <div className="p-2 bg-emerald-50/60 rounded-xl border border-[var(--status-success-text)]/30">
               <div className="text-[9px] font-bold text-[var(--status-success-text)]">فروش و درآمد کل</div>
-              <div className="text-xs font-black text-emerald-950 mt-1">
+              <div className="text-xs font-black text-emerald-950 mt-0.5">
                 {formatToman(metrics.totalRevenue).text}
               </div>
-              <div className="text-[9px] text-[var(--status-success-text)] mt-1 font-bold">
+              <div className="text-[9px] text-[var(--status-success-text)] mt-0.5 font-bold">
                 {toPersianDigits(filteredSalesRecords.length)} روز ثبت
               </div>
             </div>
 
-            <div className="p-2.5 bg-amber-50/60 rounded-xl border border-[var(--status-warning-text)]/30">
+            <div className="p-2 bg-amber-50/60 rounded-xl border border-[var(--status-warning-text)]/30">
               <div className="text-[9px] font-bold text-[var(--status-warning-text)]">بهای مواد اولیه</div>
-              <div className="text-xs font-black text-[var(--status-warning-text)] mt-1">
+              <div className="text-xs font-black text-[var(--status-warning-text)] mt-0.5">
                 {formatToman(metrics.totalCOGS).text}
               </div>
-              <div className="text-[9px] text-[var(--status-warning-text)] mt-1 font-bold">
+              <div className="text-[9px] text-[var(--status-warning-text)] mt-0.5 font-bold">
                 درصد مواد: {toPersianDigits(roundCurrency(metrics.foodCostPercent))}٪
               </div>
             </div>
 
-            <div className="p-2.5 bg-blue-50/60 rounded-xl border border-blue-200">
+            <div className="p-2 bg-blue-50/60 rounded-xl border border-blue-200">
               <div className="text-[9px] font-bold text-blue-700">هزینه نیروی کار</div>
-              <div className="text-xs font-black text-blue-950 mt-1">
+              <div className="text-xs font-black text-blue-950 mt-0.5">
                 {toPersianDigits(roundCurrency(metrics.laborCostPercent ?? 0))}٪
               </div>
-              <div className="text-[9px] text-blue-700 mt-1 font-bold">
+              <div className="text-[9px] text-blue-700 mt-0.5 font-bold">
                 مبلغ: {formatToman(metrics.totalLaborCost ?? 0).text}
               </div>
             </div>
 
-            <div className="p-2.5 bg-violet-50/60 rounded-xl border border-violet-200">
+            <div className="p-2 bg-violet-50/60 rounded-xl border border-violet-200">
               <div className="text-[9px] font-bold text-violet-700">بهای اولیه تولید</div>
-              <div className="text-xs font-black text-violet-950 mt-1">
+              <div className="text-xs font-black text-violet-950 mt-0.5">
                 {toPersianDigits(roundCurrency(metrics.primeCostPercent ?? 0))}٪
               </div>
-              <div className="text-[9px] text-violet-700 mt-1 font-bold">
+              <div className="text-[9px] text-violet-700 mt-0.5 font-bold">
                 هدف: ۵۵٪ تا ۶۵٪
               </div>
             </div>
 
-            <div className="p-2.5 bg-rose-50/60 rounded-xl border border-[var(--status-error-text)]/30">
+            <div className="p-2 bg-rose-50/60 rounded-xl border border-[var(--status-error-text)]/30">
               <div className="text-[9px] font-bold text-[var(--status-error-text)]">ضایعات و سربار</div>
-              <div className="text-xs font-black text-rose-950 mt-1">
+              <div className="text-xs font-black text-rose-950 mt-0.5">
                 {formatToman(metrics.periodOverhead + metrics.totalWaste).text}
               </div>
-              <div className="text-[9px] text-[var(--status-error-text)] mt-1 font-bold">
+              <div className="text-[9px] text-[var(--status-error-text)] mt-0.5 font-bold">
                 ضایعات: {formatToman(metrics.totalWaste).text}
               </div>
             </div>
 
-            <div className={`p-2.5 rounded-xl border ${netProfitToman.isNegative ? 'bg-rose-50/80 border-[var(--status-error-text)]/30' : 'bg-emerald-50/80 border-[var(--status-success-text)]/30'}`}>
+            <div className={`p-2 rounded-xl border ${netProfitToman.isNegative ? 'bg-rose-50/80 border-[var(--status-error-text)]/30' : 'bg-emerald-50/80 border-[var(--status-success-text)]/30'}`}>
               <div className={`text-[9px] font-bold ${netProfitToman.isNegative ? 'text-[var(--status-error-text)]' : 'text-[var(--status-success-text)]'}`}>سود خالص دوره</div>
-              <div className={`text-xs font-black mt-1 ${netProfitToman.isNegative ? 'text-[var(--status-error-text)]' : 'text-[var(--status-success-text)]'}`}>
+              <div className={`text-xs font-black mt-0.5 ${netProfitToman.isNegative ? 'text-[var(--status-error-text)]' : 'text-[var(--status-success-text)]'}`}>
                 {netProfitToman.text}
               </div>
-              <div className={`text-[9px] mt-1 font-bold ${netProfitToman.isNegative ? 'text-[var(--status-error-text)]' : 'text-[var(--status-success-text)]'}`}>
+              <div className={`text-[9px] mt-0.5 font-bold ${netProfitToman.isNegative ? 'text-[var(--status-error-text)]' : 'text-[var(--status-success-text)]'}`}>
                 حاشیه: {toPersianDigits(roundCurrency(metrics.netMarginPercent))}٪
               </div>
             </div>
           </div>
 
           {/* Section 1: Detailed PnL Table */}
-          <div className="mb-6">
-            <h3 className="text-xs font-extrabold text-[var(--text-primary)] mb-2 border-r-4 border-[var(--brand-primary)] pr-2">
+          <div className="mb-3.5">
+            <h3 className="text-xs font-extrabold text-[var(--text-primary)] mb-1.5 border-r-4 border-[var(--brand-primary)] pr-2">
               جدول ریز محاسبات صورت سود و زیان
             </h3>
             <table className="w-full text-xs text-right border-collapse border border-[var(--border-subtle)] rounded-lg overflow-hidden">
               <thead>
-                <tr className="bg-[var(--bg-base)] text-[var(--text-primary)] font-extrabold text-[11px] border-b border-[var(--border-subtle)]">
-                  <th className="p-2.5 border-l border-[var(--border-subtle)]">عنوان ردیف مالی</th>
-                  <th className="p-2.5 border-l border-[var(--border-subtle)] text-center">نوع حساب</th>
-                  <th className="p-2.5 border-l border-[var(--border-subtle)] text-left">مبلغ (تومان)</th>
-                  <th className="p-2.5 text-center">سهم از درآمد</th>
+                <tr className="bg-[var(--bg-base)] text-[var(--text-primary)] font-extrabold text-[10px] sm:text-[11px] border-b border-[var(--border-subtle)]">
+                  <th className="p-2 border-l border-[var(--border-subtle)]">عنوان ردیف مالی</th>
+                  <th className="p-2 border-l border-[var(--border-subtle)] text-center">نوع حساب</th>
+                  <th className="p-2 border-l border-[var(--border-subtle)] text-left">مبلغ (تومان)</th>
+                  <th className="p-2 text-center">سهم از درآمد</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-200 font-medium text-[11px] text-[var(--text-primary)]">
+              <tbody className="divide-y divide-stone-200 font-medium text-[10px] sm:text-[11px] text-[var(--text-primary)]">
                 {/* Revenue */}
                 <tr className="bg-emerald-50/30 font-extrabold">
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-emerald-950">۱. کل فروش و درآمدهای عملیاتی</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-center text-[var(--status-success-text)]">درآمد</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-left text-emerald-950 font-black">{formatToman(metrics.totalRevenue).text}</td>
-                  <td className="p-2.5 text-center text-emerald-900 font-black">۱۰۰٪</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-emerald-950">۱. کل فروش و درآمدهای عملیاتی</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-center text-[var(--status-success-text)]">درآمد</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-left text-emerald-950 font-black">{formatToman(metrics.totalRevenue).text}</td>
+                  <td className="p-2 text-center text-emerald-900 font-black">۱۰۰٪</td>
                 </tr>
 
                 {/* COGS */}
                 <tr>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] pr-5">۲. بهای تمام شده مواد اولیه مصرفی</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-center text-[var(--text-secondary)]">هزینه مستقیم</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-left font-bold text-[var(--status-warning-text)]">
+                  <td className="p-2 border-l border-[var(--border-subtle)] pr-4 sm:pr-5">۲. بهای تمام شده مواد اولیه مصرفی</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-center text-[var(--text-secondary)]">هزینه مستقیم</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-left font-bold text-[var(--status-warning-text)]">
                     {formatToman(metrics.totalCOGS).text}
                   </td>
-                  <td className="p-2.5 text-center font-bold text-[var(--text-secondary)]">{toPersianDigits(roundCurrency(metrics.foodCostPercent))}٪</td>
+                  <td className="p-2 text-center font-bold text-[var(--text-secondary)]">{toPersianDigits(roundCurrency(metrics.foodCostPercent))}٪</td>
                 </tr>
 
                 {/* Gross Profit */}
                 <tr className="bg-[var(--bg-base)]/80 font-black border-t-2 border-[var(--border-functional)]">
-                  <td className="p-2.5 border-l border-[var(--border-subtle)]">سود ناخالص</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-center text-[var(--text-secondary)]">میانی</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-left text-stone-950">{grossProfitToman.text}</td>
-                  <td className="p-2.5 text-center text-[var(--text-primary)]">
+                  <td className="p-2 border-l border-[var(--border-subtle)]">سود ناخالص</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-center text-[var(--text-secondary)]">میانی</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-left text-stone-950">{grossProfitToman.text}</td>
+                  <td className="p-2 text-center text-[var(--text-primary)]">
                     {metrics.totalRevenue > 0 ? toPersianDigits(roundCurrency((metrics.grossProfit / metrics.totalRevenue) * 100)) : '۰'}٪
                   </td>
                 </tr>
 
                 {/* Waste */}
                 <tr>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] pr-5">۳. ضایعات انبار و خسارات تولید</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-center text-[var(--text-secondary)]">تلفات</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-left font-bold text-[var(--status-error-text)]">
+                  <td className="p-2 border-l border-[var(--border-subtle)] pr-4 sm:pr-5">۳. ضایعات انبار و خسارات تولید</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-center text-[var(--text-secondary)]">تلفات</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-left font-bold text-[var(--status-error-text)]">
                     {formatToman(metrics.totalWaste).text}
                   </td>
-                  <td className="p-2.5 text-center font-bold text-[var(--text-secondary)]">
+                  <td className="p-2 text-center font-bold text-[var(--text-secondary)]">
                     {metrics.totalRevenue > 0 ? toPersianDigits(roundCurrency((metrics.totalWaste / metrics.totalRevenue) * 100)) : '۰'}٪
                   </td>
                 </tr>
 
                 {/* Overhead */}
                 <tr>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] pr-5">۴. هزینه‌های ثابت و سربار عملیاتی (تسهیم روزانه)</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-center text-[var(--text-secondary)]">سربار ثابت</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-left font-bold text-[var(--text-primary)]">
+                  <td className="p-2 border-l border-[var(--border-subtle)] pr-4 sm:pr-5">۴. هزینه‌های ثابت و سربار عملیاتی (تسهیم روزانه)</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-center text-[var(--text-secondary)]">سربار ثابت</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-left font-bold text-[var(--text-primary)]">
                     {formatToman(metrics.periodOverhead).text}
                   </td>
-                  <td className="p-2.5 text-center font-bold text-[var(--text-secondary)]">
+                  <td className="p-2 text-center font-bold text-[var(--text-secondary)]">
                     {metrics.totalRevenue > 0 ? toPersianDigits(roundCurrency((metrics.periodOverhead / metrics.totalRevenue) * 100)) : '۰'}٪
                   </td>
                 </tr>
 
                 {/* Net Profit */}
                 <tr className={`font-black text-xs ${netProfitToman.isNegative ? 'bg-rose-100/80 text-rose-950' : 'bg-emerald-100/80 text-emerald-950'} border-t-2 border-stone-400`}>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)]">سود (یا زیان) خالص نهایی</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-center">نهایی</td>
-                  <td className="p-2.5 border-l border-[var(--border-subtle)] text-left font-black">{netProfitToman.text}</td>
-                  <td className="p-2.5 text-center font-black">{toPersianDigits(roundCurrency(metrics.netMarginPercent))}٪</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)]">سود (یا زیان) خالص نهایی</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-center">نهایی</td>
+                  <td className="p-2 border-l border-[var(--border-subtle)] text-left font-black">{netProfitToman.text}</td>
+                  <td className="p-2 text-center font-black">{toPersianDigits(roundCurrency(metrics.netMarginPercent))}٪</td>
                 </tr>
               </tbody>
             </table>
@@ -346,30 +346,30 @@ export const PnLReportExportModal: React.FC<PnLReportExportModalProps> = ({
 
           {/* Section 2: Top Selling Products in Period */}
           {topSoldItems.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-xs font-extrabold text-[var(--text-primary)] mb-2 border-r-4 border-emerald-600 pr-2">
+            <div className="mb-3.5">
+              <h3 className="text-xs font-extrabold text-[var(--text-primary)] mb-1.5 border-r-4 border-emerald-600 pr-2">
                 پرفروش‌ترین محصولات منو در این بازه زمانی
               </h3>
               <table className="w-full text-xs text-right border-collapse border border-[var(--border-subtle)] rounded-lg overflow-hidden">
                 <thead>
-                  <tr className="bg-[var(--bg-base)] text-[var(--text-primary)] font-extrabold text-[11px] border-b border-[var(--border-subtle)]">
-                    <th className="p-2 border-l border-[var(--border-subtle)]">نام آیتم منو</th>
-                    <th className="p-2 border-l border-[var(--border-subtle)] text-center">تعداد فروش</th>
-                    <th className="p-2 border-l border-[var(--border-subtle)] text-left">فروش کل</th>
-                    <th className="p-2 border-l border-[var(--border-subtle)] text-left">بهای تمام شده</th>
-                    <th className="p-2 text-left">سود ناخالص</th>
+                  <tr className="bg-[var(--bg-base)] text-[var(--text-primary)] font-extrabold text-[10px] sm:text-[11px] border-b border-[var(--border-subtle)]">
+                    <th className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)]">نام آیتم منو</th>
+                    <th className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] text-center">تعداد فروش</th>
+                    <th className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] text-left">فروش کل</th>
+                    <th className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] text-left">بهای تمام شده</th>
+                    <th className="p-1.5 sm:p-2 text-left">سود ناخالص</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-200 text-[11px] text-[var(--text-primary)]">
-                  {topSoldItems.map((item) => {
+                <tbody className="divide-y divide-stone-200 text-[10px] sm:text-[11px] text-[var(--text-primary)]">
+                  {topSoldItems.slice(0, 4).map((item) => {
                     const profit = item.totalRev - item.totalCost;
                     return (
                       <tr key={item.menuItemId}>
-                        <td className="p-2 border-l border-[var(--border-subtle)] font-bold text-[var(--text-primary)]">{item.name}</td>
-                        <td className="p-2 border-l border-[var(--border-subtle)] text-center font-black">{toPersianDigits(item.totalQty)}</td>
-                        <td className="p-2 border-l border-[var(--border-subtle)] text-left font-bold text-emerald-900">{formatToman(item.totalRev).text}</td>
-                        <td className="p-2 border-l border-[var(--border-subtle)] text-left text-[var(--status-warning-text)] font-medium">{formatToman(item.totalCost).text}</td>
-                        <td className="p-2 text-left font-black text-[var(--text-primary)]">{formatToman(profit).text}</td>
+                        <td className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] font-bold text-[var(--text-primary)]">{item.name}</td>
+                        <td className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] text-center font-black">{toPersianDigits(item.totalQty)}</td>
+                        <td className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] text-left font-bold text-emerald-900">{formatToman(item.totalRev).text}</td>
+                        <td className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] text-left text-[var(--status-warning-text)] font-medium">{formatToman(item.totalCost).text}</td>
+                        <td className="p-1.5 sm:p-2 text-left font-black text-[var(--text-primary)]">{formatToman(profit).text}</td>
                       </tr>
                     );
                   })}
@@ -380,26 +380,26 @@ export const PnLReportExportModal: React.FC<PnLReportExportModalProps> = ({
 
           {/* Section 3: Waste Logs Summary in Period */}
           {filteredWasteLogs.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-xs font-extrabold text-[var(--text-primary)] mb-2 border-r-4 border-rose-600 pr-2">
+            <div className="mb-3.5">
+              <h3 className="text-xs font-extrabold text-[var(--text-primary)] mb-1.5 border-r-4 border-rose-600 pr-2">
                 خلاصه ضایعات و خسارات انبار ثبت‌شده در این بازه
               </h3>
               <table className="w-full text-xs text-right border-collapse border border-[var(--border-subtle)] rounded-lg overflow-hidden">
                 <thead>
-                  <tr className="bg-[var(--bg-base)] text-[var(--text-primary)] font-extrabold text-[11px] border-b border-[var(--border-subtle)]">
-                    <th className="p-2 border-l border-[var(--border-subtle)]">نام آیتم ضایعاتی</th>
-                    <th className="p-2 border-l border-[var(--border-subtle)] text-center">مقدار / واحد</th>
-                    <th className="p-2 border-l border-[var(--border-subtle)] text-left">خسارت مالی</th>
-                    <th className="p-2 text-right">علت ضایعات</th>
+                  <tr className="bg-[var(--bg-base)] text-[var(--text-primary)] font-extrabold text-[10px] sm:text-[11px] border-b border-[var(--border-subtle)]">
+                    <th className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)]">نام آیتم ضایعاتی</th>
+                    <th className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] text-center">مقدار / واحد</th>
+                    <th className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] text-left">خسارت مالی</th>
+                    <th className="p-1.5 sm:p-2 text-right">علت ضایعات</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-200 text-[11px] text-[var(--text-primary)]">
-                  {filteredWasteLogs.slice(0, 5).map((log, idx) => (
+                <tbody className="divide-y divide-stone-200 text-[10px] sm:text-[11px] text-[var(--text-primary)]">
+                  {filteredWasteLogs.slice(0, 3).map((log, idx) => (
                     <tr key={log.id || idx}>
-                      <td className="p-2 border-l border-[var(--border-subtle)] font-bold text-[var(--text-primary)]">{log.itemName}</td>
-                      <td className="p-2 border-l border-[var(--border-subtle)] text-center font-bold">{formatNumber(log.quantity)} {log.unit}</td>
-                      <td className="p-2 border-l border-[var(--border-subtle)] text-left font-black text-[var(--status-error-text)]">{formatToman(log.cost).text}</td>
-                      <td className="p-2 text-[var(--text-secondary)] font-medium">{log.reason || 'نامشخص'}</td>
+                      <td className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] font-bold text-[var(--text-primary)]">{log.itemName}</td>
+                      <td className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] text-center font-bold">{formatNumber(log.quantity)} {log.unit}</td>
+                      <td className="p-1.5 sm:p-2 border-l border-[var(--border-subtle)] text-left font-black text-[var(--status-error-text)]">{formatToman(log.cost).text}</td>
+                      <td className="p-1.5 sm:p-2 text-[var(--text-secondary)] font-medium">{log.reason || 'نامشخص'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -408,17 +408,20 @@ export const PnLReportExportModal: React.FC<PnLReportExportModalProps> = ({
           )}
 
           {/* Document Footer: Stamp, Signature & Disclaimer */}
-          <div className="pt-6 border-t-2 border-[var(--border-functional)] grid grid-cols-2 gap-8 text-xs font-bold text-[var(--text-primary)] mt-8">
+          <div
+            className="pt-3.5 border-t-2 border-stone-400 grid grid-cols-2 gap-6 text-xs font-bold text-[var(--text-primary)] mt-3.5 print-avoid-break"
+            style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}
+          >
             <div className="space-y-1">
-              <div>تاییدیه حسابداری و مدیریت مالی:</div>
-              <div className="h-16 border border-dashed border-[var(--border-functional)] rounded-lg bg-[var(--bg-base)] flex items-end justify-center pb-2 text-[10px] text-[var(--text-secondary)]">
+              <div className="text-[11px] sm:text-xs">تاییدیه حسابداری و مدیریت مالی:</div>
+              <div className="h-14 border border-dashed border-stone-400 rounded-lg bg-[var(--bg-base)] flex items-end justify-center pb-1.5 text-[10px] text-[var(--text-secondary)]">
                 محل مهر و امضای مدیریت مجموعه
               </div>
             </div>
 
             <div className="space-y-1 text-left dir-ltr">
-              <div className="dir-rtl text-right">یادداشت فنی سیستم:</div>
-              <p className="text-[10px] font-medium text-[var(--text-secondary)] dir-rtl text-right">
+              <div className="dir-rtl text-right text-[11px] sm:text-xs">یادداشت فنی سیستم:</div>
+              <p className="text-[9.5px] sm:text-[10px] font-medium text-[var(--text-secondary)] dir-rtl text-right leading-relaxed">
                 این گزارش بر اساس استانداردهای حسابداری صنعتی مطبخ، داده‌های فرمول ساخت، هزینه‌های ثابت ماهانه و ضایعات ثبت‌شده در نرم‌افزار به‌صورت هوشمند تولید گردیده است.
               </p>
             </div>

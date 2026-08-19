@@ -785,7 +785,7 @@ export const InventoryManager: React.FC = () => {
         onClose={() => setIsPurchaseModalOpen(false)}
         title="ثبت خرید جدید"
         description="ثبت فاکتور خرید مواد اولیه جهت افزایش موجودی انبار و به‌روزرسانی قیمت فی"
-        maxWidth="2xl"
+        maxWidth="xl"
       >
         <form onSubmit={handleSavePurchase} noValidate className="space-y-4">
           <SearchableSelect
@@ -867,7 +867,7 @@ export const InventoryManager: React.FC = () => {
         onClose={() => setIsAddModalOpen(false)}
         title="تعریف ماده اولیه جدید"
         description="تعریف ماده اولیه جدید همراه با ثبت خرید اولیه"
-        maxWidth="3xl"
+        maxWidth="xl"
       >
         <form onSubmit={handleSaveNewIngredient} noValidate className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">

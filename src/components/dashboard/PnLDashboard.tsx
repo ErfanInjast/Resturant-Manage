@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { staggerContainer, fadeInUpItem, cardHover } from '../../lib/motion';
 import {
@@ -55,6 +55,8 @@ import { PageSkeleton } from '../ui/PageSkeleton';
 import { JalaliDatePicker } from '../ui/JalaliDatePicker';
 import { PnLReportExportModal } from './PnLReportExportModal';
 import { KPIDetailModal, KPIMetricType } from './KPIDetailModal';
+import { TopSoldItemsModal } from './TopSoldItemsModal';
+import { WasteLogsDetailModal } from './WasteLogsDetailModal';
 import { ArrowUpRight } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -134,6 +136,8 @@ export const PnLDashboard: React.FC = () => {
   const [customSpecificDate, setCustomSpecificDate] = useState<string>(formatJalali(new Date(), 'iso'));
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [activeKpiModal, setActiveKpiModal] = useState<KPIMetricType | null>(null);
+  const [isTopSoldModalOpen, setIsTopSoldModalOpen] = useState<boolean>(false);
+  const [isWasteLogsModalOpen, setIsWasteLogsModalOpen] = useState<boolean>(false);
 
   const settings = settingsQuery ?? DEFAULT_SETTINGS;
   const salesRecords = salesRecordsQuery ?? [];
@@ -248,9 +252,9 @@ export const PnLDashboard: React.FC = () => {
     });
   });
 
-  const topSoldItemsInPeriod = Array.from(itemSalesMap.values())
-    .sort((a, b) => b.totalRev - a.totalRev)
-    .slice(0, 5);
+  const allSoldItemsInPeriod = Array.from(itemSalesMap.values()).sort((a, b) => b.totalRev - a.totalRev);
+  const topSoldItemsInPeriod = allSoldItemsInPeriod.slice(0, 4);
+  const topWasteLogsInPeriod = filteredWasteLogs.slice(0, 4);
 
   // Month-level metrics for Break-Even Target Card (remains fixed for current month as requested)
   const monthRevenue = salesRecords
@@ -331,133 +335,130 @@ export const PnLDashboard: React.FC = () => {
     );
   }
 
+  const PRESET_OPTIONS: { id: DateFilterPreset; label: string; icon?: React.ComponentType<{ className?: string }> }[] = [
+    { id: 'today', label: 'امروز' },
+    { id: 'specific', label: 'یک روز به‌خصوص', icon: Calendar },
+    { id: 'last7', label: '۷ روز اخیر' },
+    { id: 'last30', label: '۳۰ روز اخیر' },
+    { id: 'currentMonth', label: 'ماه جاری' },
+    { id: 'allTime', label: 'کل تاریخچه' },
+  ];
+
+  const filterKey = `${datePreset}_${datePreset === 'specific' ? customSpecificDate : ''}`;
+
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* Sleek Minimalist Date Scope Filter & Action Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl p-3 sm:p-4 shadow-xs">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
-          <div className="flex items-center gap-1.5 text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] pl-2 border-l border-[var(--border-subtle)] dark:border-[var(--border-subtle)] shrink-0">
-            <Filter className="h-4 w-4 text-[var(--brand-primary)]" />
-            <span>بازه گزارش:</span>
+      <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col gap-3 relative z-30 overflow-visible">
+        {/* Row 1: Filter Presets + Duration & Export */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 w-full">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
+            <div className="flex items-center gap-1.5 text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] pl-2 border-l border-[var(--border-subtle)] dark:border-[var(--border-subtle)] shrink-0">
+              <Filter className="h-4 w-4 text-[var(--brand-primary)]" />
+              <span>بازه گزارش:</span>
+            </div>
+
+            {/* Minimalist Filter Preset Buttons with Sliding Motion Highlight */}
+            <div className="relative flex items-center bg-[var(--bg-base)] dark:bg-stone-900 p-1 rounded-2xl border border-[var(--border-subtle)] overflow-x-auto scrollbar-none select-none max-w-full">
+              {PRESET_OPTIONS.map((preset) => {
+                const isSelected = datePreset === preset.id;
+                const IconComponent = preset.icon;
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => setDatePreset(preset.id)}
+                    className={cn(
+                      'relative z-10 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1 whitespace-nowrap select-none',
+                      isSelected
+                        ? 'text-white'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    )}
+                  >
+                    {IconComponent && <IconComponent className="h-3.5 w-3.5" />}
+                    <span>{preset.label}</span>
+                    {isSelected && (
+                      <motion.div
+                        layoutId="pnlActiveDatePreset"
+                        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                        className="absolute inset-0 bg-[var(--brand-primary)] rounded-xl -z-10 shadow-xs"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Minimalist Filter Preset Buttons */}
-          <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none select-none">
-            <button
-              type="button"
-              onClick={() => setDatePreset('today')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
-                datePreset === 'today'
-                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
-                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
-              }`}
-            >
-              امروز
-            </button>
+          <div className="flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-[var(--border-subtle)] shrink-0">
+            <span className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
+              دوره: <strong className="text-[var(--text-primary)] dark:text-[var(--text-primary)]">{toPersianDigits(periodDaysCount)} روز</strong>
+            </span>
 
-            <button
-              type="button"
-              onClick={() => setDatePreset('specific')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 border whitespace-nowrap ${
-                datePreset === 'specific'
-                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
-                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
-              }`}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsExportModalOpen(true)}
+              className="text-xs font-bold border-[var(--border-subtle)] hover:border-[var(--brand-primary)] text-[var(--text-primary)] hover:text-[var(--brand-primary)] rounded-xl gap-1.5 shadow-2xs cursor-pointer"
             >
-              <Calendar className="h-3.5 w-3.5" />
-              یک روز به‌خصوص
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setDatePreset('last7')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
-                datePreset === 'last7'
-                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
-                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
-              }`}
-            >
-              ۷ روز اخیر
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setDatePreset('last30')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
-                datePreset === 'last30'
-                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
-                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
-              }`}
-            >
-              ۳۰ روز اخیر
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setDatePreset('currentMonth')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
-                datePreset === 'currentMonth'
-                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
-                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
-              }`}
-            >
-              ماه جاری
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setDatePreset('allTime')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
-                datePreset === 'allTime'
-                  ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-xs'
-                  : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)] hover:bg-stone-100 dark:hover:bg-stone-800'
-              }`}
-            >
-              کل تاریخچه
-            </button>
+              <FileText className="h-3.5 w-3.5" />
+              <span>خروجی گزارش</span>
+            </Button>
           </div>
         </div>
 
-        <div className="flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-[var(--border-subtle)] shrink-0">
-          <span className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
-            دوره: <strong className="text-[var(--text-primary)] dark:text-[var(--text-primary)]">{toPersianDigits(periodDaysCount)} روز</strong>
-          </span>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsExportModalOpen(true)}
-            className="text-xs font-bold border-[var(--border-subtle)] hover:border-[var(--brand-primary)] text-[var(--text-primary)] hover:text-[var(--brand-primary)] rounded-xl gap-1.5 shadow-2xs"
-          >
-            <FileText className="h-3.5 w-3.5" />
-            <span>خروجی گزارش</span>
-          </Button>
-        </div>
-
-        {/* Specific Date Picker Sub-row */}
-        {datePreset === 'specific' && (
-          <div className="w-full pt-3 mt-1 border-t border-dashed border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex items-center gap-3">
-            <label className="text-xs font-bold text-[var(--text-secondary)] shrink-0">
-              انتخاب تاریخ روز:
-            </label>
-            <JalaliDatePicker
-              value={customSpecificDate}
-              onChange={setCustomSpecificDate}
-              minDate={MIN_JALALI_DATE}
-              maxDate={todayIso}
-              showSteppers={true}
-            />
-          </div>
-        )}
+        {/* Row 2: Specific Date Picker Sub-row (Dedicated collapsible container that never breaks top layout) */}
+        <AnimatePresence initial={false}>
+          {datePreset === 'specific' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: 'auto', marginTop: 2 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              style={{ overflow: 'visible' }}
+              className="relative z-30 overflow-visible"
+            >
+              <div className="pt-3 border-t border-dashed border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-base)]/60 dark:bg-stone-900/40 p-3 rounded-xl border border-[var(--border-subtle)] relative z-30 overflow-visible">
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="text-xs font-bold text-[var(--text-secondary)] shrink-0 flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 text-[var(--brand-primary)]" />
+                    <span>انتخاب روز مورد نظر برای تحلیل:</span>
+                  </label>
+                  <JalaliDatePicker
+                    value={customSpecificDate}
+                    onChange={setCustomSpecificDate}
+                    minDate={MIN_JALALI_DATE}
+                    maxDate={todayIso}
+                    showSteppers={true}
+                    align="right"
+                  />
+                </div>
+                <div className="text-xs font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
+                  گزارش روز: <span className="font-black text-[var(--text-primary)]">{formatJalaliReadable(customSpecificDate) || toPersianDigits(customSpecificDate)}</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Filtered Metric Cards Grid - 4 Core Pillars */}
-      <motion.div
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-      >
+      {/* Main Dynamic PnL Content Wrapped in Smooth Animated Transition */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={filterKey}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
+          className="space-y-6 relative z-10"
+        >
+          {/* Filtered Metric Cards Grid - 4 Core Pillars */}
+          <motion.div
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
         {/* Total Revenue */}
         <motion.div variants={fadeInUpItem} whileHover={cardHover.whileHover} transition={cardHover.transition} className="h-full">
           <Card
@@ -1085,91 +1086,171 @@ export const PnLDashboard: React.FC = () => {
       {/* Top Performing Items & Waste Logs in Filtered Period */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Top Sold Items */}
-        <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)]">
-          <CardHeader className="pb-3 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-            <CardTitle className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
-              <Utensils className="h-4 w-4 text-[var(--status-success-text)]" />
-              پرفروش‌ترین آیتم‌های منو ({filterTitle})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-3">
-            {topSoldItemsInPeriod.length === 0 ? (
-              <div className="text-center py-6 text-xs text-[var(--text-secondary)] font-bold">
-                هیچ فروشی در این بازه زمانی ثبت نشده است.
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {topSoldItemsInPeriod.map((item, idx) => {
-                  const profit = item.totalRev - item.totalCost;
-                  return (
-                    <div
-                      key={item.menuItemId}
-                      className="p-2.5 rounded-xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex items-center justify-between text-xs"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-stone-200 dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-black text-[10px] flex items-center justify-center shrink-0">
-                          {toPersianDigits(idx + 1)}
-                        </span>
-                        <div>
-                          <div className="font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">{item.name}</div>
-                          <div className="text-[10px] text-[var(--text-secondary)]">
-                            فروش: {toPersianDigits(item.totalQty)} عدد | درآمد: {formatToman(item.totalRev).text}
+        <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] flex flex-col justify-between">
+          <div>
+            <CardHeader className="pb-3 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex flex-row items-center justify-between">
+              <CardTitle className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
+                <Utensils className="h-4 w-4 text-[var(--status-success-text)]" />
+                پرفروش‌ترین آیتم‌های منو ({filterTitle})
+              </CardTitle>
+              {allSoldItemsInPeriod.length > 0 && (
+                <button
+                  type="button"
+                  id="open-all-top-sold-header-btn"
+                  onClick={() => setIsTopSoldModalOpen(true)}
+                  className="text-[11px] font-bold text-[var(--brand-primary)] hover:text-[var(--brand-primary)]/80 hover:bg-[var(--bg-base)] px-2 py-1 rounded-lg flex items-center gap-0.5 transition-colors cursor-pointer"
+                >
+                  <span>گزارش کامل ({toPersianDigits(allSoldItemsInPeriod.length)})</span>
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </CardHeader>
+            <CardContent className="pt-3">
+              {topSoldItemsInPeriod.length === 0 ? (
+                <div className="text-center py-6 text-xs text-[var(--text-secondary)] font-bold">
+                  هیچ فروشی در این بازه زمانی ثبت نشده است.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {topSoldItemsInPeriod.map((item, idx) => {
+                    const profit = item.totalRev - item.totalCost;
+                    return (
+                      <div
+                        key={item.menuItemId}
+                        className="p-2.5 rounded-xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex items-center justify-between text-xs hover:border-[var(--border-functional)] transition-all cursor-pointer"
+                        onClick={() => setIsTopSoldModalOpen(true)}
+                        title="برای مشاهده جزئیات کلیک کنید"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-800 text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-black text-[10px] flex items-center justify-center shrink-0">
+                            {toPersianDigits(idx + 1)}
+                          </span>
+                          <div>
+                            <div className="font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">{item.name}</div>
+                            <div className="text-[10px] text-[var(--text-secondary)]">
+                              فروش: {toPersianDigits(item.totalQty)} عدد | درآمد: {formatToman(item.totalRev).text}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="text-left shrink-0">
-                        <div className="font-black text-[var(--status-success-text)] dark:text-[var(--status-success-text)]">
-                          {formatToman(profit).text}
+                        <div className="text-left shrink-0">
+                          <div className="font-black text-[var(--status-success-text)] dark:text-[var(--status-success-text)]">
+                            {formatToman(profit).text}
+                          </div>
+                          <div className="text-[10px] text-[var(--text-secondary)] font-bold">سود ناخالص</div>
                         </div>
-                        <div className="text-[10px] text-[var(--text-secondary)] font-bold">سود ناخالص</div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </div>
+
+          {allSoldItemsInPeriod.length > 4 && (
+            <div className="p-3 pt-0">
+              <Button
+                variant="outline"
+                size="sm"
+                id="open-all-top-sold-footer-btn"
+                onClick={() => setIsTopSoldModalOpen(true)}
+                className="w-full h-8 text-xs font-black text-[var(--brand-primary)] bg-[var(--bg-base)] hover:bg-stone-200/60 dark:hover:bg-stone-800/80 border border-[var(--border-subtle)] rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+              >
+                <span>مشاهده گزارش و لیست کامل ({toPersianDigits(allSoldItemsInPeriod.length)} آیتم)</span>
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
         </Card>
 
         {/* Waste Logs Summary */}
-        <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)]">
-          <CardHeader className="pb-3 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-            <CardTitle className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
-              <Trash2 className="h-4 w-4 text-[var(--brand-primary)]" />
-              خلاصه ضایعات ثبت‌شده ({filterTitle})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-3">
-            {filteredWasteLogs.length === 0 ? (
-              <div className="text-center py-6 text-xs text-[var(--text-secondary)] font-bold">
-                هیچ ضایعاتی در این بازه زمانی ثبت نشده است.
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {filteredWasteLogs.slice(0, 5).map((log, idx) => (
-                  <div
-                    key={log.id || idx}
-                    className="p-2.5 rounded-xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex items-center justify-between text-xs"
-                  >
-                    <div>
-                      <div className="font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">{log.itemName}</div>
-                      <div className="text-[10px] text-[var(--text-secondary)]">
-                        مقدار: {formatNumber(log.quantity)} {log.unit} • علت: {log.reason || 'نامشخص'}
+        <Card className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] flex flex-col justify-between">
+          <div>
+            <CardHeader className="pb-3 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex flex-row items-center justify-between">
+              <CardTitle className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
+                <Trash2 className="h-4 w-4 text-[var(--brand-primary)]" />
+                خلاصه ضایعات ثبت‌شده ({filterTitle})
+              </CardTitle>
+              {filteredWasteLogs.length > 0 && (
+                <button
+                  type="button"
+                  id="open-all-waste-logs-header-btn"
+                  onClick={() => setIsWasteLogsModalOpen(true)}
+                  className="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 px-2 py-1 rounded-lg flex items-center gap-0.5 transition-colors cursor-pointer"
+                >
+                  <span>گزارش کامل ({toPersianDigits(filteredWasteLogs.length)})</span>
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </CardHeader>
+            <CardContent className="pt-3">
+              {filteredWasteLogs.length === 0 ? (
+                <div className="text-center py-6 text-xs text-[var(--text-secondary)] font-bold">
+                  هیچ ضایعاتی در این بازه زمانی ثبت نشده است.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {topWasteLogsInPeriod.map((log, idx) => (
+                    <div
+                      key={log.id || idx}
+                      className="p-2.5 rounded-xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex items-center justify-between text-xs hover:border-rose-300 dark:hover:border-rose-800 transition-all cursor-pointer"
+                      onClick={() => setIsWasteLogsModalOpen(true)}
+                      title="برای مشاهده جزئیات کلیک کنید"
+                    >
+                      <div>
+                        <div className="font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">{log.itemName}</div>
+                        <div className="text-[10px] text-[var(--text-secondary)]">
+                          مقدار: {formatNumber(log.quantity)} {log.unit} • علت: {log.reason || 'نامشخص'}
+                        </div>
+                      </div>
+                      <div className="text-left shrink-0">
+                        <div className="font-black text-[var(--status-error-text)] dark:text-[var(--status-error-text)]">
+                          {formatToman(log.cost).text}
+                        </div>
+                        <div className="text-[10px] text-[var(--text-secondary)] font-bold">خسارت مالی</div>
                       </div>
                     </div>
-                    <div className="text-left shrink-0">
-                      <div className="font-black text-[var(--status-error-text)] dark:text-[var(--status-error-text)]">
-                        {formatToman(log.cost).text}
-                      </div>
-                      <div className="text-[10px] text-[var(--text-secondary)] font-bold">خسارت مالی</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </div>
+
+          {filteredWasteLogs.length > 4 && (
+            <div className="p-3 pt-0">
+              <Button
+                variant="outline"
+                size="sm"
+                id="open-all-waste-logs-footer-btn"
+                onClick={() => setIsWasteLogsModalOpen(true)}
+                className="w-full h-8 text-xs font-black text-rose-700 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/20 hover:bg-rose-100/60 dark:hover:bg-rose-900/40 border border-rose-200/60 dark:border-rose-900/40 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+              >
+                <span>مشاهده تمام ضایعات و خسارات ({toPersianDigits(filteredWasteLogs.length)} مورد)</span>
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
         </Card>
       </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Full Top Sold Items Modal */}
+      <TopSoldItemsModal
+        isOpen={isTopSoldModalOpen}
+        onClose={() => setIsTopSoldModalOpen(false)}
+        filterTitle={filterTitle}
+        filterSubtitle={filterSubtitle}
+        items={allSoldItemsInPeriod}
+      />
+
+      {/* Full Waste Logs Detail Modal */}
+      <WasteLogsDetailModal
+        isOpen={isWasteLogsModalOpen}
+        onClose={() => setIsWasteLogsModalOpen(false)}
+        filterTitle={filterTitle}
+        filterSubtitle={filterSubtitle}
+        wasteLogs={filteredWasteLogs}
+      />
 
       {/* KPI Detail Drilldown Modal */}
       <KPIDetailModal
