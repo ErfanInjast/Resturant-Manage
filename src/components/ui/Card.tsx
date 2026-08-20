@@ -9,7 +9,7 @@ export const Card = React.forwardRef<
     id={id}
     ref={ref}
     className={cn(
-      'rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--text-primary)] shadow-[0_2px_10px_rgba(28,25,23,0.03)] dark:shadow-none transition-all duration-300 hover:shadow-[0_8px_24px_rgba(28,25,23,0.06)] hover:border-[var(--border-functional)]',
+      'rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] text-[var(--text-primary)] shadow-2xs transition-all duration-200 hover:border-[var(--border-functional)]',
       className
     )}
     {...props}
@@ -38,7 +38,7 @@ export const CardTitle = React.forwardRef<
     id={id}
     ref={ref}
     className={cn(
-      'text-base font-bold leading-none tracking-tight text-slate-900 dark:text-[var(--text-primary)]',
+      'text-base font-black leading-none tracking-tight text-[var(--text-primary)]',
       className
     )}
     {...props}
@@ -53,7 +53,7 @@ export const CardDescription = React.forwardRef<
   <p
     id={id}
     ref={ref}
-    className={cn('text-xs text-slate-500 dark:text-[var(--text-secondary)] font-medium leading-relaxed', className)}
+    className={cn('text-xs text-[var(--text-secondary)] font-medium leading-relaxed', className)}
     {...props}
   />
 ));

@@ -151,7 +151,7 @@ export const TopSoldItemsModal: React.FC<TopSoldItemsModalProps> = ({
         </div>
 
         {/* Search and Sort Toolbar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-[var(--bg-base)] dark:bg-stone-900/60 p-2.5 rounded-2xl border border-[var(--border-subtle)]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-[var(--bg-base)] dark:bg-[var(--bg-base)] p-2.5 rounded-2xl border border-[var(--border-subtle)]">
           {/* Search Box */}
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" />
@@ -301,7 +301,7 @@ export const TopSoldItemsModal: React.FC<TopSoldItemsModalProps> = ({
                     </div>
 
                     {/* Profit & Margin box */}
-                    <div className="p-2 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900 border border-[var(--border-subtle)] text-left min-w-[100px]">
+                    <div className="p-2 rounded-xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] text-left min-w-[100px]">
                       <div className="text-[9px] text-[var(--text-secondary)] font-bold">سود ناخالص:</div>
                       <div className="font-black text-xs text-[var(--status-success-text)]">
                         {formatToman(profit).text}

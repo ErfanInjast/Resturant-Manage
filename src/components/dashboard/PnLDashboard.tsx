@@ -321,7 +321,7 @@ export const PnLDashboard: React.FC = () => {
 
   if (salesRecords.length === 0 && menuItems.length === 0) {
     return (
-      <div className="p-4 md:p-6 space-y-6">
+      <div className="space-y-6">
         <EmptyState
           icon={ShoppingBag}
           title="هنوز هیچ فروش یا آیتم منویی ثبت نشده است"
@@ -347,7 +347,7 @@ export const PnLDashboard: React.FC = () => {
   const filterKey = `${datePreset}_${datePreset === 'specific' ? customSpecificDate : ''}`;
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="space-y-6">
       {/* Sleek Minimalist Date Scope Filter & Action Bar */}
       <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col gap-3 relative z-30 overflow-visible">
         {/* Row 1: Filter Presets + Duration & Export */}
@@ -359,7 +359,7 @@ export const PnLDashboard: React.FC = () => {
             </div>
 
             {/* Minimalist Filter Preset Buttons with Sliding Motion Highlight */}
-            <div className="relative flex items-center bg-[var(--bg-base)] dark:bg-stone-900 p-1 rounded-2xl border border-[var(--border-subtle)] overflow-x-auto scrollbar-none select-none max-w-full">
+            <div className="relative flex items-center bg-[var(--bg-base)] dark:bg-[var(--bg-base)] p-1 rounded-2xl border border-[var(--border-subtle)] overflow-x-auto scrollbar-none select-none max-w-full">
               {PRESET_OPTIONS.map((preset) => {
                 const isSelected = datePreset === preset.id;
                 const IconComponent = preset.icon;
@@ -418,7 +418,7 @@ export const PnLDashboard: React.FC = () => {
               style={{ overflow: 'visible' }}
               className="relative z-30 overflow-visible"
             >
-              <div className="pt-3 border-t border-dashed border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-base)]/60 dark:bg-stone-900/40 p-3 rounded-xl border border-[var(--border-subtle)] relative z-30 overflow-visible">
+              <div className="pt-3 border-t border-dashed border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-base)]/60 bg-[var(--bg-base)] p-3 rounded-xl border border-[var(--border-subtle)] relative z-30 overflow-visible">
                 <div className="flex flex-wrap items-center gap-3">
                   <label className="text-xs font-bold text-[var(--text-secondary)] shrink-0 flex items-center gap-1.5">
                     <Calendar className="h-4 w-4 text-[var(--brand-primary)]" />
@@ -606,7 +606,7 @@ export const PnLDashboard: React.FC = () => {
         <CardHeader className="border-b border-[var(--border-subtle)]/60 dark:border-[var(--border-subtle)] pb-3.5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-[var(--bg-base)] dark:bg-stone-800 text-[var(--text-primary)] shrink-0 border border-[var(--border-subtle)]">
+              <div className="p-2 rounded-xl bg-[var(--bg-base)] dark:bg-[var(--bg-base)] text-[var(--text-primary)] shrink-0 border border-[var(--border-subtle)]">
                 <Layers className="h-4.5 w-4.5 text-[var(--brand-primary)]" />
               </div>
               <div>
@@ -632,10 +632,10 @@ export const PnLDashboard: React.FC = () => {
           {/* 3 Clean Metric Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             {/* 1. Food Cost */}
-            <div className="p-4 rounded-2xl bg-[var(--bg-base)]/70 dark:bg-stone-900/40 border border-[var(--border-subtle)] flex flex-col justify-between space-y-2">
+            <div className="p-4 rounded-2xl bg-[var(--bg-base)]/70 bg-[var(--bg-base)] border border-[var(--border-subtle)] flex flex-col justify-between space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-[var(--text-secondary)]">سهم مواد اولیه</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-200/80 dark:bg-stone-800 text-[var(--text-primary)]">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--bg-card)] dark:bg-[var(--bg-base)] text-[var(--text-primary)]">
                   مواد مصرفی
                 </span>
               </div>
@@ -650,10 +650,10 @@ export const PnLDashboard: React.FC = () => {
             </div>
 
             {/* 2. Labor Cost */}
-            <div className="p-4 rounded-2xl bg-[var(--bg-base)]/70 dark:bg-stone-900/40 border border-[var(--border-subtle)] flex flex-col justify-between space-y-2">
+            <div className="p-4 rounded-2xl bg-[var(--bg-base)]/70 bg-[var(--bg-base)] border border-[var(--border-subtle)] flex flex-col justify-between space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-[var(--text-secondary)]">سهم هزینه نیروی کار</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-200/80 dark:bg-stone-800 text-[var(--text-primary)]">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--bg-card)] dark:bg-[var(--bg-base)] text-[var(--text-primary)]">
                   دستمزد
                 </span>
               </div>
@@ -668,10 +668,10 @@ export const PnLDashboard: React.FC = () => {
             </div>
 
             {/* 3. Total Prime Cost */}
-            <div className="p-4 rounded-2xl bg-[var(--bg-base)]/70 dark:bg-stone-900/40 border border-[var(--border-subtle)] flex flex-col justify-between space-y-2">
+            <div className="p-4 rounded-2xl bg-[var(--bg-base)]/70 bg-[var(--bg-base)] border border-[var(--border-subtle)] flex flex-col justify-between space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-[var(--text-secondary)]">بهای اولیه کل (مواد + دستمزد)</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-200/80 dark:bg-stone-800 text-[var(--text-primary)]">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--bg-card)] dark:bg-[var(--bg-base)] text-[var(--text-primary)]">
                   هدف: ۵۵٪ تا ۶۵٪
                 </span>
               </div>
@@ -687,14 +687,14 @@ export const PnLDashboard: React.FC = () => {
           </div>
 
           {/* Visual Revenue Share Strip with Restored Colors */}
-          <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-3">
+          <div className="p-4 rounded-2xl bg-[var(--bg-base)] bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-3">
             <div className="flex items-center justify-between text-xs font-extrabold text-[var(--text-primary)]">
               <span>تفکیک سهم هزینه‌های مستقیم از درآمد فروش:</span>
               <span className="text-[var(--text-secondary)] font-bold">{formatToman(filteredRevenue).text}</span>
             </div>
 
             {/* Segmented Progress Track with Clear Distinct Colors */}
-            <div className="h-4 w-full rounded-full bg-stone-200 dark:bg-stone-800 flex overflow-hidden p-0.5 border border-[var(--border-subtle)]">
+            <div className="h-4 w-full rounded-full bg-[var(--bg-card)] dark:bg-[var(--bg-base)] flex overflow-hidden p-0.5 border border-[var(--border-subtle)]">
               {filteredRevenue > 0 ? (
                 <>
                   <div
@@ -714,7 +714,7 @@ export const PnLDashboard: React.FC = () => {
                   />
                 </>
               ) : (
-                <div className="h-full w-full bg-stone-300 dark:bg-stone-700 rounded-full" />
+                <div className="h-full w-full bg-[var(--border-functional)] dark:bg-[var(--border-functional)] rounded-full" />
               )}
             </div>
 
@@ -769,7 +769,7 @@ export const PnLDashboard: React.FC = () => {
                 <th className="py-2.5 px-3 text-center">نسبت به فروش</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-100 divide-[var(--border-subtle)]/60 font-medium">
+            <tbody className="divide-y divide-[var(--border-subtle)] divide-[var(--border-subtle)]/60 font-medium">
               {/* Gross Sales */}
               <tr className="bg-emerald-50/40 dark:bg-emerald-950/20 font-black">
                 <td className="py-3 px-3 text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
@@ -1122,7 +1122,7 @@ export const PnLDashboard: React.FC = () => {
                         title="برای مشاهده جزئیات کلیک کنید"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-800 text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-black text-[10px] flex items-center justify-center shrink-0">
+                          <span className="w-5 h-5 rounded-full bg-[var(--bg-card)] dark:bg-[var(--bg-base)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-black text-[10px] flex items-center justify-center shrink-0">
                             {toPersianDigits(idx + 1)}
                           </span>
                           <div>
@@ -1153,7 +1153,7 @@ export const PnLDashboard: React.FC = () => {
                 size="sm"
                 id="open-all-top-sold-footer-btn"
                 onClick={() => setIsTopSoldModalOpen(true)}
-                className="w-full h-8 text-xs font-black text-[var(--brand-primary)] bg-[var(--bg-base)] hover:bg-stone-200/60 dark:hover:bg-stone-800/80 border border-[var(--border-subtle)] rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+                className="w-full h-8 text-xs font-black text-[var(--brand-primary)] bg-[var(--bg-base)] hover:bg-[var(--bg-card)]/60 dark:hover:bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer"
               >
                 <span>مشاهده گزارش و لیست کامل ({toPersianDigits(allSoldItemsInPeriod.length)} آیتم)</span>
                 <ChevronLeft className="h-3.5 w-3.5" />

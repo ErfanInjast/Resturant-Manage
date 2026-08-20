@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Smartphone, Zap, ArrowLeft, X, Sparkles, AlertCircle } from 'lucide-react';
+import { Smartphone, Zap, ArrowLeft, X, Sparkles } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { useScreenSize } from '../../lib/hooks/useScreenSize';
+import { Button } from '../ui/Button';
 
 export const MobileRestrictionGuard: React.FC = () => {
   const { setIsSimpleMode, notify } = useAppStore();
@@ -25,17 +26,17 @@ export const MobileRestrictionGuard: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-4 dir-rtl text-right font-['IRANYekan','iranyekan',sans-serif]">
-      <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 dir-rtl text-right font-['IRANYekan','iranyekan',sans-serif]">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
         
         {/* Header Icon */}
         <div className="flex items-center justify-between">
-          <div className="p-2.5 rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] flex items-center justify-center">
-            <Smartphone className="h-6 w-6" />
+          <div className="p-2.5 rounded-xl bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] flex items-center justify-center border border-[var(--brand-primary)]/20">
+            <Smartphone className="h-5 w-5" />
           </div>
           <button
             onClick={handleSimpleMode}
-            className="text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-xl hover:bg-[var(--bg-base)] hover:bg-[var(--bg-base)] transition-colors"
+            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-xl hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
             title="بستن پیام"
             aria-label="بستن پیام"
           >
@@ -44,21 +45,21 @@ export const MobileRestrictionGuard: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5 text-[var(--brand-primary)] font-extrabold text-xs">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5 text-[var(--brand-primary)] font-black text-xs">
             <Sparkles className="h-4 w-4 shrink-0" />
             <span>راهنمای نمای نمایشگر</span>
           </div>
-          <h2 className="text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">
+          <h2 className="text-base font-black text-[var(--text-primary)]">
             پیشنهاد برای تجربه بهتر در موبایل
           </h2>
-          <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)] leading-relaxed font-medium">
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-medium">
             برای راحتی و سرعت بیشتر روی صفحه نمایش کوچک، پیشنهاد می‌کنیم از <strong>«حالت ساده»</strong> استفاده کنید. همچنین می‌توانید وارد <strong>«حالت کامل»</strong> شوید.
           </p>
         </div>
 
         {/* Info box */}
-        <div className="p-3.5 bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium leading-relaxed space-y-1.5">
+        <div className="p-3.5 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-xl text-[11px] text-[var(--text-secondary)] font-medium leading-relaxed space-y-1.5">
           <p className="font-bold text-[var(--brand-primary)]">گزینه‌های پیش روی شما:</p>
           <ul className="list-disc list-inside space-y-1 opacity-90">
             <li><strong>حالت ساده:</strong> ثبت سریع فروش روزانه و مشاهده ۴ شاخص اصلی کلیدی</li>
@@ -68,22 +69,24 @@ export const MobileRestrictionGuard: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="pt-1 space-y-2">
-          <button
+          <Button
             type="button"
+            variant="primary"
             onClick={handleSimpleMode}
-            className="w-full h-11 bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white font-black rounded-2xl text-xs flex items-center justify-center gap-2 shadow-md shadow-[var(--brand-primary)]/20 transition-all cursor-pointer"
+            className="w-full h-10 text-xs font-black rounded-xl gap-2"
           >
             <Zap className="h-4 w-4" />
             <span>ورود به حالت ساده (پیشنهادی)</span>
             <ArrowLeft className="h-4 w-4" />
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
             onClick={handleFullMode}
-            className="w-full h-10 bg-[var(--bg-base)] border border-[var(--border-subtle)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] font-bold rounded-2xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+            className="w-full h-10 text-xs font-bold rounded-xl"
           >
             <span>ورود به حالت کامل در موبایل</span>
-          </button>
+          </Button>
         </div>
 
       </div>

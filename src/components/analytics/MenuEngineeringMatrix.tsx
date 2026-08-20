@@ -385,7 +385,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
   return (
     <div className="space-y-6">
       {/* 1. Header & Primary View Navigation Tabs */}
-      <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-3xl p-4 sm:p-5 shadow-2xs space-y-4">
+      <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl p-4 sm:p-5 shadow-2xs space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] dark:bg-[var(--brand-primary)]/20 shrink-0">
@@ -740,7 +740,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                 className="divide-y divide-[var(--border-subtle)] text-xs"
               >
                 {filteredAndSortedItems.length === 0 ? (
-                  <div className="p-8 text-center text-[var(--text-secondary)] font-bold text-xs bg-white dark:bg-stone-950/25">
+                  <div className="p-8 text-center text-[var(--text-secondary)] font-bold text-xs bg-white dark:bg-[var(--bg-card)]">
                     هیچ محصولی مطابق با جستجو یا فیلتر انتخابی یافت نشد.
                   </div>
                 ) : (
@@ -751,7 +751,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                       <motion.div
                         key={item.id}
                         variants={tableRowVariants}
-                        className="p-4 space-y-3.5 bg-white dark:bg-stone-950/25 transition-colors"
+                        className="p-4 space-y-3.5 bg-white dark:bg-[var(--bg-card)] transition-colors"
                       >
                         {/* Title and Badge header */}
                         <div className="flex items-start justify-between gap-2">
@@ -772,7 +772,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                         </div>
 
                         {/* Financial and volume metrics grid */}
-                        <div className="grid grid-cols-2 gap-2 bg-[var(--bg-base)] dark:bg-stone-900/40 p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-stone-900">
+                        <div className="grid grid-cols-2 gap-2 bg-[var(--bg-base)] dark:bg-[var(--bg-base)] p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                           <div className="space-y-0.5">
                             <span className="text-[9px] text-[var(--text-secondary)] font-bold block">قیمت و سود هر پرس:</span>
                             <div className="text-[11px] font-black text-[var(--text-primary)]">
@@ -786,7 +786,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                             </div>
                           </div>
 
-                          <div className="space-y-0.5 border-r border-[var(--border-subtle)]/50 dark:border-stone-800 pr-2.5">
+                          <div className="space-y-0.5 border-r border-[var(--border-subtle)]/50 dark:border-[var(--border-subtle)] pr-2.5">
                             <span className="text-[9px] text-[var(--text-secondary)] font-bold block">مجموع عملکرد ۳۰ روزه:</span>
                             <div className="text-[11px] font-black text-[var(--text-primary)]">
                               تعداد فروش: {formatNumber(item.computedVolume)} پرس
@@ -805,7 +805,7 @@ export const MenuEngineeringMatrix: React.FC<MenuEngineeringMatrixProps> = ({
                           <button
                             type="button"
                             onClick={() => setSelectedDetailItem(item)}
-                            className="flex items-center gap-1.5 px-4 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--brand-primary-subtle)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                            className="flex items-center gap-1.5 px-4 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--brand-primary-subtle)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px]"
                           >
                             <Eye className="h-4 w-4 text-[var(--brand-primary)]" />
                             <span>مشاهده شناسنامه محصول</span>

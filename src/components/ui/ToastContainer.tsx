@@ -20,36 +20,36 @@ const ToastItem: React.FC<{ toast: ToastNotification }> = ({ toast }) => {
     switch (toast.type) {
       case 'success':
         return {
-          icon: <CheckCircle2 className="h-5 w-5 text-[var(--status-success-text)] dark:text-[var(--status-success-text)] shrink-0 mt-0.5" />,
-          bgColor: 'bg-emerald-50 dark:bg-emerald-950/95 border-[var(--status-success-text)]/30 dark:border-[var(--status-success-text)]',
-          textColor: 'text-emerald-900 dark:text-emerald-100',
-          badgeColor: 'bg-emerald-500',
-          progressTrack: 'bg-emerald-200/50 dark:bg-emerald-800/40',
+          icon: <CheckCircle2 className="h-5 w-5 text-[var(--status-success-text)] shrink-0 mt-0.5" />,
+          bgColor: 'bg-[var(--bg-card)] border-[var(--status-success-text)]/40',
+          textColor: 'text-[var(--text-primary)]',
+          badgeColor: 'bg-[var(--status-success-text)]',
+          progressTrack: 'bg-[var(--status-success-bg)]',
         };
       case 'error':
         return {
-          icon: <AlertTriangle className="h-5 w-5 text-[var(--status-error-text)] dark:text-[var(--status-error-text)] shrink-0 mt-0.5" />,
-          bgColor: 'bg-rose-50 dark:bg-rose-950/95 border-[var(--status-error-text)]/30 dark:border-[var(--status-error-text)]',
-          textColor: 'text-rose-900 dark:text-rose-100',
-          badgeColor: 'bg-rose-500',
-          progressTrack: 'bg-rose-200/50 dark:bg-rose-800/40',
+          icon: <AlertTriangle className="h-5 w-5 text-[var(--status-error-text)] shrink-0 mt-0.5" />,
+          bgColor: 'bg-[var(--bg-card)] border-[var(--status-error-text)]/40',
+          textColor: 'text-[var(--text-primary)]',
+          badgeColor: 'bg-[var(--status-error-text)]',
+          progressTrack: 'bg-[var(--status-error-bg)]',
         };
       case 'warning':
         return {
-          icon: <AlertCircle className="h-5 w-5 text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)] shrink-0 mt-0.5" />,
-          bgColor: 'bg-amber-50 dark:bg-amber-950/95 border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]',
-          textColor: 'text-[var(--status-warning-text)] dark:text-amber-100',
-          badgeColor: 'bg-amber-500',
-          progressTrack: 'bg-amber-200/50 dark:bg-amber-800/40',
+          icon: <AlertCircle className="h-5 w-5 text-[var(--status-warning-text)] shrink-0 mt-0.5" />,
+          bgColor: 'bg-[var(--bg-card)] border-[var(--status-warning-text)]/40',
+          textColor: 'text-[var(--text-primary)]',
+          badgeColor: 'bg-[var(--status-warning-text)]',
+          progressTrack: 'bg-[var(--status-warning-bg)]',
         };
       case 'info':
       default:
         return {
-          icon: <Info className="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />,
-          bgColor: 'bg-sky-50 dark:bg-sky-950/95 border-sky-200 dark:border-sky-800/90',
-          textColor: 'text-sky-900 dark:text-sky-100',
-          badgeColor: 'bg-sky-500',
-          progressTrack: 'bg-sky-200/50 dark:bg-sky-800/40',
+          icon: <Info className="h-5 w-5 text-[var(--brand-primary)] shrink-0 mt-0.5" />,
+          bgColor: 'bg-[var(--bg-card)] border-[var(--brand-primary)]/40',
+          textColor: 'text-[var(--text-primary)]',
+          badgeColor: 'bg-[var(--brand-primary)]',
+          progressTrack: 'bg-[var(--brand-primary-subtle)]',
         };
     }
   };
@@ -81,7 +81,7 @@ const ToastItem: React.FC<{ toast: ToastNotification }> = ({ toast }) => {
       <div className="flex-1 min-w-0 pr-0.5">
         <h4 className={`text-xs font-black leading-tight ${style.textColor}`}>{toast.title}</h4>
         {toast.message && (
-          <p className="text-[11px] font-medium opacity-90 mt-1 leading-relaxed text-[var(--text-primary)] dark:text-[var(--text-secondary)]">
+          <p className="text-[11px] font-medium opacity-90 mt-1 leading-relaxed text-[var(--text-secondary)]">
             {toast.message}
           </p>
         )}
@@ -89,7 +89,7 @@ const ToastItem: React.FC<{ toast: ToastNotification }> = ({ toast }) => {
       <button
         type="button"
         onClick={() => removeToast(toast.id)}
-        className="text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded-lg hover:bg-[var(--bg-base)] transition-colors cursor-pointer shrink-0"
         aria-label="بستن پیام"
       >
         <X className="h-4 w-4" />

@@ -69,6 +69,15 @@ export interface MenuItem {
   updatedAt: string;
 }
 
+export interface ConsumedIngredientSnapshot {
+  ingredientId: number;
+  ingredientName?: string;
+  unit?: UnitType;
+  quantityPerPortion: number;
+  totalQuantity: number;
+  unitCost?: number;
+}
+
 export interface DailySalesItem {
   menuItemId: number;
   menuItemName: string;
@@ -79,6 +88,7 @@ export interface DailySalesItem {
   totalRevenue: number;
   totalCost: number;        // Total Food Cost (COGS)
   totalLaborCost?: number;  // Total Direct Labor Cost
+  ingredientsSnapshot?: ConsumedIngredientSnapshot[]; // Recipe ingredients snapshot at time of sale
 }
 
 export interface DailySalesRecord {

@@ -485,6 +485,14 @@ export const SalesManager: React.FC = () => {
       const unitSellingPrice = mi?.sellingPrice || 0;
       const unitCost = mi?.foodCost ?? mi?.primeCost ?? 0;
       const unitLaborCost = mi?.laborCost || 0;
+      const ingredientsSnapshot = (mi?.ingredients || []).map((ri) => ({
+        ingredientId: Number(ri.ingredientId),
+        ingredientName: ri.ingredientName,
+        unit: ri.unit,
+        quantityPerPortion: ri.quantity || 0,
+        totalQuantity: (ri.quantity || 0) * Number(si.quantity),
+        unitCost: ri.unitCost || 0,
+      }));
       return {
         menuItemId: Number(si.menuItemId),
         menuItemName: mi?.name || 'محصول منو',
@@ -495,6 +503,7 @@ export const SalesManager: React.FC = () => {
         totalRevenue: roundCurrency(si.quantity * unitSellingPrice),
         totalCost: roundCurrency(si.quantity * unitCost),
         totalLaborCost: roundCurrency(si.quantity * unitLaborCost),
+        ingredientsSnapshot,
       };
     });
 
@@ -503,7 +512,7 @@ export const SalesManager: React.FC = () => {
   const modalTotalLaborCost = calculatedItems.reduce((acc, curr) => acc + (curr.totalLaborCost || 0), 0);
 
   const adjustInventoryForSalesItems = async (
-    items: { menuItemId: number; quantity: number }[],
+    items: DailySalesItem[] | { menuItemId: number; quantity: number; ingredientsSnapshot?: any[] }[],
     multiplier: 1 | -1
   ) => {
     const allMenuItems = await db.menuItems.toArray();
@@ -511,14 +520,30 @@ export const SalesManager: React.FC = () => {
 
     const totalDeltaMap = new Map<number, number>();
     for (const sItem of items) {
-      const menuItem = menuItemMap.get(Number(sItem.menuItemId));
-      if (!menuItem || !menuItem.ingredients) continue;
+      const soldQty = Number(sItem.quantity) || 0;
+      if (soldQty <= 0) continue;
 
-      for (const recipeIng of menuItem.ingredients) {
-        const ingId = Number(recipeIng.ingredientId);
-        if (!ingId) continue;
-        const consumedQty = recipeIng.quantity * sItem.quantity;
-        totalDeltaMap.set(ingId, (totalDeltaMap.get(ingId) || 0) + consumedQty);
+      if (sItem.ingredientsSnapshot && sItem.ingredientsSnapshot.length > 0) {
+        // Use exact historical snapshot captured at time of sale
+        for (const snap of sItem.ingredientsSnapshot) {
+          const ingId = Number(snap.ingredientId);
+          if (!ingId) continue;
+          const consumedQty = snap.totalQuantity !== undefined
+            ? snap.totalQuantity
+            : (snap.quantityPerPortion || 0) * soldQty;
+          totalDeltaMap.set(ingId, (totalDeltaMap.get(ingId) || 0) + consumedQty);
+        }
+      } else {
+        // Fallback for legacy sales records without snapshot
+        const menuItem = menuItemMap.get(Number(sItem.menuItemId));
+        if (!menuItem || !menuItem.ingredients) continue;
+
+        for (const recipeIng of menuItem.ingredients) {
+          const ingId = Number(recipeIng.ingredientId);
+          if (!ingId) continue;
+          const consumedQty = (recipeIng.quantity || 0) * soldQty;
+          totalDeltaMap.set(ingId, (totalDeltaMap.get(ingId) || 0) + consumedQty);
+        }
       }
     }
 
@@ -738,7 +763,7 @@ export const SalesManager: React.FC = () => {
   const nextMonthProjectedRev = roundCurrency(28 * avgDailyRev);
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -784,7 +809,7 @@ export const SalesManager: React.FC = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <div className="px-3.5 py-2 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/60 border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-right">
+              <div className="px-3.5 py-2 rounded-xl bg-[var(--bg-base)] dark:bg-[var(--bg-base)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-right">
                 <span className="block text-[10px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-bold mb-0.5">
                   پیش‌بینی هفته آینده
                 </span>
@@ -793,7 +818,7 @@ export const SalesManager: React.FC = () => {
                 </span>
               </div>
 
-              <div className="px-3.5 py-2 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/60 border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-right">
+              <div className="px-3.5 py-2 rounded-xl bg-[var(--bg-base)] dark:bg-[var(--bg-base)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-right">
                 <span className="block text-[10px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-bold mb-0.5">
                   پیش‌بینی ۴ هفته (یک‌ماه)
                 </span>
@@ -1076,7 +1101,7 @@ export const SalesManager: React.FC = () => {
                           <motion.div
                             key={record.id}
                             variants={tableRowVariants}
-                            className="p-4 space-y-3.5 bg-white dark:bg-stone-950/25 transition-colors"
+                            className="p-4 space-y-3.5 bg-white dark:bg-[var(--bg-card)] transition-colors"
                           >
                             {/* Card Header: Date & Quantity */}
                             <div className="flex items-start justify-between gap-2">
@@ -1099,20 +1124,20 @@ export const SalesManager: React.FC = () => {
                             </div>
 
                             {/* Financial Summary Grid */}
-                            <div className="grid grid-cols-3 gap-2 bg-[var(--bg-base)] dark:bg-stone-900/40 p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-stone-900">
+                            <div className="grid grid-cols-3 gap-2 bg-[var(--bg-base)] dark:bg-[var(--bg-base)] p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                               <div className="space-y-0.5 text-center">
                                 <span className="block text-[9px] text-[var(--text-secondary)] font-bold">درآمد کل:</span>
                                 <span className="text-[11px] font-black text-[var(--status-success-text)]">
                                   {formatToman(record.totalRevenue).text}
                                 </span>
                               </div>
-                              <div className="space-y-0.5 text-center border-r border-[var(--border-subtle)]/50 dark:border-stone-800">
+                              <div className="space-y-0.5 text-center border-r border-[var(--border-subtle)]/50 dark:border-[var(--border-subtle)]">
                                 <span className="block text-[9px] text-[var(--text-secondary)] font-bold">بهای مواد مصرفی:</span>
                                 <span className="text-[11px] font-black text-[var(--brand-primary)] dark:text-stone-300">
                                   {formatToman(record.totalCOGS).text}
                                 </span>
                               </div>
-                              <div className="space-y-0.5 text-center border-r border-[var(--border-subtle)]/50 dark:border-stone-800">
+                              <div className="space-y-0.5 text-center border-r border-[var(--border-subtle)]/50 dark:border-[var(--border-subtle)]">
                                 <span className="block text-[9px] text-[var(--text-secondary)] font-bold">سود ناخالص:</span>
                                 <span className={`text-[11px] font-black ${grossProfit >= 0 ? 'text-[var(--status-success-text)]' : 'text-[var(--status-error-text)]'}`}>
                                   {formatToman(grossProfit).text}
@@ -1124,7 +1149,7 @@ export const SalesManager: React.FC = () => {
                             <div className="flex items-center justify-end gap-1.5 pt-1">
                               <button
                                 onClick={() => setDetailRecord(record)}
-                                className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--brand-primary-subtle)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                                className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--brand-primary-subtle)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px]"
                                 title="مشاهده جزئیات فاکتور"
                               >
                                 <Eye className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
@@ -1133,7 +1158,7 @@ export const SalesManager: React.FC = () => {
 
                               <button
                                 onClick={() => openEditSalesModal(record)}
-                                className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
+                                className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
                                 title="ویرایش"
                               >
                                 <Pencil className="h-3.5 w-3.5" />
@@ -1141,7 +1166,7 @@ export const SalesManager: React.FC = () => {
 
                               <button
                                 onClick={() => record.id && handleDeleteSalesRecord(record.id)}
-                                className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
+                                className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
                                 title="حذف"
                               >
                                 <Trash2 className="h-3.5 w-3.5 text-[var(--status-error-text)]" />
@@ -1384,7 +1409,7 @@ export const SalesManager: React.FC = () => {
                     return (
                       <div
                         key={group.date}
-                        className="p-4 space-y-3.5 bg-white dark:bg-stone-950/25 transition-colors"
+                        className="p-4 space-y-3.5 bg-white dark:bg-[var(--bg-card)] transition-colors"
                       >
                         {/* Card Header: Date & Waste count */}
                         <div className="flex items-start justify-between gap-2">
@@ -1404,7 +1429,7 @@ export const SalesManager: React.FC = () => {
                         </div>
 
                         {/* Damage & Reasons Summary */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--bg-base)] dark:bg-stone-900/40 p-3 rounded-xl border border-[var(--border-subtle)] dark:border-stone-900">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--bg-base)] dark:bg-[var(--bg-base)] p-3 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                           <div className="space-y-0.5">
                             <span className="block text-[9px] text-[var(--text-secondary)] font-bold">مجموع خسارت مالی:</span>
                             <span className="text-sm font-black text-[var(--status-error-text)]">
@@ -1419,7 +1444,7 @@ export const SalesManager: React.FC = () => {
                                 <Badge
                                   key={i}
                                   variant="outline"
-                                  className="text-[9px] bg-white dark:bg-stone-900 text-[var(--status-error-text)] dark:text-rose-300 border-[var(--status-error-text)]/20 px-1.5 py-0"
+                                  className="text-[9px] bg-white dark:bg-[var(--bg-card)] text-[var(--status-error-text)] dark:text-rose-300 border-[var(--status-error-text)]/20 px-1.5 py-0"
                                 >
                                   {r}
                                 </Badge>
@@ -1437,7 +1462,7 @@ export const SalesManager: React.FC = () => {
                         <div className="flex items-center justify-end gap-1.5 pt-1">
                           <button
                             onClick={() => setDetailWasteDate(group.date)}
-                            className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                            className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px]"
                             title="مشاهده جزئیات ضایعات"
                           >
                             <Eye className="h-3.5 w-3.5 text-[var(--status-error-text)]" />
@@ -1449,7 +1474,7 @@ export const SalesManager: React.FC = () => {
                               setWasteDate(group.date);
                               openWasteModal();
                             }}
-                            className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
+                            className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
                             title="ثبت ضایعات در این تاریخ"
                           >
                             <Plus className="h-3.5 w-3.5" />
@@ -1457,7 +1482,7 @@ export const SalesManager: React.FC = () => {
 
                           <button
                             onClick={() => handleDeleteWasteGroup(group)}
-                            className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
+                            className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
                             title="حذف کلیه ضایعات این تاریخ"
                           >
                             <Trash2 className="h-3.5 w-3.5 text-[var(--status-error-text)]" />
@@ -1496,45 +1521,38 @@ export const SalesManager: React.FC = () => {
         }}
         title={editingRecordId ? 'ویرایش گزارش فروش روزانه' : 'ثبت فروش روز جدید'}
         description={editingRecordId ? 'تعداد فروش محصولات در این تاریخ را اصلاح و ویرایش کنید.' : 'تعداد فروش هر محصول منو در این روز را مشخص کنید.'}
-        maxWidth="2xl"
+        maxWidth="3xl"
       >
-        <form onSubmit={handleSaveSales} noValidate className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <form onSubmit={handleSaveSales} noValidate className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">
-                  تاریخ فروش
-                </label>
-              </div>
-
-              <div className="w-full">
-                <JalaliDatePicker
-                  value={salesDate}
-                  onChange={setSalesDate}
-                  minDate={MIN_JALALI_DATE}
-                  maxDate={getTodayJalaliIso()}
-                  showSteppers={true}
-                  className="w-full"
-                />
-              </div>
+              <JalaliDatePicker
+                label="تاریخ فروش"
+                value={salesDate}
+                onChange={setSalesDate}
+                minDate={MIN_JALALI_DATE}
+                maxDate={getTodayJalaliIso()}
+                showSteppers={true}
+                className="w-full"
+              />
 
               {existingSalesRecord && (
-                <div className="mt-1.5 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--status-warning-bg)] text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)] border border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]/30 text-[11px] font-bold">
-                  <Pencil className="h-3 w-3 shrink-0 text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]" />
+                <div className="mt-1.5 flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[var(--status-warning-bg)] text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)] border border-[var(--status-warning-text)]/30 text-[11px] font-bold">
+                  <Pencil className="h-3 w-3 shrink-0 text-[var(--status-warning-text)]" />
                   <span>اطلاعات این تاریخ بارگذاری شد (ویرایش فاکتور موجود)</span>
                 </div>
               )}
 
               {/* Quick Preset Buttons */}
               <div className="flex items-center gap-1.5 mt-2">
-                <span className="text-[10px] text-[var(--text-secondary)] font-bold shrink-0">میانبر:</span>
+                <span className="text-[11px] text-[var(--text-secondary)] font-bold shrink-0">میانبر:</span>
                 <button
                   type="button"
                   onClick={() => setSalesDate(getTodayJalaliIso())}
-                  className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold cursor-pointer transition-colors ${
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition-colors ${
                     normalizeDateStr(salesDate) === normalizeDateStr(getTodayJalaliIso())
                       ? 'bg-[var(--brand-primary)] text-white'
-                      : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                      : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-base)] border border-[var(--border-subtle)]'
                   }`}
                 >
                   امروز
@@ -1542,10 +1560,10 @@ export const SalesManager: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSalesDate(getShiftedJalaliIso(getTodayJalaliIso(), -1))}
-                  className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold cursor-pointer transition-colors ${
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition-colors ${
                     normalizeDateStr(salesDate) === normalizeDateStr(getShiftedJalaliIso(getTodayJalaliIso(), -1))
                       ? 'bg-[var(--brand-primary)] text-white'
-                      : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                      : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-base)] border border-[var(--border-subtle)]'
                   }`}
                 >
                   دیروز
@@ -1553,10 +1571,10 @@ export const SalesManager: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSalesDate(getShiftedJalaliIso(getTodayJalaliIso(), -2))}
-                  className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold cursor-pointer transition-colors ${
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition-colors ${
                     normalizeDateStr(salesDate) === normalizeDateStr(getShiftedJalaliIso(getTodayJalaliIso(), -2))
                       ? 'bg-[var(--brand-primary)] text-white'
-                      : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                      : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-base)] border border-[var(--border-subtle)]'
                   }`}
                 >
                   پریروز
@@ -1584,23 +1602,23 @@ export const SalesManager: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] pt-1 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-            <span>محصولات در فاکتور ({formatNumber(salesItems.filter((i) => i.quantity > 0).length)} نوع)</span>
-            <div className="flex gap-3">
+          <div className="flex items-center justify-between text-xs font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)] pt-1.5 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+            <span>اقلام در فاکتور ({formatNumber(salesItems.filter((i) => i.quantity > 0).length)} محصول)</span>
+            <div className="flex gap-2.5">
               <button
                 type="button"
                 onClick={() => {
                   setSalesItems(menuItems.map((m) => ({ menuItemId: m.id!, quantity: 1 })));
                 }}
-                className="text-[11px] font-extrabold text-[var(--brand-primary)] hover:underline cursor-pointer"
+                className="text-xs font-black text-[var(--brand-primary)] hover:underline cursor-pointer"
               >
-                + افزودن همه محصولات
+                + افزودن همه
               </button>
               {salesItems.some((i) => i.quantity > 0) && (
                 <button
                   type="button"
                   onClick={() => setSalesItems([])}
-                  className="text-[11px] font-extrabold text-[var(--text-secondary)] hover:text-[var(--status-error-text)] cursor-pointer"
+                  className="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--status-error-text)] cursor-pointer"
                 >
                   پاکسازی فاکتور
                 </button>
@@ -1609,15 +1627,12 @@ export const SalesManager: React.FC = () => {
           </div>
 
           {/* Selected Items List */}
-          <div className="max-h-60 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+          <div className="max-h-44 overflow-y-auto space-y-1.5 pr-0.5 custom-scrollbar">
             {salesItems.filter((si) => si.quantity > 0).length === 0 ? (
-              <div className="p-6 text-center border-2 border-dashed border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl bg-[var(--bg-base)]/50 dark:bg-[var(--bg-card)]">
-                <ShoppingCart className="h-8 w-8 text-stone-300 dark:text-[var(--text-secondary)] mx-auto mb-2" />
+              <div className="p-4 text-center border border-dashed border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-xl bg-[var(--bg-base)]/50 dark:bg-[var(--bg-card)]">
+                <ShoppingCart className="h-5 w-5 text-stone-300 dark:text-[var(--text-secondary)] mx-auto mb-1" />
                 <p className="text-xs font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
-                  هیچ محصولی هنوز به فاکتور اضافه نشده است.
-                </p>
-                <p className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] mt-1">
-                  از منوی کشویی بالا، محصول مورد نظر را جستجو و انتخاب کنید.
+                  هیچ محصولی هنوز به فاکتور اضافه نشده است. از منوی کشویی بالا، محصول را انتخاب کنید.
                 </p>
               </div>
             ) : (
@@ -1630,10 +1645,10 @@ export const SalesManager: React.FC = () => {
                   return (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between p-3 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-[var(--bg-base)]/80 dark:bg-[var(--bg-card)] hover:bg-white hover:bg-[var(--bg-base)] transition-colors gap-2"
+                      className="flex items-center justify-between p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] bg-[var(--bg-base)]/70 dark:bg-[var(--bg-card)] hover:bg-white transition-colors gap-2 shadow-2xs"
                     >
                       <div className="flex-1 min-w-0">
-                        <span className="font-extrabold text-xs text-[var(--text-primary)] dark:text-[var(--text-primary)] block truncate">
+                        <span className="font-black text-xs text-[var(--text-primary)] dark:text-[var(--text-primary)] block truncate">
                           {item.name}
                         </span>
                         <span className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium">
@@ -1642,12 +1657,12 @@ export const SalesManager: React.FC = () => {
                       </div>
 
                       {/* Stepper Controls */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div className="flex items-center gap-1.5 bg-white dark:bg-[var(--bg-card)] p-1 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-functional)]">
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-1 bg-white dark:bg-[var(--bg-card)] p-0.5 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-functional)] shadow-2xs">
                           <button
                             type="button"
                             onClick={() => item.id && updateItemQty(item.id, -1)}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--bg-base)] dark:bg-stone-700 text-[var(--text-primary)] dark:text-[var(--text-primary)] font-bold hover:bg-stone-200 dark:hover:bg-stone-600 cursor-pointer transition-colors text-xs"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--bg-base)] dark:bg-[var(--border-functional)] text-[var(--text-primary)] font-bold hover:bg-[var(--bg-base)] cursor-pointer transition-colors text-xs"
                           >
                             -
                           </button>
@@ -1662,7 +1677,7 @@ export const SalesManager: React.FC = () => {
                                 setDirectItemQty(item.id, eng === '' ? 0 : Number(eng));
                               }
                             }}
-                            className="w-12 h-7 rounded-md bg-transparent text-center font-black text-xs text-[var(--text-primary)] dark:text-[var(--text-primary)] focus:outline-hidden focus:ring-1 focus:ring-[var(--brand-primary)]"
+                            className="w-10 h-7 rounded bg-transparent text-center font-black text-xs text-[var(--text-primary)] dark:text-[var(--text-primary)] focus:outline-hidden"
                           />
 
                           <button
@@ -1690,34 +1705,34 @@ export const SalesManager: React.FC = () => {
           </div>
 
           {/* Modal Summary Banner */}
-          <div className="rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] p-4 flex justify-between items-center text-xs shadow-2xs transition-colors">
+          <div className="rounded-xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] p-3 flex justify-between items-center text-xs">
             <div>
-              <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-extrabold block">جمع درآمد روزانه:</span>
-              <span className="text-base font-black text-[var(--status-success-text)] dark:text-[var(--status-success-text)] mt-0.5 block">
+              <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-bold block text-[11px]">جمع درآمد روزانه:</span>
+              <span className="text-sm font-black text-[var(--status-success-text)] dark:text-[var(--status-success-text)] mt-0.5 block">
                 {formatToman(modalTotalRevenue).text}
               </span>
             </div>
             <div className="text-left dir-ltr">
-              <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-extrabold block">جمع بهای تمام شده تولید:</span>
-              <span className="text-base font-black text-[var(--brand-primary)] dark:text-[var(--status-error-text)] mt-0.5 block">
+              <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-bold block text-[11px]">جمع بهای تمام شده:</span>
+              <span className="text-sm font-black text-[var(--brand-primary)] dark:text-[var(--status-error-text)] mt-0.5 block">
                 {formatToman(modalTotalCOGS).text}
               </span>
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => {
                 setIsSalesModalOpen(false);
                 setEditingRecordId(null);
               }}
-              className="h-10 px-4 rounded-xl text-xs font-bold"
             >
               انصراف
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting} className="h-10 px-4 rounded-xl text-xs font-black">
+            <Button type="submit" variant="primary" size="sm" disabled={isSubmitting} className="font-black">
               {isSubmitting ? 'در حال ثبت...' : (editingRecordId ? 'ذخیره تغییرات' : 'ثبت فروش امروز')}
             </Button>
           </div>
@@ -1733,18 +1748,14 @@ export const SalesManager: React.FC = () => {
         }}
         title={editingWasteId ? "ویرایش گزارش ضایعات" : "ثبت ضایعات و آسیب‌دیدگی انبار"}
         description={editingWasteId ? "مشخصات و میزان خسارت ضایعات را ویرایش کنید." : "انتخاب ماده اولیه یا آیتم منو جهت محاسبه خودکار خسارت مالی"}
+        maxWidth="2xl"
       >
-        <form onSubmit={handleSaveWaste} noValidate className="space-y-5">
-          {/* 0. Date Selector */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">
-                تاریخ ثبت ضایعات
-              </label>
-            </div>
-
-            <div className="w-full">
+        <form onSubmit={handleSaveWaste} noValidate className="space-y-3">
+          {/* Row 1: Date and Type */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
+            <div>
               <JalaliDatePicker
+                label="تاریخ ثبت ضایعات"
                 value={wasteDate}
                 onChange={setWasteDate}
                 minDate={MIN_JALALI_DATE}
@@ -1754,154 +1765,98 @@ export const SalesManager: React.FC = () => {
               />
             </div>
 
-            {/* Quick Preset Buttons */}
-            <div className="flex items-center gap-1.5 mt-2">
-              <span className="text-[10px] text-[var(--text-secondary)] font-bold shrink-0">میانبر:</span>
-              <button
-                type="button"
-                onClick={() => setWasteDate(getTodayJalaliIso())}
-                className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold cursor-pointer transition-colors ${
-                  normalizeDateStr(wasteDate) === normalizeDateStr(getTodayJalaliIso())
-                    ? 'bg-rose-600 text-white'
-                    : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
-                }`}
-              >
-                امروز
-              </button>
-              <button
-                type="button"
-                onClick={() => setWasteDate(getShiftedJalaliIso(getTodayJalaliIso(), -1))}
-                className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold cursor-pointer transition-colors ${
-                  normalizeDateStr(wasteDate) === normalizeDateStr(getShiftedJalaliIso(getTodayJalaliIso(), -1))
-                    ? 'bg-rose-600 text-white'
-                    : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
-                }`}
-              >
-                دیروز
-              </button>
-              <button
-                type="button"
-                onClick={() => setWasteDate(getShiftedJalaliIso(getTodayJalaliIso(), -2))}
-                className={`px-2 py-0.5 rounded-lg text-[10px] font-extrabold cursor-pointer transition-colors ${
-                  normalizeDateStr(wasteDate) === normalizeDateStr(getShiftedJalaliIso(getTodayJalaliIso(), -2))
-                    ? 'bg-rose-600 text-white'
-                    : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:bg-stone-200 dark:hover:bg-stone-700'
-                }`}
-              >
-                پریروز
-              </button>
+            <div>
+              <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] mb-1.5">
+                نوع ضایعات
+              </label>
+              <div className="grid grid-cols-2 gap-1.5 p-1 h-10 bg-[var(--bg-base)] dark:bg-[var(--bg-card)] rounded-xl border border-[var(--border-functional)]">
+                <button
+                  type="button"
+                  onClick={() => setWasteType('ingredient')}
+                  className={cn(
+                    'flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-xs font-black transition-all cursor-pointer h-full',
+                    wasteType === 'ingredient'
+                      ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs border border-[var(--border-subtle)] dark:border-[var(--border-functional)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  )}
+                >
+                  <Package className="h-3.5 w-3.5" />
+                  <span>ماده اولیه</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setWasteType('menuItem')}
+                  className={cn(
+                    'flex items-center justify-center gap-1.5 py-1 px-2 rounded-lg text-xs font-black transition-all cursor-pointer h-full',
+                    wasteType === 'menuItem'
+                      ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-2xs border border-[var(--border-subtle)] dark:border-[var(--border-functional)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  )}
+                >
+                  <Utensils className="h-3.5 w-3.5" />
+                  <span>آیتم منو</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* 1. Type Selector Toggle */}
-          <div>
-            <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] mb-2">
-              نوع ضایعات
-            </label>
-            <div className="grid grid-cols-2 gap-2 p-1.5 bg-[var(--bg-base)] dark:bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)] dark:border-[var(--border-functional)]">
-              <button
-                type="button"
-                onClick={() => setWasteType('ingredient')}
-                className={cn(
-                  'flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black transition-all cursor-pointer',
-                  wasteType === 'ingredient'
-                    ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-xs border border-[var(--border-subtle)] dark:border-[var(--border-functional)]'
-                    : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)]'
-                )}
-              >
-                <Package className="h-4 w-4" />
-                <span>ماده اولیه (انبار)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setWasteType('menuItem')}
-                className={cn(
-                  'flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black transition-all cursor-pointer',
-                  wasteType === 'menuItem'
-                    ? 'bg-white dark:bg-[var(--bg-card)] text-[var(--brand-primary)] shadow-xs border border-[var(--border-subtle)] dark:border-[var(--border-functional)]'
-                    : 'text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)]'
-                )}
-              >
-                <Utensils className="h-4 w-4" />
-                <span>آیتم منو (محصول آماده)</span>
-              </button>
-            </div>
-          </div>
-
-          {/* 2. Item Selector Dropdown */}
-          {wasteType === 'ingredient' ? (
-            <div>
-              {ingredients.length === 0 ? (
-                <div className="p-4 rounded-2xl bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]/30 text-[var(--status-warning-text)] dark:text-amber-200 text-xs font-extrabold flex items-center justify-between gap-2">
-                  <span>هیچ ماده اولیه‌ای در انبار ثبت نشده است.</span>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setIsWasteModalOpen(false);
-                      setActiveTab('inventory');
-                    }}
-                    className="text-[11px]"
-                  >
-                    مدیریت انبار
-                  </Button>
-                </div>
+          {/* Row 2: Item Selection and Quantity */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
+            <div className="sm:col-span-2">
+              {wasteType === 'ingredient' ? (
+                ingredients.length === 0 ? (
+                  <div>
+                    <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1.5">
+                      انتخاب ماده اولیه از انبار
+                    </label>
+                    <div className="h-10 p-2.5 rounded-xl bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/30 text-[var(--status-warning-text)] text-xs font-bold flex items-center justify-between">
+                      <span>هیچ ماده اولیه‌ای ثبت نشده است.</span>
+                    </div>
+                  </div>
+                ) : (
+                  <SearchableSelect
+                    label="انتخاب ماده اولیه از انبار"
+                    options={ingredients.map((ing) => ({
+                      value: ing.id!,
+                      label: ing.name,
+                      sublabel: `فی: ${formatToman(ing.unitCost).text} / ${getUnitLabel(ing.unit)} | موجودی: ${formatNumber(ing.currentStock)} ${getUnitLabel(ing.unit)}`,
+                    }))}
+                    value={selectedIngredientId}
+                    onChange={(val) => setSelectedIngredientId(val as number)}
+                    placeholder="جستجو و انتخاب..."
+                  />
+                )
               ) : (
-                <SearchableSelect
-                  label="انتخاب ماده اولیه از انبار"
-                  options={ingredients.map((ing) => ({
-                    value: ing.id!,
-                    label: ing.name,
-                    sublabel: `فی: ${formatToman(ing.unitCost).text} / ${getUnitLabel(ing.unit)} | موجودی: ${formatNumber(ing.currentStock)} ${getUnitLabel(ing.unit)}`,
-                  }))}
-                  value={selectedIngredientId}
-                  onChange={(val) => setSelectedIngredientId(val as number)}
-                  placeholder="جستجو و انتخاب ماده اولیه..."
-                />
+                menuItems.length === 0 ? (
+                  <div>
+                    <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1.5">
+                      انتخاب محصول / آیتم منو
+                    </label>
+                    <div className="h-10 p-2.5 rounded-xl bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/30 text-[var(--status-warning-text)] text-xs font-bold flex items-center justify-between">
+                      <span>هیچ آیتم منویی ثبت نشده است.</span>
+                    </div>
+                  </div>
+                ) : (
+                  <SearchableSelect
+                    label="انتخاب محصول / آیتم منو"
+                    options={menuItems.map((mi) => ({
+                      value: mi.id!,
+                      label: mi.name,
+                      sublabel: `هزینه مواد: ${formatToman(mi.foodCost ?? mi.primeCost ?? 0).text}`,
+                    }))}
+                    value={selectedMenuItemId}
+                    onChange={(val) => setSelectedMenuItemId(val as number)}
+                    placeholder="جستجو و انتخاب..."
+                  />
+                )
               )}
             </div>
-          ) : (
-            <div>
-              {menuItems.length === 0 ? (
-                <div className="p-4 rounded-2xl bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/30 dark:border-[var(--status-warning-text)]/30 text-[var(--status-warning-text)] dark:text-amber-200 text-xs font-extrabold flex items-center justify-between gap-2">
-                  <span>هیچ آیتم منویی ثبت نشده است.</span>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setIsWasteModalOpen(false);
-                      setActiveTab('menu');
-                    }}
-                    className="text-[11px]"
-                  >
-                    مدیریت منو
-                  </Button>
-                </div>
-              ) : (
-                <SearchableSelect
-                  label="انتخاب محصول / آیتم منو"
-                  options={menuItems.map((mi) => ({
-                    value: mi.id!,
-                    label: mi.name,
-                    sublabel: `قیمت تمام شده مواد: ${formatToman(mi.foodCost ?? mi.primeCost ?? 0).text} | دسته‌بندی: ${mi.category}`,
-                  }))}
-                  value={selectedMenuItemId}
-                  onChange={(val) => setSelectedMenuItemId(val as number)}
-                  placeholder="جستجو و انتخاب آیتم منو..."
-                />
-              )}
-            </div>
-          )}
 
-          {/* 3. Quantity Input */}
-          <div>
-            <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] mb-1.5">
-              مقدار / تعداد ضایعات
-            </label>
-            <div className="relative flex items-center">
+            <div>
+              <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] mb-1.5">
+                مقدار ضایعات ({currentWasteUnit}) <span className="text-[var(--status-error-text)]">*</span>
+              </label>
               <input
                 type="text"
                 inputMode="decimal"
@@ -1913,121 +1868,81 @@ export const SalesManager: React.FC = () => {
                   if (eng === '') setWasteQty('');
                   else if (/^\d*\.?\d*$/.test(eng)) setWasteQty(val);
                 }}
-                placeholder={wasteType === 'ingredient' ? 'مثلاً: ۱.۵' : 'مثلاً: ۲'}
-                className="w-full h-11 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] pr-3.5 pl-24 py-2 text-sm font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all dir-rtl"
+                placeholder="مثلاً: ۱.۵"
+                className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all dir-rtl shadow-2xs"
               />
-              <div className="absolute left-2 px-2.5 py-1 rounded-lg bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] text-xs font-extrabold pointer-events-none">
-                {currentWasteUnit}
-              </div>
             </div>
-
-            {wasteType === 'ingredient' && selectedIng && wasteQtyNum > selectedIng.currentStock && (
-              <p className="mt-1.5 text-[11px] font-extrabold text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)] flex items-center gap-1">
-                <span>⚠️ توجه: مقدار ضایعات ({formatNumber(wasteQtyNum)}) بیشتر از موجودی انبار ({formatNumber(selectedIng.currentStock)} {getUnitLabel(selectedIng.unit)}) است.</span>
-              </p>
-            )}
           </div>
 
-          {/* 4. Auto-Calculated Cost Card */}
-          <div className="p-4 rounded-2xl bg-[var(--status-error-bg)] border border-[var(--status-error-text)]/20 space-y-2">
-            <div className="flex items-center justify-between text-xs font-extrabold text-[var(--text-primary)]">
-              <span className="flex items-center gap-1.5 text-[var(--status-error-text)]">
-                <Calculator className="h-4 w-4" />
-                <span>محاسبه خودکار خسارت مالی</span>
-              </span>
-              <span className="text-[var(--text-secondary)] font-bold text-[11px]">بر اساس قیمت انبار و فرمول ساخت</span>
-            </div>
-
-            <div className="flex items-baseline justify-between pt-1">
-              <span className="text-xs font-bold text-[var(--text-secondary)]">
-                مبلغ کل ضایعات:
-              </span>
-              <div className="text-left">
-                <span className="text-xl font-black text-[var(--status-error-text)] ml-1">
-                  {formatToman(autoCalculatedCost).text}
-                </span>
-              </div>
-            </div>
-
-            {/* Formula Breakdown */}
-            <div className="pt-2 border-t border-[var(--status-error-text)]/20 flex items-center justify-between text-[11px] font-bold text-[var(--text-secondary)]">
-              <span>فرمول محاسبه:</span>
-              <span className="text-[var(--text-primary)] dark:text-[var(--text-primary)]">
-                {formatNumber(wasteQtyNum)} {currentWasteUnit} × {formatToman(unitCost).text}
+          {/* Auto-Calculated Cost Card */}
+          <div className="p-3 rounded-xl bg-[var(--status-error-bg)] border border-[var(--status-error-text)]/20 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5 text-[var(--status-error-text)] font-bold">
+              <Calculator className="h-4 w-4" />
+              <span>مبلغ کل خسارت:</span>
+              <span className="text-sm font-black mr-1">
+                {formatToman(autoCalculatedCost).text}
               </span>
             </div>
-
-            {/* Inventory deduction preview */}
-            {wasteType === 'ingredient' && selectedIng && (
-              <div className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)] flex items-center justify-between pt-1">
-                <span>تاثیر بر انبار:</span>
-                <span className="text-[var(--text-primary)] dark:text-[var(--text-secondary)]">
-                  موجودی {formatNumber(selectedIng.currentStock)} ➔ پس از ثبت: {formatNumber(Math.max(0, roundCurrency(selectedIng.currentStock - wasteQtyNum)))} {getUnitLabel(selectedIng.unit)}
-                </span>
-              </div>
-            )}
+            <span className="text-[11px] text-[var(--text-secondary)] font-bold">
+              {formatNumber(wasteQtyNum)} {currentWasteUnit} × {formatToman(unitCost).text}
+            </span>
           </div>
 
-          {/* 5. Reason Field with Quick Presets */}
+          {/* Reason Field with Quick Presets */}
           <div>
-            <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] mb-1.5">
-              علت ضایعات
-            </label>
-            
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {[
-                'انقضا و فساد تاریخ مصرف',
-                'سوختگی و خرابی در پخت',
-                'آسیب در انبار یا حمل‌ونقل',
-                'خرابی یخچال و تجهیزات',
-                'مرجوعی و اشتباه سفارش',
-                'افت کیفیت فرآوری اولیه',
-              ].map((reasonPreset) => (
-                <button
-                  key={reasonPreset}
-                  type="button"
-                  onClick={() => setWasteReason(reasonPreset)}
-                  className={cn(
-                    'px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer border',
-                    wasteReason === reasonPreset
-                      ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
-                      : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] hover:bg-[var(--bg-base)] dark:hover:bg-stone-700'
-                  )}
-                >
-                  {reasonPreset}
-                </button>
-              ))}
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">
+                علت ضایعات
+              </label>
+              <div className="flex flex-wrap gap-1">
+                {['انقضا و فساد', 'سوختگی در پخت', 'آسیب حمل‌ونقل', 'افت کیفیت'].map((reasonPreset) => (
+                  <button
+                    key={reasonPreset}
+                    type="button"
+                    onClick={() => setWasteReason(reasonPreset)}
+                    className={cn(
+                      'px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer border',
+                      wasteReason === reasonPreset
+                        ? 'bg-rose-600 text-white border-rose-600'
+                        : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-base)]'
+                    )}
+                  >
+                    {reasonPreset}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <input
               type="text"
               value={wasteReason}
               onChange={(e) => setWasteReason(e.target.value)}
-              placeholder="یا علت سفارشی را تایپ کنید..."
-              className="w-full h-10 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all dir-rtl"
+              placeholder="تایپ علت سفارشی..."
+              className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all dir-rtl shadow-2xs"
             />
           </div>
 
           {/* Modal Actions */}
-          <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+          <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => {
                 setIsWasteModalOpen(false);
                 setEditingWasteId(null);
               }}
-              className="h-10 px-4 rounded-xl text-xs font-bold"
             >
               انصراف
             </Button>
             <Button
               type="submit"
-              variant="danger"
-              disabled={wasteQtyNum <= 0 || (wasteType === 'ingredient' ? !selectedIngredientId : !selectedMenuItemId)}
-              className="h-10 px-5 rounded-xl text-xs font-black shadow-md shadow-[var(--status-error-text)]/20"
+              variant="primary"
+              size="sm"
+              disabled={isSubmitting || wasteQtyNum <= 0 || (wasteType === 'ingredient' ? !selectedIngredientId : !selectedMenuItemId)}
+              className="font-black bg-rose-600 hover:bg-rose-700 text-white"
             >
-              {editingWasteId ? 'ذخیره تغییرات' : 'ثبت قطعی ضایعات'}
+              {isSubmitting ? 'در حال ثبت...' : (editingWasteId ? 'ذخیره تغییرات' : 'ثبت قطعی ضایعات')}
             </Button>
           </div>
         </form>

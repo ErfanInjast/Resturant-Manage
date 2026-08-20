@@ -370,7 +370,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 font-['IRANYekan','iranyekan',sans-serif] dir-rtl select-none overflow-hidden transition-colors duration-200">
-      <div className="w-full max-w-3xl bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden my-auto max-h-[96vh] transition-colors duration-200">
+      <div className="w-full max-w-3xl bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden my-auto max-h-[96vh] transition-colors duration-200">
         
         {/* Header Bar */}
         <div className="shrink-0 bg-[var(--bg-base)] dark:bg-[#262320] border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] p-3 sm:p-4 transition-colors duration-200">
@@ -404,7 +404,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="h-8 w-8 rounded-xl bg-[var(--bg-base)] hover:bg-stone-200 dark:bg-[var(--bg-card)] dark:hover:bg-stone-700 text-[var(--text-primary)] dark:text-[var(--text-secondary)] flex items-center justify-center transition-colors cursor-pointer border border-[var(--border-subtle)] dark:border-[var(--border-functional)]"
+                className="h-8 w-8 rounded-xl bg-[var(--bg-base)] hover:bg-[var(--bg-base)] dark:bg-[var(--bg-card)] dark:hover:bg-[var(--bg-base)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] flex items-center justify-center transition-colors cursor-pointer border border-[var(--border-subtle)] dark:border-[var(--border-functional)]"
                 title={theme === 'dark' ? 'حالت روز (روشن)' : 'حالت شب (تاریک)'}
               >
                 {theme === 'dark' ? <Sun className="h-4 w-4 text-[var(--status-warning-text)]" /> : <Moon className="h-4 w-4 text-[var(--text-secondary)]" />}
@@ -481,7 +481,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                       value={restaurantName}
                       onChange={(e) => setRestaurantName(e.target.value)}
                       placeholder="مثلاً: کافه رستوران سپهر"
-                      className="w-full h-10 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-[var(--bg-base)] dark:bg-stone-950 px-3 py-2 text-xs font-bold text-[var(--text-primary)] dark:text-white placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
+                      className="w-full h-10 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-[var(--bg-base)] dark:bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
                     />
                   </div>
 
@@ -498,11 +498,11 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                             onClick={() => setBusinessType(bt.id)}
                             className={`p-2.5 rounded-xl border transition-all text-right flex items-center gap-2 cursor-pointer ${
                               isSelected
-                                ? 'bg-[var(--brand-primary)]/10 dark:bg-[var(--brand-primary)]/20 border-[var(--brand-primary)] text-[var(--text-primary)] dark:text-white shadow-xs'
-                                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:border-[var(--border-functional)] dark:hover:border-stone-700'
+                                ? 'bg-[var(--brand-primary)]/10 dark:bg-[var(--brand-primary)]/20 border-[var(--brand-primary)] text-[var(--text-primary)] dark:text-[var(--text-primary)] shadow-xs'
+                                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:border-[var(--border-functional)] dark:hover:border-[var(--border-functional)]'
                             }`}
                           >
-                            <div className={`p-1.5 rounded-lg shrink-0 ${isSelected ? 'bg-[var(--brand-primary)] text-white' : 'bg-stone-200 dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)]'}`}>
+                            <div className={`p-1.5 rounded-lg shrink-0 ${isSelected ? 'bg-[var(--brand-primary)] text-white' : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)]'}`}>
                               <Icon className="h-4 w-4" />
                             </div>
                             <div className="truncate">
@@ -521,7 +521,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                           value={customBusinessTitle}
                           onChange={(e) => setCustomBusinessTitle(e.target.value)}
                           placeholder="مثلاً: آبمیوه بستنی، طباخی، بوفه باشگاه..."
-                          className="w-full h-9 rounded-lg border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-stone-950 px-3 py-1 text-xs font-bold text-[var(--text-primary)] dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full h-9 rounded-lg border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-3 py-1 text-xs font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                       </div>
                     )}
@@ -550,7 +550,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                           const eng = toEnglishDigits(e.target.value);
                           setWorkingDaysPerMonth(eng === '' ? 0 : Math.min(31, Math.max(1, Number(eng))));
                         }}
-                        className="w-full h-9 rounded-lg border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-stone-950 px-3 text-xs font-bold text-[var(--text-primary)] dark:text-white text-right focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
+                        className="w-full h-9 rounded-lg border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-3 text-xs font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)] text-right focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
                       />
                       <div className="flex gap-1.5">
                         {[20, 24, 26, 30].map((days) => (
@@ -561,7 +561,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                             className={`flex-1 h-8 rounded-md text-[11px] font-bold border transition-all cursor-pointer ${
                               workingDaysPerMonth === days
                                 ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
-                                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] hover:bg-[var(--bg-base)]'
                             }`}
                           >
                             {toPersianDigits(days)} روز
@@ -580,7 +580,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                           const eng = toEnglishDigits(e.target.value);
                           setDailyWorkHours(eng === '' ? 0 : Math.min(24, Math.max(1, Number(eng))));
                         }}
-                        className="w-full h-9 rounded-lg border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-stone-950 px-3 text-xs font-bold text-[var(--text-primary)] dark:text-white text-right focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
+                        className="w-full h-9 rounded-lg border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-3 text-xs font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)] text-right focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]"
                       />
                       <div className="flex gap-1.5">
                         {[6, 8, 10, 12, 16].map((hrs) => (
@@ -591,7 +591,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                             className={`flex-1 h-8 rounded-md text-[11px] font-bold border transition-all cursor-pointer ${
                               dailyWorkHours === hrs
                                 ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
-                                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] hover:bg-[var(--bg-base)]'
                             }`}
                           >
                             {toPersianDigits(hrs)} ساعت
@@ -620,7 +620,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                           className={`flex-1 h-9 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                             targetFoodCostPercent === pct
                               ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
-                              : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] hover:bg-stone-200 dark:hover:bg-stone-700'
+                              : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] hover:bg-[var(--bg-base)]'
                           }`}
                         >
                           {toPersianDigits(pct)}٪
@@ -645,7 +645,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                     <SmartMoneyInput
                       label="اجاره ماهانه"
                       labelClassName="text-[var(--text-primary)] dark:text-[var(--text-secondary)] text-[11px]"
-                      className="bg-white dark:bg-stone-950 border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-white text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
+                      className="bg-white dark:bg-[var(--bg-card)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-[var(--text-primary)] text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
                       value={rent}
                       onChange={setRent}
                       placeholder="مثلاً ۵۰,۰۰۰,۰۰۰"
@@ -653,7 +653,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                     <SmartMoneyInput
                       label="حقوق پرسنل"
                       labelClassName="text-[var(--text-primary)] dark:text-[var(--text-secondary)] text-[11px]"
-                      className="bg-white dark:bg-stone-950 border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-white text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
+                      className="bg-white dark:bg-[var(--bg-card)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-[var(--text-primary)] text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
                       value={salaries}
                       onChange={setSalaries}
                       placeholder="مثلاً ۷۰,۰۰۰,۰۰۰"
@@ -661,7 +661,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                     <SmartMoneyInput
                       label="قبوض و انرژی"
                       labelClassName="text-[var(--text-primary)] dark:text-[var(--text-secondary)] text-[11px]"
-                      className="bg-white dark:bg-stone-950 border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-white text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
+                      className="bg-white dark:bg-[var(--bg-card)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-[var(--text-primary)] text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
                       value={utilities}
                       onChange={setUtilities}
                       placeholder="مثلاً ۸,۰۰۰,۰۰۰"
@@ -669,7 +669,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                     <SmartMoneyInput
                       label="تبلیغات"
                       labelClassName="text-[var(--text-primary)] dark:text-[var(--text-secondary)] text-[11px]"
-                      className="bg-white dark:bg-stone-950 border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-white text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
+                      className="bg-white dark:bg-[var(--bg-card)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-[var(--text-primary)] text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
                       value={marketing}
                       onChange={setMarketing}
                       placeholder="مثلاً ۵,۰۰۰,۰۰۰"
@@ -677,7 +677,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                     <SmartMoneyInput
                       label="بیمه و مالیات"
                       labelClassName="text-[var(--text-primary)] dark:text-[var(--text-secondary)] text-[11px]"
-                      className="bg-white dark:bg-stone-950 border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-white text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
+                      className="bg-white dark:bg-[var(--bg-card)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-[var(--text-primary)] text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
                       value={insurance}
                       onChange={setInsurance}
                       placeholder="مثلاً ۱۰,۰۰۰,۰۰۰"
@@ -685,7 +685,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                     <SmartMoneyInput
                       label="سایر هزینه‌ها"
                       labelClassName="text-[var(--text-primary)] dark:text-[var(--text-secondary)] text-[11px]"
-                      className="bg-white dark:bg-stone-950 border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-white text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
+                      className="bg-white dark:bg-[var(--bg-card)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-[var(--text-primary)] text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
                       value={general}
                       onChange={setGeneral}
                       placeholder="مثلاً ۴,۰۰۰,۰۰۰"
@@ -693,7 +693,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                     <SmartMoneyInput
                       label="تعمیرات و نگهداری"
                       labelClassName="text-[var(--text-primary)] dark:text-[var(--text-secondary)] text-[11px]"
-                      className="bg-white dark:bg-stone-950 border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-white text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
+                      className="bg-white dark:bg-[var(--bg-card)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-[var(--text-primary)] text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
                       value={maintenance}
                       onChange={setMaintenance}
                       placeholder="مثلاً ۳,۵۰۰,۰۰۰"
@@ -701,7 +701,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                     <SmartMoneyInput
                       label="بسته‌بندی و ارسال"
                       labelClassName="text-[var(--text-primary)] dark:text-[var(--text-secondary)] text-[11px]"
-                      className="bg-white dark:bg-stone-950 border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-white text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
+                      className="bg-white dark:bg-[var(--bg-card)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-[var(--text-primary)] text-xs h-9 placeholder:text-[var(--text-secondary)] dark:placeholder:text-[var(--text-secondary)]"
                       value={delivery}
                       onChange={setDelivery}
                       placeholder="مثلاً ۴,۵۰۰,۰۰۰"
@@ -783,7 +783,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ onComplete }
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentStep((prev) => prev - 1)}
-                className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] hover:bg-[var(--bg-base)] dark:hover:bg-stone-700 text-xs font-bold h-9 rounded-xl"
+                className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] hover:bg-[var(--bg-base)] dark:hover:bg-[var(--bg-base)] text-xs font-bold h-9 rounded-xl"
               >
                 <ArrowRight className="h-3.5 w-3.5 ml-1" />
                 <span>مرحله قبل</span>

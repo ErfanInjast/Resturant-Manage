@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Menu, PlusCircle, Calendar, Sun, Moon, Zap, Layers } from 'lucide-react';
+import { Menu, PlusCircle, Calendar, Zap, Layers } from 'lucide-react';
 import { db } from '../../db';
 import { useAppStore } from '../../store/useAppStore';
 import { Button } from '../ui/Button';
@@ -11,8 +11,6 @@ export const Header: React.FC = () => {
     setIsMobileDrawerOpen,
     activeTab,
     setActiveTab,
-    theme,
-    toggleTheme,
     isSimpleMode,
     toggleSimpleMode,
   } = useAppStore();
@@ -43,18 +41,18 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-30 w-full border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/90 backdrop-blur-xl shadow-[0_1px_3px_rgba(28,25,23,0.02)] transition-colors">
-      <div className="flex h-16 w-full max-w-[1440px] mx-auto items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Right column / Brand area (aligned with sidebar width lg:w-64) */}
+    <header className="sticky top-0 z-30 w-full border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/90 backdrop-blur-xl shadow-2xs transition-colors">
+      <div className="flex h-14 sm:h-16 w-full max-w-[1440px] mx-auto items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Right column / Brand area */}
         <div className="flex items-center gap-2 sm:gap-3 lg:w-64 lg:shrink-0 lg:pr-4 h-full min-w-0">
           {!isSimpleMode && (
             <button
               type="button"
               onClick={() => setIsMobileDrawerOpen(true)}
-              className="inline-flex items-center justify-center rounded-xl p-2 text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 lg:hidden cursor-pointer transition-colors shrink-0"
+              className="inline-flex items-center justify-center rounded-xl p-1.5 text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 lg:hidden cursor-pointer transition-colors shrink-0"
               aria-label="منوی موبایل"
             >
-              <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
+              <Menu className="h-5 w-5" />
             </button>
           )}
 
@@ -65,7 +63,7 @@ export const Header: React.FC = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--status-success-text)] opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--status-success-text)]"></span>
                 </span>
-                <h1 className="text-xs sm:text-sm md:text-base font-black text-[var(--text-primary)] tracking-tight leading-snug truncate">
+                <h1 className="text-xs sm:text-sm font-black text-[var(--text-primary)] tracking-tight leading-snug truncate">
                   {settings?.restaurantName || 'مدیریت مالی رستوران'}
                 </h1>
               </div>
@@ -81,16 +79,16 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Header Actions area (aligned with main content area) */}
-        <div className="flex items-center gap-2 lg:pr-6">
+        {/* Header Actions area */}
+        <div className="flex items-center gap-2">
           {!isSimpleMode && activeTab !== 'sales' && (
             <Button
-              variant="primary"
+              variant="success"
               size="sm"
               onClick={() => setActiveTab('sales')}
-              className="bg-[var(--status-success-text)] hover:opacity-90 text-white shadow-xs font-bold"
+              className="gap-1.5 shadow-2xs font-bold"
             >
-              <PlusCircle className="h-4 w-4" />
+              <PlusCircle className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">ثبت فروش جدید</span>
             </Button>
           )}
@@ -100,16 +98,16 @@ export const Header: React.FC = () => {
             variant={isSimpleMode ? "primary" : "outline"}
             size="sm"
             onClick={toggleSimpleMode}
-            className={
-              isSimpleMode
-                ? "bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white font-black rounded-xl shadow-xs transition-all gap-1.5"
-                : "text-[var(--text-primary)] hover:text-[var(--brand-primary)] border-[var(--border-subtle)] bg-[var(--bg-card)] rounded-xl font-bold transition-all gap-1.5"
-            }
+            className="gap-1.5 font-bold"
             title={isSimpleMode ? "تغییر به مدیریت کامل انبارداری و آنالیز" : "تغییر به ثبت فروش و خلاصه آمار سریع"}
           >
-            {isSimpleMode ? <Layers className="h-4 w-4" /> : <Zap className="h-4 w-4 text-[var(--brand-primary)]" />}
+            {isSimpleMode ? (
+              <Layers className="h-3.5 w-3.5" />
+            ) : (
+              <Zap className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
+            )}
             <span className="hidden md:inline">
-              {isSimpleMode ? "نمای کامل و پیشرفته" : "نمای ساده و سریع"}
+              {isSimpleMode ? "نمای پیشرفته" : "نمای ساده"}
             </span>
           </Button>
         </div>
@@ -117,4 +115,3 @@ export const Header: React.FC = () => {
     </header>
   );
 };
-

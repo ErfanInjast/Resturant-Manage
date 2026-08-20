@@ -70,7 +70,7 @@ export const SmartMoneyInput: React.FC<SmartMoneyInputProps> = ({
           className={cn(
             'flex h-10 w-full rounded-xl border border-[var(--border-functional)] bg-[var(--bg-card)] pr-3 py-2 text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] disabled:cursor-not-allowed disabled:opacity-50 transition-all text-right dir-rtl',
             suffix ? 'pl-14' : 'pl-3',
-            error && 'border-[var(--status-error-text)] focus:ring-[var(--status-error-text)] focus:border-[var(--status-error-text)]',
+            error && 'border-[var(--status-error-text)] focus:ring-[var(--status-error-text)]/20 focus:border-[var(--status-error-text)]',
             className
           )}
         />
@@ -80,9 +80,7 @@ export const SmartMoneyInput: React.FC<SmartMoneyInputProps> = ({
           </div>
         )}
       </div>
-      {error && <p className="mt-1 text-xs text-red-600 font-bold">{error}</p>}
+      {error && <p className="mt-1 text-xs text-[var(--status-error-text)] font-bold">{error}</p>}
     </div>
   );
 };
-
-

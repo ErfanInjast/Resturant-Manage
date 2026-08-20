@@ -44,7 +44,7 @@ export default function App() {
   if (!settingsState || !settingsState.loaded) {
     return (
       <div className="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center p-4 dir-rtl transition-colors duration-200">
-        <div className="flex flex-col items-center gap-4 bg-[var(--bg-card)] p-8 rounded-3xl border border-[var(--border-subtle)] shadow-xl backdrop-blur-md max-w-xs w-full text-center">
+        <div className="flex flex-col items-center gap-4 bg-[var(--bg-card)] p-8 rounded-2xl border border-[var(--border-subtle)] shadow-xl backdrop-blur-md max-w-xs w-full text-center">
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 rounded-2xl bg-[var(--brand-primary)]/20 animate-ping opacity-75" />
             <div className="relative h-14 w-14 rounded-2xl bg-[var(--brand-primary)] text-white flex items-center justify-center shadow-lg shadow-[var(--brand-primary)]/30">
@@ -105,7 +105,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] flex flex-col font-['IRANYekan','iranyekan',sans-serif] dir-rtl select-none transition-colors duration-200">
       <Header />
-      <div className="flex flex-1 w-full max-w-[1440px] mx-auto pb-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 gap-6">
+      <div className="flex flex-1 w-full max-w-[1440px] mx-auto pb-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 gap-6 items-start">
         {!isSimpleMode && <Sidebar />}
         <main className="flex-1 min-w-0 transition-all">
           <AnimatePresence mode="wait">

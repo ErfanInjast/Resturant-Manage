@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import {
   BookOpen,
   CheckCircle2,
@@ -23,7 +22,6 @@ import {
 import { useAppStore } from '../../store/useAppStore';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
 import { SmartMoneyInput } from '../ui/SmartMoneyInput';
 import { formatToman, toPersianDigits } from '../../lib/utils';
 
@@ -35,7 +33,6 @@ interface ChapterDef {
   shortDesc: string;
   icon: React.ComponentType<{ className?: string }>;
   badge: string;
-  badgeVariant?: 'primary' | 'success' | 'warning' | 'info' | 'purple' | 'danger';
 }
 
 export const GuideManager: React.FC = () => {
@@ -65,7 +62,6 @@ export const GuideManager: React.FC = () => {
       shortDesc: 'محاسبه هزینه اجاره، حقوق، قبوض و نرخ سرانه هر دقیقه',
       icon: Settings,
       badge: 'پایه',
-      badgeVariant: 'info',
     },
     {
       id: 'inventory',
@@ -73,7 +69,6 @@ export const GuideManager: React.FC = () => {
       shortDesc: 'مدیریت موجودی، واحد سنجش و درصد دورریز مواد اولیه',
       icon: Boxes,
       badge: 'انبارداری',
-      badgeVariant: 'warning',
     },
     {
       id: 'menu',
@@ -81,7 +76,6 @@ export const GuideManager: React.FC = () => {
       shortDesc: 'تعریف دستور پخت، بهای مواد و قیمت‌گذاری علمی',
       icon: UtensilsCrossed,
       badge: 'هسته سیستم',
-      badgeVariant: 'success',
     },
     {
       id: 'sales',
@@ -89,7 +83,6 @@ export const GuideManager: React.FC = () => {
       shortDesc: 'کسر خودکار انبار، ثبت فروش روزانه و ضایعات ریالی',
       icon: Receipt,
       badge: 'روزانه',
-      badgeVariant: 'primary',
     },
     {
       id: 'analytics',
@@ -97,7 +90,6 @@ export const GuideManager: React.FC = () => {
       shortDesc: 'سود و زیان، بهای اولیه (زیر ۶۵٪) و ماتریس مهندسی منو',
       icon: PieChart,
       badge: 'گزارشات',
-      badgeVariant: 'purple',
     },
     {
       id: 'backup',
@@ -105,7 +97,6 @@ export const GuideManager: React.FC = () => {
       shortDesc: 'ذخیره ۱۰۰٪ آفلاین در مرورگر و دریافت فایل پشتیبان',
       icon: ShieldCheck,
       badge: 'امنیت داده',
-      badgeVariant: 'danger',
     },
     {
       id: 'calculator',
@@ -113,7 +104,6 @@ export const GuideManager: React.FC = () => {
       shortDesc: 'شبیه‌ساز آنی محاسبه قیمت تمام‌شده، افت و سود',
       icon: Calculator,
       badge: 'تعاملی',
-      badgeVariant: 'primary',
     },
     {
       id: 'faq',
@@ -121,7 +111,6 @@ export const GuideManager: React.FC = () => {
       shortDesc: 'پاسخ به سوالات پرتکرار و نکات کلیدی نرم‌افزار',
       icon: HelpCircle,
       badge: 'راهنما',
-      badgeVariant: 'info',
     },
   ];
 
@@ -156,12 +145,12 @@ export const GuideManager: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-8 font-['IRANYekan','iranyekan',sans-serif] text-[var(--text-primary)]">
-      {/* Header Banner - Compact & Minimalist */}
-      <div className="rounded-3xl bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] p-5 sm:p-6 shadow-2xs">
+    <div className="space-y-6">
+      {/* Header Banner */}
+      <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] p-5 sm:p-6 shadow-2xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="p-3 rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] shrink-0">
+            <div className="p-3 rounded-2xl bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] shrink-0 border border-[var(--brand-primary)]/20">
               <BookOpen className="h-6 w-6" />
             </div>
             <div>
@@ -182,7 +171,7 @@ export const GuideManager: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="جستجو در سرفصل‌ها..."
-              className="w-full h-10 pr-9 pl-4 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900 border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)] transition-all"
+              className="w-full h-10 pr-9 pl-4 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)] text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
             />
           </div>
         </div>
@@ -200,7 +189,7 @@ export const GuideManager: React.FC = () => {
               className={`flex items-center gap-2 px-3.5 py-2.5 rounded-2xl text-xs font-black transition-all shrink-0 cursor-pointer border ${
                 isActive
                   ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)] shadow-2xs'
-                  : 'bg-white dark:bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)]'
+                  : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)]'
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -210,15 +199,15 @@ export const GuideManager: React.FC = () => {
         })}
       </div>
 
-      {/* Active Chapter Content - Structured & Clean */}
+      {/* Active Chapter Content */}
       <div className="space-y-6">
         {/* Chapter 1: Setup & Fixed Costs */}
         {activeChapter === 'setup' && (
-          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
-            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+          <Card className="border border-[var(--border-subtle)] bg-[var(--bg-card)] rounded-2xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] shrink-0 border border-[var(--brand-primary)]/20">
                     <Settings className="h-5 w-5" />
                   </div>
                   <div>
@@ -233,7 +222,7 @@ export const GuideManager: React.FC = () => {
                 <Button
                   size="sm"
                   onClick={() => setActiveTab('settings')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shrink-0"
+                  className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white text-xs font-bold rounded-xl shrink-0"
                 >
                   <span>ورود به تنظیمات</span>
                   <ArrowLeft className="h-3.5 w-3.5" />
@@ -243,9 +232,9 @@ export const GuideManager: React.FC = () => {
 
             <CardContent className="p-5 sm:p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-2.5">
+                <div className="p-4 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-2.5">
                   <h4 className="font-black text-xs text-[var(--text-primary)] flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-blue-600" />
+                    <CheckCircle2 className="h-4 w-4 text-[var(--brand-primary)]" />
                     <span>اقلام تشکیل‌دهنده هزینه‌های ثابت:</span>
                   </h4>
                   <ul className="space-y-1.5 text-xs text-[var(--text-secondary)] font-medium">
@@ -256,12 +245,12 @@ export const GuideManager: React.FC = () => {
                   </ul>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/50 space-y-2.5">
-                  <h4 className="font-black text-xs text-blue-900 dark:text-blue-300 flex items-center gap-2">
-                    <Calculator className="h-4 w-4 text-blue-600" />
+                <div className="p-4 rounded-2xl bg-[var(--brand-primary-subtle)] border border-[var(--brand-primary)]/20 space-y-2.5">
+                  <h4 className="font-black text-xs text-[var(--text-primary)] flex items-center gap-2">
+                    <Calculator className="h-4 w-4 text-[var(--brand-primary)]" />
                     <span>فرمول نرخ سربار هر دقیقه کاری:</span>
                   </h4>
-                  <div className="p-2.5 rounded-xl bg-white dark:bg-[var(--bg-card)] text-[11px] font-black text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/50 text-center">
+                  <div className="p-2.5 rounded-xl bg-[var(--bg-card)] text-[11px] font-black text-[var(--brand-primary)] border border-[var(--brand-primary)]/30 text-center">
                     نرخ دقیقه = کل هزینه‌های ماهانه ÷ (روزهای کاری × ساعات روزانه × ۶۰)
                   </div>
                   <p className="text-[11px] text-[var(--text-secondary)] font-medium">
@@ -270,8 +259,8 @@ export const GuideManager: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 flex items-start gap-2.5 text-xs text-amber-900 dark:text-amber-300">
-                <Lightbulb className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-2xl bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/20 flex items-start gap-2.5 text-xs text-[var(--status-warning-text)]">
+                <Lightbulb className="h-4 w-4 shrink-0 mt-0.5" />
                 <p className="font-medium">
                   <strong>نکته کاربردی:</strong> روزهای کاری واقعی ماه را در تنظیمات دقیق وارد کنید تا هزینه به ازای ساعات واقعی فعالیت محاسبه شود.
                 </p>
@@ -282,11 +271,11 @@ export const GuideManager: React.FC = () => {
 
         {/* Chapter 2: Inventory & Waste */}
         {activeChapter === 'inventory' && (
-          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
-            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+          <Card className="border border-[var(--border-subtle)] bg-[var(--bg-card)] rounded-2xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-[var(--status-warning-bg)] text-[var(--status-warning-text)] shrink-0 border border-[var(--status-warning-text)]/20">
                     <Boxes className="h-5 w-5" />
                   </div>
                   <div>
@@ -301,7 +290,7 @@ export const GuideManager: React.FC = () => {
                 <Button
                   size="sm"
                   onClick={() => setActiveTab('inventory')}
-                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shrink-0"
+                  className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white text-xs font-bold rounded-xl shrink-0"
                 >
                   <span>ورود به انبار</span>
                   <ArrowLeft className="h-3.5 w-3.5" />
@@ -310,12 +299,12 @@ export const GuideManager: React.FC = () => {
             </CardHeader>
 
             <CardContent className="p-5 sm:p-6 space-y-5">
-              <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 space-y-2.5">
-                <div className="flex items-center gap-2 text-amber-900 dark:text-amber-300 font-black text-xs">
-                  <TrendingUp className="h-4 w-4 text-amber-600" />
+              <div className="p-4 rounded-2xl bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/20 space-y-2.5">
+                <div className="flex items-center gap-2 text-[var(--status-warning-text)] font-black text-xs">
+                  <TrendingUp className="h-4 w-4" />
                   <span>فرمول قیمت واقعی هر گرم پس از کسر افت:</span>
                 </div>
-                <div className="p-2.5 rounded-xl bg-white dark:bg-[var(--bg-card)] text-amber-800 dark:text-amber-300 font-bold text-xs text-center border border-amber-200 dark:border-amber-900/40">
+                <div className="p-2.5 rounded-xl bg-[var(--bg-card)] text-[var(--status-warning-text)] font-bold text-xs text-center border border-[var(--status-warning-text)]/30">
                   قیمت هر گرم خالص = (قیمت خرید هر کیلو ÷ ((۱۰۰ - درصد افت) ÷ ۱۰۰)) ÷ ۱۰۰۰
                 </div>
                 <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
@@ -324,20 +313,20 @@ export const GuideManager: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div className="p-3 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-1">
+                <div className="p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-1">
                   <span className="text-[10px] font-bold text-[var(--text-secondary)]">۱. ثبت خرید</span>
                   <p className="font-bold text-[var(--text-primary)]">ثبت فاکتورهای جدید با کسر خودکار</p>
                 </div>
-                <div className="p-3 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-1">
-                  <span className="text-[10px] font-bold text-amber-600">۲. میانگین موزون</span>
+                <div className="p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-1">
+                  <span className="text-[10px] font-bold text-[var(--status-warning-text)]">۲. میانگین موزون</span>
                   <p className="font-bold text-[var(--text-primary)]">محاسبه نرخ متوسط خریدها (WAC)</p>
                 </div>
-                <div className="p-3 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-1">
-                  <span className="text-[10px] font-bold text-blue-600">۳. تاریخچه قیمت</span>
+                <div className="p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-1">
+                  <span className="text-[10px] font-bold text-[var(--brand-primary)]">۳. تاریخچه قیمت</span>
                   <p className="font-bold text-[var(--text-primary)]">پایش نموداری نوسانات قیمت تامین</p>
                 </div>
-                <div className="p-3 rounded-xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-1">
-                  <span className="text-[10px] font-bold text-emerald-600">۴. هشدار کمبود</span>
+                <div className="p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-1">
+                  <span className="text-[10px] font-bold text-[var(--status-success-text)]">۴. هشدار کمبود</span>
                   <p className="font-bold text-[var(--text-primary)]">آلارم رسیدن به حداقل نقطه سفارش</p>
                 </div>
               </div>
@@ -347,11 +336,11 @@ export const GuideManager: React.FC = () => {
 
         {/* Chapter 3: Recipe & Pricing */}
         {activeChapter === 'menu' && (
-          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
-            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+          <Card className="border border-[var(--border-subtle)] bg-[var(--bg-card)] rounded-2xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-[var(--status-success-bg)] text-[var(--status-success-text)] shrink-0 border border-[var(--status-success-text)]/20">
                     <UtensilsCrossed className="h-5 w-5" />
                   </div>
                   <div>
@@ -366,7 +355,7 @@ export const GuideManager: React.FC = () => {
                 <Button
                   size="sm"
                   onClick={() => setActiveTab('menu')}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shrink-0"
+                  className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white text-xs font-bold rounded-xl shrink-0"
                 >
                   <span>آنالیز منو</span>
                   <ArrowLeft className="h-3.5 w-3.5" />
@@ -376,9 +365,9 @@ export const GuideManager: React.FC = () => {
 
             <CardContent className="p-5 sm:p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50 space-y-2">
-                  <h4 className="font-black text-xs text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
-                    <Zap className="h-4 w-4 text-emerald-600" />
+                <div className="p-4 rounded-2xl bg-[var(--status-success-bg)] border border-[var(--status-success-text)]/20 space-y-2">
+                  <h4 className="font-black text-xs text-[var(--status-success-text)] flex items-center gap-2">
+                    <Zap className="h-4 w-4" />
                     <span>محاسبه خودکار بهای مواد (Food Cost)</span>
                   </h4>
                   <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
@@ -386,12 +375,12 @@ export const GuideManager: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-2">
+                <div className="p-4 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-2">
                   <h4 className="font-black text-xs text-[var(--text-primary)] flex items-center gap-2">
-                    <Calculator className="h-4 w-4 text-emerald-600" />
+                    <Calculator className="h-4 w-4 text-[var(--status-success-text)]" />
                     <span>قیمت پیشنهادی بر اساس درصد هدف</span>
                   </h4>
-                  <div className="p-2.5 rounded-xl bg-white dark:bg-[var(--bg-card)] text-[11px] font-black text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/40 text-center">
+                  <div className="p-2.5 rounded-xl bg-[var(--bg-card)] text-[11px] font-black text-[var(--status-success-text)] border border-[var(--status-success-text)]/30 text-center">
                     قیمت پیشنهادی = هزینه کل مواد ÷ (درصد هدف فودکاست ÷ ۱۰۰)
                   </div>
                   <p className="text-[11px] text-[var(--text-secondary)] font-medium">
@@ -405,11 +394,11 @@ export const GuideManager: React.FC = () => {
 
         {/* Chapter 4: Sales & Daily Logs */}
         {activeChapter === 'sales' && (
-          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
-            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+          <Card className="border border-[var(--border-subtle)] bg-[var(--bg-card)] rounded-2xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] shrink-0 border border-[var(--brand-primary)]/20">
                     <Receipt className="h-5 w-5" />
                   </div>
                   <div>
@@ -424,7 +413,7 @@ export const GuideManager: React.FC = () => {
                 <Button
                   size="sm"
                   onClick={() => setActiveTab('sales')}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shrink-0"
+                  className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white text-xs font-bold rounded-xl shrink-0"
                 >
                   <span>ثبت فروش</span>
                   <ArrowLeft className="h-3.5 w-3.5" />
@@ -434,13 +423,13 @@ export const GuideManager: React.FC = () => {
 
             <CardContent className="p-5 sm:p-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] space-y-1.5">
-                  <h4 className="font-black text-xs text-indigo-600">ثبت فاکتورهای فروش روزانه</h4>
+                <div className="p-4 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-1.5">
+                  <h4 className="font-black text-xs text-[var(--brand-primary)]">ثبت فاکتورهای فروش روزانه</h4>
                   <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
                     با ثبت فروش هر محصول، مواد اولیه تشکیل‌دهنده آن بر اساس رسپی به طور خودکار از موجودی انبار کسر می‌شوند.
                   </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 space-y-1.5">
+                <div className="p-4 rounded-2xl bg-[var(--status-error-bg)] border border-[var(--status-error-text)]/20 space-y-1.5">
                   <h4 className="font-black text-xs text-[var(--status-error-text)]">ثبت ضایعات و خسارت</h4>
                   <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
                     مواد فاسد شده، سوخته یا آسیب‌دیده را در بخش ضایعات ثبت کنید تا اثر ریالی آن در سود و زیان محاسبه شود.
@@ -453,11 +442,11 @@ export const GuideManager: React.FC = () => {
 
         {/* Chapter 5: Analytics & Menu Matrix */}
         {activeChapter === 'analytics' && (
-          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
-            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+          <Card className="border border-[var(--border-subtle)] bg-[var(--bg-card)] rounded-2xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] shrink-0 border border-[var(--brand-primary)]/20">
                     <PieChart className="h-5 w-5" />
                   </div>
                   <div>
@@ -472,7 +461,7 @@ export const GuideManager: React.FC = () => {
                 <Button
                   size="sm"
                   onClick={() => setActiveTab('analytics')}
-                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shrink-0"
+                  className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)] text-white text-xs font-bold rounded-xl shrink-0"
                 >
                   <span>ماتریس سودآوری</span>
                   <ArrowLeft className="h-3.5 w-3.5" />
@@ -482,9 +471,9 @@ export const GuideManager: React.FC = () => {
 
             <CardContent className="p-5 sm:p-6 space-y-5">
               {/* Prime Cost Highlight */}
-              <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 space-y-1.5">
-                <h4 className="font-black text-xs text-amber-900 dark:text-amber-300 flex items-center gap-2">
-                  <Layers className="h-4 w-4 text-amber-600" />
+              <div className="p-4 rounded-2xl bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/20 space-y-1.5">
+                <h4 className="font-black text-xs text-[var(--status-warning-text)] flex items-center gap-2">
+                  <Layers className="h-4 w-4" />
                   <span>استاندارد بهای اولیه تولید (Prime Cost):</span>
                 </h4>
                 <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed">
@@ -494,20 +483,20 @@ export const GuideManager: React.FC = () => {
 
               {/* 4 Quadrants Summary */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 space-y-1">
-                  <span className="font-black text-amber-800 dark:text-amber-300">🌟 محصولات طلایی</span>
+                <div className="p-3.5 rounded-2xl bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/20 space-y-1">
+                  <span className="font-black text-[var(--status-warning-text)]">🌟 محصولات طلایی</span>
                   <p className="text-[11px] text-[var(--text-secondary)]">سود بالا + فروش بالا. ستون اصلی سودآوری و پرچمدار منو.</p>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 space-y-1">
-                  <span className="font-black text-blue-800 dark:text-blue-300">🔥 پرفروش‌های محبوب</span>
+                <div className="p-3.5 rounded-2xl bg-[var(--brand-primary-subtle)] border border-[var(--brand-primary)]/20 space-y-1">
+                  <span className="font-black text-[var(--brand-primary)]">🔥 پرفروش‌های محبوب</span>
                   <p className="text-[11px] text-[var(--text-secondary)]">فروش بالا + حاشیه سود کمتر. نیازمند تعدیل فودکاست یا قیمت.</p>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/40 space-y-1">
-                  <span className="font-black text-purple-800 dark:text-purple-300">💡 فرصت‌های رشد</span>
+                <div className="p-3.5 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-1">
+                  <span className="font-black text-[var(--text-primary)]">💡 فرصت‌های رشد</span>
                   <p className="text-[11px] text-[var(--text-secondary)]">سود فوق‌العاده + فروش کم. نیازمند معرفی بیشتر و پروموشن.</p>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 space-y-1">
-                  <span className="font-black text-rose-800 dark:text-rose-300">⚠️ نیازمند بهینه‌سازی</span>
+                <div className="p-3.5 rounded-2xl bg-[var(--status-error-bg)] border border-[var(--status-error-text)]/20 space-y-1">
+                  <span className="font-black text-[var(--status-error-text)]">⚠️ نیازمند بهینه‌سازی</span>
                   <p className="text-[11px] text-[var(--text-secondary)]">سود کم + فروش کم. منبع خواب سرمایه انبار و نیازمند اصلاح یا حذف.</p>
                 </div>
               </div>
@@ -517,11 +506,11 @@ export const GuideManager: React.FC = () => {
 
         {/* Chapter 6: Backup & Offline Security */}
         {activeChapter === 'backup' && (
-          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
-            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+          <Card className="border border-[var(--border-subtle)] bg-[var(--bg-card)] rounded-2xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-[var(--status-error-bg)] text-[var(--status-error-text)] shrink-0 border border-[var(--status-error-text)]/20">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div>
@@ -554,8 +543,8 @@ export const GuideManager: React.FC = () => {
 
         {/* Chapter 7: Interactive Simulator */}
         {activeChapter === 'calculator' && (
-          <Card className="border border-[var(--brand-primary)]/30 rounded-3xl overflow-hidden bg-white dark:bg-[var(--bg-card)] shadow-2xs">
-            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+          <Card className="border border-[var(--brand-primary)]/30 rounded-2xl overflow-hidden bg-[var(--bg-card)] shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-[var(--brand-primary)] text-white shrink-0">
                   <Calculator className="h-5 w-5" />
@@ -574,7 +563,7 @@ export const GuideManager: React.FC = () => {
             <CardContent className="p-5 sm:p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Inputs */}
-                <div className="space-y-4 p-4.5 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)]">
+                <div className="space-y-4 p-4.5 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)]">
                   <h4 className="text-xs font-black text-[var(--text-primary)] flex items-center gap-2">
                     <Settings className="h-4 w-4 text-[var(--brand-primary)]" />
                     <span>ورودی‌های فرضی آیتم</span>
@@ -601,7 +590,7 @@ export const GuideManager: React.FC = () => {
                         onChange={(e) => setCalcWaste(Number(e.target.value))}
                         className="flex-1 accent-[var(--brand-primary)]"
                       />
-                      <span className="text-xs font-black w-12 text-center py-1 px-2 rounded-xl bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)]">
+                      <span className="text-xs font-black w-12 text-center py-1 px-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)]">
                         ٪{toPersianDigits(calcWaste)}
                       </span>
                     </div>
@@ -625,42 +614,42 @@ export const GuideManager: React.FC = () => {
                 </div>
 
                 {/* Outputs */}
-                <div className="space-y-4 p-4.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 flex flex-col justify-between">
+                <div className="space-y-4 p-4.5 rounded-2xl bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/20 flex flex-col justify-between">
                   <div className="space-y-3.5">
-                    <h4 className="text-xs font-black text-amber-900 dark:text-amber-300 flex items-center gap-2">
+                    <h4 className="text-xs font-black text-[var(--status-warning-text)] flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-[var(--brand-primary)]" />
                       <span>خروجی محاسبات زنده سیستم</span>
                     </h4>
 
                     <div className="space-y-2.5 text-xs">
-                      <div className="flex justify-between items-center pb-2 border-b border-amber-200 dark:border-amber-900/40">
+                      <div className="flex justify-between items-center pb-2 border-b border-[var(--status-warning-text)]/20">
                         <span className="text-[var(--text-secondary)] font-medium">قیمت واقعی ماده اولیه پاک‌شده (هر کیلو):</span>
-                        <span className="font-bold text-amber-900 dark:text-amber-200">{formatToman(netCostPerKg).text}</span>
+                        <span className="font-bold text-[var(--status-warning-text)]">{formatToman(netCostPerKg).text}</span>
                       </div>
 
-                      <div className="flex justify-between items-center pb-2 border-b border-amber-200 dark:border-amber-900/40">
+                      <div className="flex justify-between items-center pb-2 border-b border-[var(--status-warning-text)]/20">
                         <span className="text-[var(--text-secondary)] font-medium">قیمت خالص هر گرم:</span>
-                        <span className="font-bold text-amber-900 dark:text-amber-200">{formatToman(netCostPerGram).text}</span>
+                        <span className="font-bold text-[var(--status-warning-text)]">{formatToman(netCostPerGram).text}</span>
                       </div>
 
-                      <div className="flex justify-between items-center pb-2 border-b border-amber-200 dark:border-amber-900/40">
+                      <div className="flex justify-between items-center pb-2 border-b border-[var(--status-warning-text)]/20">
                         <span className="text-[var(--text-secondary)] font-medium">بهای تمام‌شده این پرس ({toPersianDigits(calcWeightGrams)} گرم):</span>
                         <span className="font-black text-[var(--status-error-text)] text-sm">{formatToman(recipeFoodCost).text}</span>
                       </div>
 
-                      <div className="flex justify-between items-center pb-2 border-b border-amber-200 dark:border-amber-900/40">
+                      <div className="flex justify-between items-center pb-2 border-b border-[var(--status-warning-text)]/20">
                         <span className="text-[var(--text-secondary)] font-medium">درصد واقعی بهای مواد:</span>
-                        <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm">٪{toPersianDigits(foodCostPercentage)}</span>
+                        <span className="font-black text-[var(--status-success-text)] text-sm">٪{toPersianDigits(foodCostPercentage)}</span>
                       </div>
 
                       <div className="flex justify-between items-center">
                         <span className="text-[var(--text-secondary)] font-medium">سود ناخالص هر پرس:</span>
-                        <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm">{formatToman(grossProfit).text}</span>
+                        <span className="font-black text-[var(--status-success-text)] text-sm">{formatToman(grossProfit).text}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-white dark:bg-[var(--bg-card)] border border-amber-200 dark:border-amber-900/40 text-[11px] text-[var(--text-primary)] font-medium leading-relaxed">
+                  <div className="p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--status-warning-text)]/20 text-[11px] text-[var(--text-primary)] font-medium leading-relaxed">
                     💡 درصد بهای مواد این غذا <strong>٪{toPersianDigits(foodCostPercentage)}</strong> است. (هدف استاندارد: زیر ۳۵٪).
                   </div>
                 </div>
@@ -671,8 +660,8 @@ export const GuideManager: React.FC = () => {
 
         {/* Chapter 8: FAQs */}
         {activeChapter === 'faq' && (
-          <Card className="border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] rounded-3xl overflow-hidden shadow-2xs">
-            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]/40 dark:bg-stone-900/40">
+          <Card className="border border-[var(--border-subtle)] bg-[var(--bg-card)] rounded-2xl overflow-hidden shadow-2xs">
+            <CardHeader className="border-b border-[var(--border-subtle)] pb-4 bg-[var(--bg-base)]">
               <CardTitle className="text-base font-black text-[var(--text-primary)] flex items-center gap-2">
                 <HelpCircle className="h-5 w-5 text-[var(--brand-primary)]" />
                 <span>پرسش‌های متداول و پاسخ‌های کاربردی</span>
@@ -706,7 +695,7 @@ export const GuideManager: React.FC = () => {
                       />
                     </button>
                     {isOpen && (
-                      <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-base)]/50 p-4 sm:p-5">
+                      <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-base)] p-4 sm:p-5">
                         <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-medium">
                           {faq.a}
                         </p>
@@ -722,4 +711,3 @@ export const GuideManager: React.FC = () => {
     </div>
   );
 };
-

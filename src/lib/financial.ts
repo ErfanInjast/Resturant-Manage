@@ -1,6 +1,15 @@
-// netProfit = totalRevenue - totalCOGS - totalWasteCost
-// Decision: wasteCost is included as real operational expense
-// Last updated: 2026-08-14
+// Standardized Financial Calculation Engine
+// Architectural Principles & Separation of Concerns:
+// 1. COGS (Cost of Goods Sold): Pure raw materials + recipe waste for sold items.
+// 2. Direct Labor: Per-portion preparation/assembly labor specified on menu items.
+// 3. Fixed Labor (Salaries): Monthly payroll staff costs entered in fixed overhead settings.
+// 4. Total Labor Cost = Direct Labor (from sales) + Period Fixed Salaries.
+// 5. Prime Cost = COGS + Total Labor Cost. (Key restaurant efficiency benchmark; target < 55-60%).
+// 6. Total Overhead = Rent + Utilities + Salaries + Marketing + Insurance + General + Maintenance + Delivery.
+// 7. Net Profit = Gross Profit - Period Total Overhead - Total Waste
+//    EQUI-FORMULA: Net Profit = Revenue - Prime Cost - Non-Labor Overhead - Total Waste.
+//    CRITICAL: Never subtract Prime Cost AND Total Overhead together, as that would deduct Salaries twice!
+// Last updated: 2026-08-19
 
 import type { DailySalesRecord, WasteLog, FixedCosts, AppSettings } from '../types';
 import { roundCurrency } from './utils';
@@ -12,6 +21,8 @@ import {
   getDaysInJalaliMonth,
   calculateWorkingDays,
 } from './jalali';
+
+export { calculateWorkingDays };
 
 // Magic values/constants abstracted to UPPER_SNAKE_CASE
 const MILLISECONDS_IN_DAY = 86400000;
@@ -377,4 +388,59 @@ export function calculateFinancialMetrics(config: FinancialMetricsConfig): Finan
     filterSubtitle,
   };
 }
+
+export interface MenuItemPricingInput {
+  materialCost: number;
+  wastePercent?: number;
+  laborCost?: number;
+  packagingCost?: number;
+  sellingPrice?: number;
+  targetFoodCostPercent?: number;
+}
+
+export interface MenuItemPricingResult {
+  totalMaterialCost: number;
+  wasteCost: number;
+  foodCost: number;
+  portionCost: number;
+  primeCost: number;
+  targetPrice: number;
+  grossProfit: number;
+  marginPercent: number;
+}
+
+/**
+ * Standardized single source of truth for Menu Item pricing and portion cost calculations.
+ * Used identically in MenuManager (live preview) and syncAndRecalculateAllData (db engine).
+ */
+export function calculateMenuItemPricing(
+  input: MenuItemPricingInput
+): MenuItemPricingResult {
+  const materialCost = Math.max(0, input.materialCost || 0);
+  const wastePercent = Math.max(0, input.wastePercent || 0);
+  const laborCost = Math.max(0, input.laborCost || 0);
+  const packagingCost = Math.max(0, input.packagingCost || 0);
+  const sellingPrice = Math.max(0, input.sellingPrice || 0);
+  const targetFoodCostPercent = Math.max(0, input.targetFoodCostPercent ?? 35);
+
+  const wasteCost = roundCurrency(materialCost * (wastePercent / 100));
+  const foodCost = roundCurrency(materialCost + wasteCost);
+  const portionCost = roundCurrency(foodCost + laborCost + packagingCost);
+  const targetFoodCostRatio = targetFoodCostPercent / 100;
+  const targetPrice = targetFoodCostRatio > 0 ? roundCurrency(foodCost / targetFoodCostRatio) : foodCost;
+  const grossProfit = roundCurrency(sellingPrice - portionCost);
+  const marginPercent = sellingPrice > 0 ? ((sellingPrice - portionCost) / sellingPrice) * 100 : 0;
+
+  return {
+    totalMaterialCost: materialCost,
+    wasteCost,
+    foodCost,
+    portionCost,
+    primeCost: portionCost,
+    targetPrice,
+    grossProfit,
+    marginPercent,
+  };
+}
+
 

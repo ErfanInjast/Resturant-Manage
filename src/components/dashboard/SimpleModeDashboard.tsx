@@ -438,7 +438,7 @@ export const SimpleModeDashboard: React.FC = () => {
   return (
     <div className="space-y-6 pt-2 pb-24 dir-rtl font-['IRANYekan','iranyekan',sans-serif] text-right">
       {/* HEADER STATUS & FILTER BAR */}
-      <div className="p-5 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/60 dark:border-stone-800 shadow-xs space-y-4">
+      <div className="p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-xs space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="p-3.5 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
@@ -446,21 +446,21 @@ export const SimpleModeDashboard: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-base sm:text-lg font-black text-stone-900 dark:text-white leading-tight">
+                <h1 className="text-base sm:text-lg font-black text-[var(--text-primary)] leading-tight">
                   داشبورد سریع و ثبت فاکتور روزانه
                 </h1>
                 <span className="text-[10px] tracking-wide px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50 font-extrabold">
                   سامانه ثبت سریع فروشگاهی
                 </span>
               </div>
-              <p className="text-xs text-stone-500 dark:text-stone-400 font-medium mt-1">
+              <p className="text-xs text-[var(--text-secondary)] font-medium mt-1">
                 پایش هوشمند و یکپارچه درآمدهای فروشگاهی، هزینه‌ها و خالص سودآوری
               </p>
             </div>
           </div>
 
           {/* Date Filter Pills - Framer Motion Segmented Slider */}
-          <div className="relative flex items-center bg-stone-100/80 dark:bg-stone-950 p-1 rounded-2xl border border-stone-200/50 dark:border-stone-800/80 w-full lg:w-auto overflow-x-auto scrollbar-none select-none">
+          <div className="relative flex items-center bg-[var(--bg-base)] p-1 rounded-2xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] w-full lg:w-auto overflow-x-auto scrollbar-none select-none">
             {[
               { id: 'today', label: 'امروز' },
               { id: 'last7', label: '۷ روز اخیر' },
@@ -477,7 +477,7 @@ export const SimpleModeDashboard: React.FC = () => {
                     'relative z-10 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[10px] sm:text-xs font-black transition-all whitespace-nowrap cursor-pointer flex-1 lg:flex-initial text-center',
                     isSelected
                       ? 'text-white'
-                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   )}
                 >
                   {preset.label}
@@ -485,7 +485,7 @@ export const SimpleModeDashboard: React.FC = () => {
                     <motion.div
                       layoutId="activeDatePreset"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      className="absolute inset-0 bg-stone-900 dark:bg-stone-800 rounded-xl -z-10 shadow-sm"
+                      className="absolute inset-0 bg-[var(--brand-primary)] rounded-xl -z-10 shadow-sm"
                     />
                   )}
                 </button>
@@ -498,9 +498,9 @@ export const SimpleModeDashboard: React.FC = () => {
       {/* 4 PRIMARY EXECUTIVE KPI CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: REVENUE */}
-        <Card className="p-5 bg-white dark:bg-stone-900 border border-stone-200/60 dark:border-stone-800/80 space-y-3.5 shadow-xs relative overflow-hidden group">
+        <Card className="p-5 bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-3.5 shadow-xs relative overflow-hidden group">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-500 dark:text-stone-400">فروش و درآمد کل</span>
+            <span className="text-xs font-bold text-[var(--text-secondary)]">فروش و درآمد کل</span>
             <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               <TrendingUp className="h-4.5 w-4.5" />
             </div>
@@ -509,19 +509,19 @@ export const SimpleModeDashboard: React.FC = () => {
             <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
               {formatToman(revenue).text}
             </div>
-            <div className="text-[10px] text-stone-400 dark:text-stone-500 font-medium">
+            <div className="text-[10px] text-[var(--text-secondary)] font-medium">
               مجموع مبالغ دریافتی فاکتورها
             </div>
           </div>
-          <div className="border-t border-stone-100 dark:border-stone-800/60 pt-3 text-[11px] text-stone-500 dark:text-stone-400 font-medium">
-            بازه تحلیل: <span className="font-extrabold text-stone-900 dark:text-white">{filterTitle}</span>
+          <div className="border-t border-[var(--border-subtle)] pt-3 text-[11px] text-[var(--text-secondary)] font-medium">
+            بازه تحلیل: <span className="font-extrabold text-[var(--text-primary)]">{filterTitle}</span>
           </div>
         </Card>
 
         {/* KPI 2: COST OF GOODS & FOOD COST PROGRESS */}
-        <Card className="p-5 bg-white dark:bg-stone-900 border border-stone-200/60 dark:border-stone-800/80 space-y-3.5 shadow-xs">
+        <Card className="p-5 bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-3.5 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-500 dark:text-stone-400">بهای تمام‌شده مواد اولیه</span>
+            <span className="text-xs font-bold text-[var(--text-secondary)]">بهای تمام‌شده مواد اولیه</span>
             <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
               <ShoppingBag className="h-4.5 w-4.5" />
             </div>
@@ -530,18 +530,18 @@ export const SimpleModeDashboard: React.FC = () => {
             <div className="text-2xl font-black text-amber-600 dark:text-amber-400 tracking-tight">
               {formatToman(cogs).text}
             </div>
-            <div className="text-[10px] text-stone-400 dark:text-stone-500 font-medium">
+            <div className="text-[10px] text-[var(--text-secondary)] font-medium">
               مصرف تقریبی موجودی انبار
             </div>
           </div>
           
           {/* Rich Indicator Progress Bar */}
-          <div className="border-t border-stone-100 dark:border-stone-800/60 pt-3 space-y-1.5">
-            <div className="flex justify-between text-[11px] font-bold text-stone-500 dark:text-stone-400">
+          <div className="border-t border-[var(--border-subtle)] pt-3 space-y-1.5">
+            <div className="flex justify-between text-[11px] font-bold text-[var(--text-secondary)]">
               <span>نسبت هزینه غذا به کل فروش:</span>
               <span className="font-extrabold text-amber-600 dark:text-amber-400">{toPersianDigits(foodCostPercent)}٪</span>
             </div>
-            <div className="w-full h-1.5 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-[var(--bg-base)] rounded-full overflow-hidden">
               <div
                 className="h-full bg-amber-500 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(100, foodCostPercent)}%` }}
@@ -551,9 +551,9 @@ export const SimpleModeDashboard: React.FC = () => {
         </Card>
 
         {/* KPI 3: OVERHEAD & WASTE */}
-        <Card className="p-5 bg-white dark:bg-stone-900 border border-stone-200/60 dark:border-stone-800/80 space-y-3.5 shadow-xs">
+        <Card className="p-5 bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-3.5 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-500 dark:text-stone-400">سربار جاری و ضایعات</span>
+            <span className="text-xs font-bold text-[var(--text-secondary)]">سربار جاری و ضایعات</span>
             <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400">
               <Trash2 className="h-4.5 w-4.5" />
             </div>
@@ -562,18 +562,18 @@ export const SimpleModeDashboard: React.FC = () => {
             <div className="text-2xl font-black text-rose-600 dark:text-rose-400 tracking-tight">
               {formatToman(periodOverhead + totalWaste).text}
             </div>
-            <div className="text-[10px] text-stone-400 dark:text-stone-500 font-medium">
+            <div className="text-[10px] text-[var(--text-secondary)] font-medium">
               بابت {formatToman(periodOverhead).text} سربار + {formatToman(totalWaste).text} ضایعات
             </div>
           </div>
 
           {/* Waste Share Indicator */}
-          <div className="border-t border-stone-100 dark:border-stone-800/60 pt-3 space-y-1.5">
-            <div className="flex justify-between text-[11px] font-bold text-stone-500 dark:text-stone-400">
+          <div className="border-t border-[var(--border-subtle)] pt-3 space-y-1.5">
+            <div className="flex justify-between text-[11px] font-bold text-[var(--text-secondary)]">
               <span>سهم ضایعات از انبار:</span>
               <span className="font-extrabold text-rose-600 dark:text-rose-400">{toPersianDigits(wasteSharePercent)}٪</span>
             </div>
-            <div className="w-full h-1.5 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-[var(--bg-base)] rounded-full overflow-hidden">
               <div
                 className="h-full bg-rose-500 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(100, wasteSharePercent)}%` }}
@@ -592,7 +592,7 @@ export const SimpleModeDashboard: React.FC = () => {
           )}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-700 dark:text-stone-300">سود خالص نهایی</span>
+            <span className="text-xs font-bold text-[var(--text-primary)]">سود خالص نهایی</span>
             <div className={cn('p-2.5 rounded-xl', netProfit >= 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400')}>
               {netProfit >= 0 ? <TrendingUp className="h-4.5 w-4.5" /> : <TrendingDown className="h-4.5 w-4.5" />}
             </div>
@@ -601,18 +601,18 @@ export const SimpleModeDashboard: React.FC = () => {
             <div className={cn('text-2xl font-black tracking-tight', netProfit >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400')}>
               {formatToman(netProfit).text}
             </div>
-            <div className="text-[10px] text-stone-400 dark:text-stone-500 font-medium">
+            <div className="text-[10px] text-[var(--text-secondary)] font-medium">
               پس از کسر هزینه‌های مستقیم و سربار
             </div>
           </div>
 
           {/* Net Margin Progress Bar */}
-          <div className="border-t border-stone-100 dark:border-stone-800/60 pt-3 space-y-1.5">
-            <div className="flex justify-between text-[11px] font-bold text-stone-500 dark:text-stone-400">
+          <div className="border-t border-[var(--border-subtle)] pt-3 space-y-1.5">
+            <div className="flex justify-between text-[11px] font-bold text-[var(--text-secondary)]">
               <span>حاشیه سود خالص:</span>
               <span className={cn('font-extrabold', netProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>{toPersianDigits(netMarginPercent)}٪</span>
             </div>
-            <div className="w-full h-1.5 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-[var(--bg-base)] rounded-full overflow-hidden">
               <div
                 className={cn('h-full rounded-full transition-all duration-500', netProfit >= 0 ? 'bg-emerald-500' : 'bg-rose-500')}
                 style={{ width: `${Math.max(0, Math.min(100, netMarginPercent))}%` }}
@@ -623,9 +623,9 @@ export const SimpleModeDashboard: React.FC = () => {
       </div>
 
       {/* WORKSPACE: POS QUICK ENTRY & PURCHASE LOGGING PANEL */}
-      <Card className="bg-white dark:bg-stone-900 border border-stone-200/60 dark:border-stone-800 shadow-sm rounded-3xl overflow-hidden">
+      <Card className="bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-sm rounded-2xl overflow-hidden">
         {/* Workspace Tab Switcher - Sliding Framer Motion Design */}
-        <div className="relative flex p-2 bg-stone-50 dark:bg-stone-950 border-b border-stone-100 dark:border-stone-800/60">
+        <div className="relative flex p-2 bg-[var(--bg-base)] border-b border-[var(--border-subtle)]">
           <div className="grid grid-cols-2 gap-1 w-full relative">
             <button
               type="button"
@@ -634,7 +634,7 @@ export const SimpleModeDashboard: React.FC = () => {
                 'relative z-10 py-3 text-[10px] sm:text-xs md:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl cursor-pointer whitespace-nowrap min-w-0',
                 activeEntryTab === 'sales'
                   ? 'text-emerald-700 dark:text-emerald-300'
-                  : 'text-stone-500 hover:text-stone-900 dark:hover:text-white'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               )}
             >
               <Receipt className="h-4 w-4 sm:h-4.5 sm:w-4.5 shrink-0" />
@@ -643,7 +643,7 @@ export const SimpleModeDashboard: React.FC = () => {
                 <motion.div
                   layoutId="activeEntryTabBg"
                   transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-                  className="absolute inset-0 bg-white dark:bg-stone-900 border border-emerald-500/10 dark:border-emerald-500/5 rounded-xl shadow-xs -z-10"
+                  className="absolute inset-0 bg-[var(--bg-card)] border border-emerald-500/10 dark:border-emerald-500/5 rounded-xl shadow-xs -z-10"
                 />
               )}
             </button>
@@ -654,7 +654,7 @@ export const SimpleModeDashboard: React.FC = () => {
                 'relative z-10 py-3 text-[10px] sm:text-xs md:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl cursor-pointer whitespace-nowrap min-w-0',
                 activeEntryTab === 'purchase'
                   ? 'text-amber-700 dark:text-amber-300'
-                  : 'text-stone-500 hover:text-stone-900 dark:hover:text-white'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               )}
             >
               <ShoppingBag className="h-4 w-4 sm:h-4.5 sm:w-4.5 shrink-0" />
@@ -663,7 +663,7 @@ export const SimpleModeDashboard: React.FC = () => {
                 <motion.div
                   layoutId="activeEntryTabBg"
                   transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-                  className="absolute inset-0 bg-white dark:bg-stone-900 border border-amber-500/10 dark:border-amber-500/5 rounded-xl shadow-xs -z-10"
+                  className="absolute inset-0 bg-[var(--bg-card)] border border-amber-500/10 dark:border-amber-500/5 rounded-xl shadow-xs -z-10"
                 />
               )}
             </button>
@@ -674,14 +674,14 @@ export const SimpleModeDashboard: React.FC = () => {
           {activeEntryTab === 'sales' ? (
             <div className="space-y-6">
               {/* Entry Header */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-100 dark:border-stone-850 pb-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] pb-4">
                 <div className="flex items-center gap-3">
                   <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                     <Receipt className="h-5 w-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="text-sm sm:text-base font-black text-stone-900 dark:text-white">
+                      <h2 className="text-sm sm:text-base font-black text-[var(--text-primary)]">
                         ثبت فاکتور فروش (ثبت سریع منو)
                       </h2>
                       {existingDateRecord && (
@@ -690,14 +690,14 @@ export const SimpleModeDashboard: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-stone-400 dark:text-stone-400 font-medium mt-0.5">
+                    <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">
                       تعداد هر آیتم فروش‌رفته را انتخاب کرده و دکمه ثبت نهایی را بفشارید
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                  <span className="text-xs font-bold text-stone-600 dark:text-stone-400 shrink-0">تاریخ فاکتور:</span>
+                  <span className="text-xs font-bold text-[var(--text-secondary)] shrink-0">تاریخ فاکتور:</span>
                   <JalaliDatePicker
                     value={salesDate}
                     onChange={(newIso) => setSalesDate(newIso)}
@@ -712,7 +712,7 @@ export const SimpleModeDashboard: React.FC = () => {
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                   {/* Search Input */}
                   <div className="relative flex-1">
-                    <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+                    <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" />
                     <input
                       type="text"
                       value={searchQuery}
@@ -721,13 +721,13 @@ export const SimpleModeDashboard: React.FC = () => {
                         setMenuCurrentPage(1);
                       }}
                       placeholder="جستجوی سریع محصول منو..."
-                      className="w-full h-11 pr-10 pl-10 rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                      className="w-full h-11 pr-10 pl-10 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                     />
                     {searchQuery && (
                       <button
                         type="button"
                         onClick={() => setSearchQuery('')}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 cursor-pointer"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-stone-600 dark:hover:text-stone-200 p-1 cursor-pointer"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
@@ -741,7 +741,7 @@ export const SimpleModeDashboard: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       onClick={handleResetForm}
-                      className="h-11 rounded-2xl px-4 text-xs text-stone-500 hover:text-rose-500 dark:text-stone-400 dark:hover:text-rose-400 gap-2 cursor-pointer border border-transparent hover:border-rose-200/50 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all"
+                      className="h-11 rounded-2xl px-4 text-xs text-[var(--text-secondary)] hover:text-rose-500 dark:text-[var(--text-secondary)] dark:hover:text-rose-400 gap-2 cursor-pointer border border-transparent hover:border-rose-200/50 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all"
                     >
                       <RotateCcw className="h-3.5 w-3.5" />
                       <span>پاکسازی فرم ({toPersianDigits(totalSelectedCount)})</span>
@@ -766,14 +766,14 @@ export const SimpleModeDashboard: React.FC = () => {
                           'px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-2 border',
                           isSelected
                             ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                            : 'bg-stone-50 dark:bg-stone-950 text-stone-500 dark:text-stone-400 border-stone-200/50 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-850'
+                            : 'bg-[var(--bg-base)] text-[var(--text-secondary)] border-[var(--border-subtle)] dark:border-[var(--border-subtle)] hover:bg-[var(--bg-base)]'
                         )}
                       >
                         <span>{cat}</span>
                         <span
                           className={cn(
                             'px-2 py-0.5 text-[10px] rounded-full font-black leading-none',
-                            isSelected ? 'bg-white/20 text-white' : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
+                            isSelected ? 'bg-white/20 text-white' : 'bg-[var(--bg-base)] text-[var(--text-secondary)]'
                           )}
                         >
                           {toPersianDigits(count)}
@@ -786,15 +786,15 @@ export const SimpleModeDashboard: React.FC = () => {
 
               {/* Product Cards POS Grid */}
               {menuItems.length === 0 ? (
-                <div className="p-10 text-center text-xs text-stone-500 dark:text-stone-400 border border-dashed border-stone-200 dark:border-stone-800 rounded-3xl space-y-3">
-                  <UtensilsCrossed className="h-10 w-10 mx-auto text-stone-300 dark:text-stone-700" />
-                  <p className="font-bold text-sm text-stone-800 dark:text-white">هیچ آیتم منویی ثبت نشده است.</p>
+                <div className="p-10 text-center text-xs text-[var(--text-secondary)] border border-dashed border-[var(--border-subtle)] rounded-2xl space-y-3">
+                  <UtensilsCrossed className="h-10 w-10 mx-auto text-[var(--border-functional)]" />
+                  <p className="font-bold text-sm text-[var(--text-primary)]">هیچ آیتم منویی ثبت نشده است.</p>
                   <p className="text-[11px] max-w-sm mx-auto leading-relaxed">
                     از بخش منو و رسپی در حالت دسکتاپ می‌توانید محصولات منو را تعریف و قیمت‌گذاری کنید.
                   </p>
                 </div>
               ) : paginatedMenuItems.length === 0 ? (
-                <div className="p-10 text-center text-xs text-stone-400 dark:text-stone-500 border border-stone-100 dark:border-stone-800 rounded-3xl">
+                <div className="p-10 text-center text-xs text-[var(--text-secondary)] border border-[var(--border-subtle)] rounded-2xl">
                   هیچ محصولی با عنوان جستجو شده یافت نشد.
                 </div>
               ) : (
@@ -811,10 +811,10 @@ export const SimpleModeDashboard: React.FC = () => {
                           key={item.id}
                           whileTap={{ scale: 0.98 }}
                           className={cn(
-                            'p-4 rounded-3xl border transition-all flex flex-col justify-between gap-4 relative overflow-hidden',
+                            'p-4 rounded-2xl border transition-all flex flex-col justify-between gap-4 relative overflow-hidden',
                             hasItems
                               ? 'bg-emerald-500/[0.04] dark:bg-emerald-500/[0.03] border-emerald-500 shadow-sm shadow-emerald-500/5'
-                              : 'bg-stone-50 dark:bg-stone-950 border-stone-200/50 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
+                              : 'bg-[var(--bg-base)] border-[var(--border-subtle)] dark:border-[var(--border-subtle)] hover:border-[var(--border-functional)] dark:hover:border-[var(--border-functional)]'
                           )}
                         >
                           {/* Corner selected tag decoration */}
@@ -826,7 +826,7 @@ export const SimpleModeDashboard: React.FC = () => {
 
                           {/* Top Row: Category & Fallback Visual Badge */}
                           <div className="flex items-center justify-between gap-2 pt-1">
-                            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-stone-200/60 dark:bg-stone-900 text-stone-500 dark:text-stone-400">
+                            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)]">
                               {item.category || 'عمومی'}
                             </span>
 
@@ -843,25 +843,25 @@ export const SimpleModeDashboard: React.FC = () => {
                               'w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shrink-0 transition-all',
                               hasItems
                                 ? 'bg-emerald-500 text-white'
-                                : 'bg-stone-200/60 dark:bg-stone-900 text-stone-600 dark:text-stone-400'
+                                : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)]'
                             )}>
                               {item.name.slice(0, 1)}
                             </div>
                             <div className="space-y-1 min-w-0 flex-1">
-                              <h3 className="text-xs font-black text-stone-850 dark:text-white line-clamp-1">
+                              <h3 className="text-xs font-black text-[var(--text-primary)] dark:text-white line-clamp-1">
                                 {item.name}
                               </h3>
-                              <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500">
-                                قیمت واحد: <span className="text-stone-700 dark:text-stone-300">{formatToman(item.sellingPrice || 0).text}</span>
+                              <p className="text-[10px] font-bold text-[var(--text-secondary)]">
+                                قیمت واحد: <span className="text-[var(--text-primary)]">{formatToman(item.sellingPrice || 0).text}</span>
                               </p>
                             </div>
                           </div>
 
                           {/* Tactical Stepper Control Pill Dock */}
-                          <div className="flex items-center justify-between gap-2 pt-3 border-t border-stone-200/40 dark:border-stone-800/40">
-                            <span className="text-[11px] font-bold text-stone-400 dark:text-stone-500">تعداد:</span>
+                          <div className="flex items-center justify-between gap-2 pt-3 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+                            <span className="text-[11px] font-bold text-[var(--text-secondary)]">تعداد:</span>
                             
-                            <div className="flex items-center bg-stone-100 dark:bg-stone-900 p-0.5 rounded-xl border border-stone-200/40 dark:border-stone-800">
+                            <div className="flex items-center bg-[var(--bg-base)] p-0.5 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                               <button
                                 type="button"
                                 onClick={() => handleItemQtyChange(numId, -1)}
@@ -870,7 +870,7 @@ export const SimpleModeDashboard: React.FC = () => {
                                   'w-7 h-7 rounded-lg font-black flex items-center justify-center text-sm transition-colors cursor-pointer',
                                   qty > 0
                                     ? 'bg-rose-500 text-white hover:bg-rose-600'
-                                    : 'text-stone-400 opacity-30 cursor-not-allowed'
+                                    : 'text-[var(--text-secondary)] opacity-30 cursor-not-allowed'
                                 )}
                               >
                                 <Minus className="h-3.5 w-3.5" />
@@ -880,7 +880,7 @@ export const SimpleModeDashboard: React.FC = () => {
                                 type="text"
                                 value={toPersianDigits(qty)}
                                 onChange={(e) => handleSetItemQty(numId, e.target.value)}
-                                className="w-9 h-7 text-center bg-transparent border-0 text-xs font-black text-stone-800 dark:text-white focus:ring-0 focus:outline-hidden"
+                                className="w-9 h-7 text-center bg-transparent border-0 text-xs font-black text-[var(--text-primary)] focus:ring-0 focus:outline-hidden"
                               />
 
                               <button
@@ -914,10 +914,10 @@ export const SimpleModeDashboard: React.FC = () => {
               )}
 
               {/* Live Cart & Submit Section */}
-              <div className="p-5 rounded-3xl bg-stone-50 dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+              <div className="p-5 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-stone-500 dark:text-stone-400">مجموع فاکتور این تاریخ:</span>
+                    <span className="text-xs font-bold text-[var(--text-secondary)]">مجموع فاکتور این تاریخ:</span>
                     <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
                       {toPersianDigits(totalSelectedCount)} عدد محصول
                     </span>
@@ -925,7 +925,7 @@ export const SimpleModeDashboard: React.FC = () => {
                   <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
                     {formatToman(quickTotalRevenue).text}
                   </div>
-                  <div className="text-[10px] text-stone-400 dark:text-stone-500 font-bold">
+                  <div className="text-[10px] text-[var(--text-secondary)] font-bold">
                     بهای تقریبی مواد اولیه مصرفی: {formatToman(quickTotalCOGS).text}
                   </div>
                 </div>
@@ -947,23 +947,23 @@ export const SimpleModeDashboard: React.FC = () => {
           ) : (
             <div className="space-y-6">
               {/* Entry Header */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-100 dark:border-stone-850 pb-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] pb-4">
                 <div className="flex items-center gap-3">
                   <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
                     <Boxes className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-sm sm:text-base font-black text-stone-900 dark:text-white">
+                    <h2 className="text-sm sm:text-base font-black text-[var(--text-primary)]">
                       ثبت فاکتور خرید (ورود به انبار)
                     </h2>
-                    <p className="text-xs text-stone-400 dark:text-stone-400 font-medium mt-0.5">
+                    <p className="text-xs text-[var(--text-secondary)] font-medium mt-0.5">
                       اطلاعات فاکتور خرید مواد اولیه را جهت محاسبه دقیق بهای تمام‌شده و کنترل موجودی وارد کنید
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                  <span className="text-xs font-bold text-stone-600 dark:text-stone-400 shrink-0">تاریخ فاکتور خرید:</span>
+                  <span className="text-xs font-bold text-[var(--text-secondary)] shrink-0">تاریخ فاکتور خرید:</span>
                   <JalaliDatePicker
                     value={purchaseDate}
                     onChange={(newIso) => setPurchaseDate(newIso)}
@@ -980,7 +980,7 @@ export const SimpleModeDashboard: React.FC = () => {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden bg-stone-50 dark:bg-stone-950 p-4 rounded-2xl border border-stone-200 dark:border-stone-800 space-y-4"
+                    className="overflow-hidden bg-[var(--bg-base)] p-4 rounded-2xl border border-[var(--border-subtle)] space-y-4"
                   >
                     <div className="flex items-center justify-between">
                       <h3 className="text-xs font-black text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
@@ -990,7 +990,7 @@ export const SimpleModeDashboard: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setShowInlineNewIng(false)}
-                        className="p-1 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+                        className="p-1 rounded-lg text-[var(--text-secondary)] hover:text-stone-600 dark:hover:text-stone-200"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -998,18 +998,18 @@ export const SimpleModeDashboard: React.FC = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-stone-500">نام ماده اولیه:</label>
+                        <label className="text-[11px] font-bold text-[var(--text-secondary)]">نام ماده اولیه:</label>
                         <input
                           type="text"
                           value={newIngName}
                           onChange={(e) => setNewIngName(e.target.value)}
                           placeholder="مثال: قهوه اسپرسو برزیل، مرغ..."
-                          className="w-full h-10 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 px-3 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20"
+                          className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-amber-500/20"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-stone-500">واحد اندازه‌گیری:</label>
+                        <label className="text-[11px] font-bold text-[var(--text-secondary)]">واحد اندازه‌گیری:</label>
                         <SearchableSelect
                           options={[
                             { value: 'kg', label: 'کیلوگرم (kg)' },
@@ -1023,12 +1023,12 @@ export const SimpleModeDashboard: React.FC = () => {
                           onChange={(val) => setNewIngUnit(val as UnitType)}
                           placeholder="واحد اندازه‌گیری"
                           enableSearch={false}
-                          triggerClassName="h-10 rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-xs text-stone-800 dark:text-white"
+                          triggerClassName="h-10 rounded-xl border-[var(--border-subtle)] bg-[var(--bg-card)] text-xs text-[var(--text-primary)]"
                         />
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-stone-500">دسته‌بندی:</label>
+                        <label className="text-[11px] font-bold text-[var(--text-secondary)]">دسته‌بندی:</label>
                         <SearchableSelect
                           options={[
                             { value: 'پروتئین', label: 'پروتئین' },
@@ -1044,7 +1044,7 @@ export const SimpleModeDashboard: React.FC = () => {
                           onChange={(val) => setNewIngCategory(String(val))}
                           placeholder="دسته‌بندی"
                           enableSearch={false}
-                          triggerClassName="h-10 rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-xs text-stone-800 dark:text-white"
+                          triggerClassName="h-10 rounded-xl border-[var(--border-subtle)] bg-[var(--bg-card)] text-xs text-[var(--text-primary)]"
                         />
                       </div>
                     </div>
@@ -1055,7 +1055,7 @@ export const SimpleModeDashboard: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowInlineNewIng(false)}
-                        className="text-xs text-stone-400 cursor-pointer"
+                        className="text-xs text-[var(--text-secondary)] cursor-pointer"
                       >
                         انصراف
                       </Button>
@@ -1079,7 +1079,7 @@ export const SimpleModeDashboard: React.FC = () => {
                 {/* Ingredient Selector */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">ماده اولیه خریداری‌شده:</label>
+                    <label className="text-xs font-extrabold text-[var(--text-primary)]">ماده اولیه خریداری‌شده:</label>
                     {!showInlineNewIng && (
                       <button
                         type="button"
@@ -1115,7 +1115,7 @@ export const SimpleModeDashboard: React.FC = () => {
                       value={purchaseIngId}
                       onChange={(val) => setPurchaseIngId(Number(val))}
                       placeholder="یک ماده اولیه را انتخاب کنید..."
-                      triggerClassName="h-11 rounded-2xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 text-xs font-bold text-stone-900 dark:text-white"
+                      triggerClassName="h-11 rounded-2xl border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs font-bold text-[var(--text-primary)]"
                     />
                   )}
                 </div>
@@ -1123,7 +1123,7 @@ export const SimpleModeDashboard: React.FC = () => {
                 {/* Qty & Price */}
                 <div className="grid grid-cols-2 gap-3.5">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                    <label className="text-xs font-extrabold text-[var(--text-primary)]">
                       مقدار خرید {purchaseIngId && `(${getUnitLabel(ingredients.find((i) => i.id === Number(purchaseIngId))?.unit || '')})`}:
                     </label>
                     <input
@@ -1135,17 +1135,17 @@ export const SimpleModeDashboard: React.FC = () => {
                         setPurchaseQty(eng === '' ? '' : eng);
                       }}
                       placeholder="مثال: ۵.۵"
-                      className="w-full h-11 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 px-3 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20"
+                      className="w-full h-11 rounded-xl border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] px-3 text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-amber-500/20"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">قیمت کل خرید (تومان):</label>
+                    <label className="text-xs font-extrabold text-[var(--text-primary)]">قیمت کل خرید (تومان):</label>
                     <SmartMoneyInput
                       value={purchasePrice}
                       onChange={setPurchasePrice}
                       placeholder="مبلغ کل فاکتور"
-                      className="h-11 rounded-xl border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 text-xs text-stone-900 dark:text-white"
+                      className="h-11 rounded-xl border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] text-xs text-[var(--text-primary)]"
                     />
                   </div>
                 </div>
@@ -1154,13 +1154,13 @@ export const SimpleModeDashboard: React.FC = () => {
               {/* Note and Save button */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                 <div className="col-span-1 md:col-span-9 space-y-1.5">
-                  <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">توضیحات فاکتور خرید (اختیاری):</label>
+                  <label className="text-xs font-extrabold text-[var(--text-primary)]">توضیحات فاکتور خرید (اختیاری):</label>
                   <input
                     type="text"
                     value={purchaseNote}
                     onChange={(e) => setPurchaseNote(e.target.value)}
                     placeholder="بابت فاکتور شماره فلان، خرید از میدان تره‌بار و..."
-                    className="w-full h-11 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 px-3 text-xs font-bold text-stone-900 dark:text-white placeholder-stone-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20"
+                    className="w-full h-11 rounded-xl border border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] px-3 text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-amber-500/20"
                   />
                 </div>
 
@@ -1183,9 +1183,9 @@ export const SimpleModeDashboard: React.FC = () => {
       </Card>
 
       {/* RECENT INVOICES & PURCHASES LOG PANEL WITH DUAL-TAB PAGINATION */}
-      <Card className="p-5 bg-white dark:bg-stone-900 border border-stone-200/60 dark:border-stone-800 space-y-5 shadow-xs rounded-3xl">
+      <Card className="p-5 bg-[var(--bg-card)] border border-[var(--border-subtle)] space-y-5 shadow-xs rounded-2xl">
         {/* Header Tabs */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-stone-100 dark:border-stone-800 pb-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
           <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto custom-scrollbar pb-1 sm:pb-0">
             <button
               type="button"
@@ -1197,7 +1197,7 @@ export const SimpleModeDashboard: React.FC = () => {
                 'px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer flex items-center gap-2 border',
                 activeHistoryTab === 'sales'
                   ? 'bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 dark:border-emerald-500/10'
-                  : 'bg-transparent text-stone-500 dark:text-stone-400 border-transparent hover:bg-stone-100 dark:hover:bg-stone-800'
+                  : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-base)]'
               )}
             >
               <Receipt className="h-4 w-4" />
@@ -1216,7 +1216,7 @@ export const SimpleModeDashboard: React.FC = () => {
                 'px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer flex items-center gap-2 border',
                 activeHistoryTab === 'purchase'
                   ? 'bg-amber-500/5 text-amber-600 dark:text-amber-400 border-amber-500/20 dark:border-amber-500/10'
-                  : 'bg-transparent text-stone-500 dark:text-stone-400 border-transparent hover:bg-stone-100 dark:hover:bg-stone-800'
+                  : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-base)]'
               )}
             >
               <ShoppingBag className="h-4 w-4" />
@@ -1227,7 +1227,7 @@ export const SimpleModeDashboard: React.FC = () => {
             </button>
           </div>
 
-          <span className="text-[11px] text-stone-400 dark:text-stone-500 font-bold hidden sm:inline">
+          <span className="text-[11px] text-[var(--text-secondary)] font-bold hidden sm:inline">
             نمایش تاریخچه تعاملی فاکتورهای ثبت‌شده
           </span>
         </div>
@@ -1235,9 +1235,9 @@ export const SimpleModeDashboard: React.FC = () => {
         {activeHistoryTab === 'sales' ? (
           <div className="space-y-4">
             {/* Sales Invoices List */}
-            <div className="divide-y divide-stone-100 dark:divide-stone-850 border border-stone-200/60 dark:border-stone-800 rounded-2xl overflow-hidden shadow-xs">
+            <div className="divide-y divide-stone-100 dark:divide-stone-850 border border-[var(--border-subtle)] rounded-2xl overflow-hidden shadow-xs">
               {salesRecords.length === 0 ? (
-                <div className="p-10 text-center text-xs text-stone-400 dark:text-stone-500 bg-stone-50/50 dark:bg-stone-950/20">
+                <div className="p-10 text-center text-xs text-[var(--text-secondary)] bg-stone-50/50 dark:bg-[var(--bg-card)]/20">
                   هنوز هیچ فاکتور فروشی ثبت نشده است.
                 </div>
               ) : (
@@ -1249,20 +1249,20 @@ export const SimpleModeDashboard: React.FC = () => {
                     const itemCount = record.items?.reduce((acc, i) => acc + i.quantity, 0) || 0;
 
                     return (
-                      <div key={recId || record.date} className="bg-white dark:bg-stone-900 transition-colors">
+                      <div key={recId || record.date} className="bg-[var(--bg-card)] transition-colors">
                         <div
                           onClick={() => setExpandedInvoiceId(isExpanded ? null : recId)}
-                          className="p-4 flex items-center justify-between gap-3 hover:bg-stone-50 dark:hover:bg-stone-950/40 cursor-pointer select-none"
+                          className="p-4 flex items-center justify-between gap-3 hover:bg-[var(--bg-base)] cursor-pointer select-none"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 shrink-0">
+                            <div className="p-2.5 rounded-xl bg-[var(--bg-base)] text-[var(--text-secondary)] shrink-0">
                               <Calendar className="h-4.5 w-4.5" />
                             </div>
                             <div>
-                              <div className="text-xs font-black text-stone-850 dark:text-white">
+                              <div className="text-xs font-black text-[var(--text-primary)] dark:text-white">
                                 فاکتور {formatJalaliReadable(record.date)}
                               </div>
-                              <div className="text-[10px] text-stone-400 dark:text-stone-500 font-bold mt-0.5">
+                              <div className="text-[10px] text-[var(--text-secondary)] font-bold mt-0.5">
                                 تعداد کل محصولات: {toPersianDigits(itemCount)} عدد
                               </div>
                             </div>
@@ -1273,7 +1273,7 @@ export const SimpleModeDashboard: React.FC = () => {
                               <div className="text-xs font-black text-emerald-600 dark:text-emerald-400">
                                 {formatToman(record.totalRevenue).text}
                               </div>
-                              <div className="text-[10px] text-stone-400 dark:text-stone-500 font-bold">
+                              <div className="text-[10px] text-[var(--text-secondary)] font-bold">
                                 بهای مواد: {formatToman(record.totalCOGS).text}
                               </div>
                             </div>
@@ -1287,7 +1287,7 @@ export const SimpleModeDashboard: React.FC = () => {
                                   window.scrollTo({ top: 300, behavior: 'smooth' });
                                 }}
                                 title="ویرایش در فرم"
-                                className="p-2 rounded-xl text-stone-400 hover:text-stone-950 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+                                className="p-2 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
                               >
                                 <Edit2 className="h-3.5 w-3.5" />
                               </button>
@@ -1298,11 +1298,11 @@ export const SimpleModeDashboard: React.FC = () => {
                                   if (recId) handleDeleteInvoice(recId, record.date);
                                 }}
                                 title="حذف فاکتور"
-                                className="p-2 rounded-xl text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                                className="p-2 rounded-xl text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
-                              <div className="p-1 text-stone-400">
+                              <div className="p-1 text-[var(--text-secondary)]">
                                 {isExpanded ? <ChevronUp className="h-4.5 w-4.5" /> : <ChevronDown className="h-4.5 w-4.5" />}
                               </div>
                             </div>
@@ -1316,29 +1316,29 @@ export const SimpleModeDashboard: React.FC = () => {
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: 'auto', opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden bg-stone-50 dark:bg-stone-950/50 border-t border-stone-150 dark:border-stone-850 p-4 space-y-4"
+                              className="overflow-hidden bg-[var(--bg-base)]/50 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)] p-4 space-y-4"
                             >
-                              <div className="text-[11px] font-black text-stone-500 flex items-center gap-1.5">
+                              <div className="text-[11px] font-black text-[var(--text-secondary)] flex items-center gap-1.5">
                                 <Receipt className="h-4 w-4" />
                                 <span>پیش‌نمایش قبض فروش کافه / رستوران:</span>
                               </div>
 
                               {/* Interactive Thermal-Style Digital Receipt */}
-                              <div className="relative mx-auto max-w-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl shadow-xs p-5 pb-7 overflow-hidden font-mono text-[11px] text-stone-700 dark:text-stone-300">
+                              <div className="relative mx-auto max-w-sm bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-xs p-5 pb-7 overflow-hidden font-mono text-[11px] text-[var(--text-primary)]">
                                 {/* Receipt Top Wave Cut Decoration */}
                                 <div className="absolute top-0 left-0 right-0 h-1 bg-[radial-gradient(circle,transparent_20%,#e5e7eb_21%,#e5e7eb_39%,transparent_40%)] dark:bg-[radial-gradient(circle,transparent_20%,#1f2937_21%,#1f2937_39%,transparent_40%)] bg-[length:8px_16px] bg-repeat-x" />
                                 
-                                <div className="text-center space-y-1 pb-4 border-b border-dashed border-stone-200 dark:border-stone-800 pt-2">
-                                  <div className="font-sans font-black text-xs text-stone-900 dark:text-white">فاکتور فروش دیجیتال</div>
-                                  <div className="text-[10px] text-stone-400">{formatJalaliReadable(record.date)}</div>
+                                <div className="text-center space-y-1 pb-4 border-b border-dashed border-[var(--border-subtle)] pt-2">
+                                  <div className="font-sans font-black text-xs text-[var(--text-primary)]">فاکتور فروش دیجیتال</div>
+                                  <div className="text-[10px] text-[var(--text-secondary)]">{formatJalaliReadable(record.date)}</div>
                                 </div>
 
                                 <div className="py-4 space-y-3.5">
                                   {record.items.map((it, idx) => (
                                     <div key={idx} className="flex justify-between items-start gap-2">
                                       <div className="space-y-0.5">
-                                        <div className="font-sans font-bold text-stone-900 dark:text-white text-xs">{it.menuItemName}</div>
-                                        <div className="text-stone-400 dark:text-stone-500 font-sans text-[10px]">
+                                        <div className="font-sans font-bold text-[var(--text-primary)] text-xs">{it.menuItemName}</div>
+                                        <div className="text-[var(--text-secondary)] font-sans text-[10px]">
                                           {toPersianDigits(it.quantity)} عدد × {formatToman(it.unitSellingPrice || 0).text}
                                         </div>
                                       </div>
@@ -1347,10 +1347,10 @@ export const SimpleModeDashboard: React.FC = () => {
                                   ))}
                                 </div>
 
-                                <div className="pt-4 border-t border-dashed border-stone-200 dark:border-stone-800 space-y-2 font-sans">
-                                  <div className="flex justify-between text-[10px] text-stone-400">
+                                <div className="pt-4 border-t border-dashed border-[var(--border-subtle)] space-y-2 font-sans">
+                                  <div className="flex justify-between text-[10px] text-[var(--text-secondary)]">
                                     <span>مجموع تعداد اقلام فاکتور:</span>
-                                    <span className="font-bold text-stone-700 dark:text-stone-300">{toPersianDigits(itemCount)} عدد</span>
+                                    <span className="font-bold text-[var(--text-primary)]">{toPersianDigits(itemCount)} عدد</span>
                                   </div>
                                   <div className="flex justify-between text-xs font-black text-stone-950 dark:text-white pt-1">
                                     <span>مبلغ کل فروش:</span>
@@ -1360,7 +1360,7 @@ export const SimpleModeDashboard: React.FC = () => {
                                     <span>بهای تمام‌شده انبار:</span>
                                     <span className="font-bold">{formatToman(record.totalCOGS).text}</span>
                                   </div>
-                                  <div className="flex justify-between text-[10px] text-emerald-600 dark:text-emerald-400 pt-1.5 border-t border-stone-100 dark:border-stone-800">
+                                  <div className="flex justify-between text-[10px] text-emerald-600 dark:text-emerald-400 pt-1.5 border-t border-[var(--border-subtle)]">
                                     <span>سود خالص فاکتور:</span>
                                     <span className="font-black text-xs">{formatToman(record.totalRevenue - record.totalCOGS).text}</span>
                                   </div>
@@ -1396,9 +1396,9 @@ export const SimpleModeDashboard: React.FC = () => {
         ) : (
           <div className="space-y-4">
             {/* Purchase Invoices List */}
-            <div className="divide-y divide-stone-100 dark:divide-stone-850 border border-stone-200/60 dark:border-stone-800 rounded-2xl overflow-hidden shadow-xs">
+            <div className="divide-y divide-stone-100 dark:divide-stone-850 border border-[var(--border-subtle)] rounded-2xl overflow-hidden shadow-xs">
               {purchaseLogs.length === 0 ? (
-                <div className="p-10 text-center text-xs text-stone-400 dark:text-stone-500 bg-stone-50/50 dark:bg-stone-950/20">
+                <div className="p-10 text-center text-xs text-[var(--text-secondary)] bg-stone-50/50 dark:bg-[var(--bg-card)]/20">
                   هنوز هیچ فاکتور خریدی ثبت نشده است.
                 </div>
               ) : (
@@ -1410,18 +1410,18 @@ export const SimpleModeDashboard: React.FC = () => {
                     const unitLabel = targetIng ? getUnitLabel(targetIng.unit) : '';
 
                     return (
-                      <div key={log.id} className="bg-white dark:bg-stone-900 transition-colors p-4 flex items-center justify-between gap-3 hover:bg-stone-50 dark:hover:bg-stone-950/40">
+                      <div key={log.id} className="bg-[var(--bg-card)] transition-colors p-4 flex items-center justify-between gap-3 hover:bg-[var(--bg-base)]">
                         <div className="flex items-center gap-3">
-                          <div className="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-amber-600 dark:text-amber-400 shrink-0">
+                          <div className="p-2.5 rounded-xl bg-[var(--bg-base)] text-amber-600 dark:text-amber-400 shrink-0">
                             <Boxes className="h-4.5 w-4.5" />
                           </div>
                           <div>
-                            <div className="text-xs font-black text-stone-850 dark:text-white">
+                            <div className="text-xs font-black text-[var(--text-primary)] dark:text-white">
                               خرید {ingName}
                             </div>
-                            <div className="text-[10px] text-stone-400 dark:text-stone-500 font-bold mt-1 flex items-center gap-2 flex-wrap">
+                            <div className="text-[10px] text-[var(--text-secondary)] font-bold mt-1 flex items-center gap-2 flex-wrap">
                               <span>تاریخ خرید: {formatJalaliReadable(log.date)}</span>
-                              {log.note && <span className="text-stone-400 font-normal">({log.note})</span>}
+                              {log.note && <span className="text-[var(--text-secondary)] font-normal">({log.note})</span>}
                             </div>
                           </div>
                         </div>
@@ -1431,7 +1431,7 @@ export const SimpleModeDashboard: React.FC = () => {
                             <div className="font-black text-amber-600 dark:text-amber-400">
                               {formatToman(log.totalPrice).text}
                             </div>
-                            <div className="text-[10px] text-stone-400 dark:text-stone-500 font-bold mt-0.5">
+                            <div className="text-[10px] text-[var(--text-secondary)] font-bold mt-0.5">
                               {toPersianDigits(log.quantity)} {unitLabel} (هر {unitLabel} {formatToman(log.unitCost).text})
                             </div>
                           </div>
@@ -1451,7 +1451,7 @@ export const SimpleModeDashboard: React.FC = () => {
                               }
                             }}
                             title="حذف سابقه خرید"
-                            className="p-2 rounded-xl text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                            className="p-2 rounded-xl text-[var(--text-secondary)] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -1482,9 +1482,9 @@ export const SimpleModeDashboard: React.FC = () => {
 
       {/* STICKY BOTTOM MOBILE ACTION BAR */}
       {isMobileScreen && totalSelectedCount > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 p-3 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 shadow-lg z-40 flex items-center justify-between gap-3">
+        <div className="fixed bottom-0 left-0 right-0 p-3 bg-white/95 dark:bg-[var(--bg-card)]/95 backdrop-blur-md border-t border-[var(--border-subtle)] shadow-lg z-40 flex items-center justify-between gap-3">
           <div>
-            <div className="text-[10px] font-bold text-stone-400 dark:text-stone-500">
+            <div className="text-[10px] font-bold text-[var(--text-secondary)]">
               فاکتور {formatJalaliReadable(salesDate)} ({toPersianDigits(totalSelectedCount)} عدد)
             </div>
             <div className="text-base font-black text-emerald-600 dark:text-emerald-400">

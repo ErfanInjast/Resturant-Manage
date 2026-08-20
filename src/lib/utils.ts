@@ -103,16 +103,25 @@ export function formatToman(amount: number, compact = true): { text: string; isN
   } else if (absAmount < 1000) {
     textStr = `${formatNumber(absAmount, 0)} تومان`;
   } else if (absAmount < 1000000) {
-    const thousands = roundCurrency(absAmount / 1000);
+    const rawThousands = absAmount / 1000;
+    const thousands = Math.round(rawThousands * 10) / 10;
     const decimal = thousands % 1 === 0 ? 0 : 1;
     textStr = `${formatNumber(thousands, decimal)} هزار تومان`;
   } else if (absAmount < 1000000000) {
-    const millions = roundCurrency(absAmount / 1000000);
-    const decimal = millions % 1 === 0 ? 0 : 2;
+    const rawMillions = absAmount / 1000000;
+    const millions = Math.round(rawMillions * 100) / 100;
+    let decimal = 0;
+    if (Math.abs(millions - Math.round(millions)) > 0.0001) {
+      decimal = Math.abs(millions * 10 - Math.round(millions * 10)) > 0.0001 ? 2 : 1;
+    }
     textStr = `${formatNumber(millions, decimal)} میلیون تومان`;
   } else {
-    const billions = roundCurrency(absAmount / 1000000000);
-    const decimal = billions % 1 === 0 ? 0 : 2;
+    const rawBillions = absAmount / 1000000000;
+    const billions = Math.round(rawBillions * 100) / 100;
+    let decimal = 0;
+    if (Math.abs(billions - Math.round(billions)) > 0.0001) {
+      decimal = Math.abs(billions * 10 - Math.round(billions * 10)) > 0.0001 ? 2 : 1;
+    }
     textStr = `${formatNumber(billions, decimal)} میلیارد تومان`;
   }
 

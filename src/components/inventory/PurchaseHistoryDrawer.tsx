@@ -29,7 +29,7 @@ import { Pagination } from '../ui/Pagination';
 import { db } from '../../db';
 import type { Ingredient, PurchaseLog } from '../../types';
 import { useAppStore } from '../../store/useAppStore';
-import { calculateWACFromLogs, recalculateIngredientCost } from '../../lib/inventoryCost';
+import { calculateWACFromLogs, recalculateIngredientCost, getTimelineEventTimestamp } from '../../lib/inventoryCost';
 import { formatCurrency, toPersianDigits, toEnglishDigits, parseFormattedNumber, getUnitLabel } from '../../lib/utils';
 import { formatJalaliReadable, getTodayJalaliIso, toJalaliIso } from '../../lib/jalali';
 
@@ -92,16 +92,20 @@ export const PurchaseHistoryDrawer: React.FC<PurchaseHistoryDrawerProps> = ({
     return logs
       .filter((l) => l.reason === 'purchase')
       .sort((a, b) => {
-        if (a.date !== b.date) return a.date.localeCompare(b.date);
-        return (a.createdAt || '').localeCompare(b.createdAt || '');
+        const tsA = getTimelineEventTimestamp(a.date, a.createdAt, 'purchase');
+        const tsB = getTimelineEventTimestamp(b.date, b.createdAt, 'purchase');
+        if (tsA !== tsB) return tsA - tsB;
+        return (a.id || 0) - (b.id || 0);
       });
   }, [logs]);
 
   // Table logs sorted newest first
   const logsNewestFirst = useMemo(() => {
     return [...logs].sort((a, b) => {
-      if (a.date !== b.date) return b.date.localeCompare(a.date);
-      return (b.createdAt || '').localeCompare(a.createdAt || '');
+      const tsA = getTimelineEventTimestamp(a.date, a.createdAt, a.reason === 'purchase' ? 'purchase' : 'adjustment');
+      const tsB = getTimelineEventTimestamp(b.date, b.createdAt, b.reason === 'purchase' ? 'purchase' : 'adjustment');
+      if (tsA !== tsB) return tsB - tsA;
+      return (b.id || 0) - (a.id || 0);
     });
   }, [logs]);
 

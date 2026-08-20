@@ -36,22 +36,20 @@ export const ConfirmDialogModal: React.FC = () => {
     switch (confirmModal.variant) {
       case 'danger':
         return {
-          icon: <AlertTriangle className="h-6 w-6 text-rose-600 dark:text-rose-400" />,
-          iconBg: 'bg-rose-500/10 dark:bg-rose-500/20 border border-rose-500/30 text-rose-600 dark:text-rose-400',
-          cardBorder: 'border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] shadow-2xl',
-          badgeBg: 'bg-rose-500/10 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30',
+          icon: <AlertTriangle className="h-6 w-6 text-[var(--status-error-text)]" />,
+          iconBg: 'bg-[var(--status-error-bg)] border border-[var(--status-error-text)]/20 text-[var(--status-error-text)]',
+          badgeBg: 'bg-[var(--status-error-bg)] text-[var(--status-error-text)] border border-[var(--status-error-text)]/20',
           badgeDefault: 'عملیات غیرقابل بازگشت',
-          boxBg: 'bg-rose-50 dark:bg-rose-950/30 border border-rose-500/20 text-rose-950 dark:text-rose-100',
+          boxBg: 'bg-[var(--status-error-bg)] border border-[var(--status-error-text)]/20 text-[var(--text-primary)]',
           btnVariant: 'danger' as const,
         };
       case 'warning':
         return {
-          icon: <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />,
-          iconBg: 'bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400',
-          cardBorder: 'border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] shadow-2xl',
-          badgeBg: 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30',
+          icon: <AlertCircle className="h-6 w-6 text-[var(--status-warning-text)]" />,
+          iconBg: 'bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/20 text-[var(--status-warning-text)]',
+          badgeBg: 'bg-[var(--status-warning-bg)] text-[var(--status-warning-text)] border border-[var(--status-warning-text)]/20',
           badgeDefault: 'هشدار بازنشانی داده‌ها',
-          boxBg: 'bg-amber-50 dark:bg-amber-950/30 border border-amber-500/20 text-amber-950 dark:text-amber-100',
+          boxBg: 'bg-[var(--status-warning-bg)] border border-[var(--status-warning-text)]/20 text-[var(--text-primary)]',
           btnVariant: 'warning' as const,
         };
       case 'primary':
@@ -59,10 +57,9 @@ export const ConfirmDialogModal: React.FC = () => {
         return {
           icon: <HelpCircle className="h-6 w-6 text-[var(--brand-primary)]" />,
           iconBg: 'bg-[var(--brand-primary-subtle)] border border-[var(--brand-primary)]/20 text-[var(--brand-primary)]',
-          cardBorder: 'border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] shadow-2xl',
           badgeBg: 'bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] border border-[var(--brand-primary)]/20',
           badgeDefault: 'تایید درخواست',
-          boxBg: 'bg-[var(--bg-base)] border border-[var(--border-subtle)] text-[var(--text-primary)] dark:text-[var(--text-primary)]',
+          boxBg: 'bg-[var(--bg-base)] border border-[var(--border-subtle)] text-[var(--text-primary)]',
           btnVariant: 'primary' as const,
         };
     }
@@ -75,15 +72,15 @@ export const ConfirmDialogModal: React.FC = () => {
     <Dialog.Root open={isOpen} onOpenChange={(open) => { if (!open) handleCancel(); }}>
       {isOpen && (
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-50 bg-stone-950/75 backdrop-blur-md animate-in fade-in duration-150" />
-          <Dialog.Content className={`fixed left-[50%] top-[50%] z-50 w-[92vw] max-w-md translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-[var(--bg-card)] border rounded-3xl shadow-2xl overflow-hidden p-6 sm:p-7 space-y-5 focus:outline-hidden dir-rtl text-right font-['IRANYekan','iranyekan',sans-serif] ${styles.cardBorder}`}>
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150" />
+          <Dialog.Content className="fixed left-[50%] top-[50%] z-50 w-[92vw] max-w-md translate-x-[-50%] translate-y-[-50%] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-2xl overflow-hidden p-6 space-y-5 focus:outline-hidden dir-rtl text-right">
             {/* Top Close Button */}
             <Dialog.Close asChild>
               <button
                 type="button"
                 onClick={handleCancel}
                 aria-label="بستن پنجره"
-                className="absolute top-5 left-5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:text-[var(--text-primary)] p-1.5 rounded-2xl hover:bg-[var(--bg-base)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
+                className="absolute top-5 left-5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-xl hover:bg-[var(--bg-base)] transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -99,24 +96,24 @@ export const ConfirmDialogModal: React.FC = () => {
 
             {/* Header Title & Icon */}
             <div className="flex items-start gap-3.5">
-              <div className={`p-3 rounded-2xl border shrink-0 shadow-xs ${styles.iconBg}`}>
+              <div className={`p-3 rounded-xl border shrink-0 shadow-xs ${styles.iconBg}`}>
                 {styles.icon}
               </div>
               <div className="space-y-1 flex-1 pt-0.5">
-                <Dialog.Title className="text-base font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] leading-snug">
+                <Dialog.Title className="text-base font-black text-[var(--text-primary)] leading-snug">
                   {confirmModal.title}
                 </Dialog.Title>
               </div>
             </div>
 
             {/* Warning Content Callout Box */}
-            <div className={`p-4 rounded-2xl border space-y-3 ${styles.boxBg}`}>
+            <div className={`p-4 rounded-xl border space-y-3 ${styles.boxBg}`}>
               <p className="text-xs font-bold leading-relaxed">
                 {confirmModal.message}
               </p>
 
               {confirmModal.details && confirmModal.details.length > 0 && (
-                <ul className="space-y-1.5 pt-1 border-t border-current/15 text-[11px] font-medium opacity-90">
+                <ul className="space-y-1.5 pt-1 border-t border-[var(--border-subtle)] text-[11px] font-medium opacity-90">
                   {confirmModal.details.map((detail, idx) => (
                     <li key={idx} className="flex items-start gap-1.5">
                       <span className="inline-block h-1.5 w-1.5 rounded-full bg-current mt-1.5 shrink-0" />
@@ -128,14 +125,14 @@ export const ConfirmDialogModal: React.FC = () => {
             </div>
 
             {/* Footer Actions */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border-subtle)]">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleCancel}
                 disabled={isLoading}
-                className="h-10 px-4 text-xs font-bold border-[var(--border-subtle)] dark:border-[var(--border-functional)] text-[var(--text-primary)] dark:text-[var(--text-secondary)] rounded-xl hover:bg-[var(--bg-base)] hover:bg-[var(--bg-base)] cursor-pointer"
+                className="h-10 px-4 text-xs font-bold rounded-xl"
               >
                 {confirmModal.cancelText || 'انصراف'}
               </Button>
@@ -146,7 +143,7 @@ export const ConfirmDialogModal: React.FC = () => {
                 size="sm"
                 onClick={handleConfirm}
                 isLoading={isLoading}
-                className="h-10 px-5 text-xs font-black rounded-xl shadow-md cursor-pointer flex items-center gap-1.5"
+                className="h-10 px-5 text-xs font-black rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5"
               >
                 <Check className="h-4 w-4" />
                 <span>{confirmModal.confirmText || 'تایید و ادامه'}</span>

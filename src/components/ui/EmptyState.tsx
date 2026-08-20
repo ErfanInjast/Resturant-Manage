@@ -29,15 +29,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     <div
       id={id}
       className={cn(
-        'flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-[var(--border-subtle)] bg-white dark:bg-[var(--bg-card)] p-10 text-center transition-all my-4',
+        'flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[var(--border-subtle)] bg-[var(--bg-card)] p-10 text-center transition-all my-4',
         className
       )}
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--brand-primary-subtle)] dark:bg-[var(--brand-primary)]/20 text-[var(--brand-primary)] mb-4 shadow-2xs border border-[var(--brand-primary)]/20">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--brand-primary-subtle)] text-[var(--brand-primary)] mb-4 shadow-2xs border border-[var(--brand-primary)]/20">
         <Icon className="h-8 w-8" />
       </div>
-      <h3 className="text-base font-bold text-slate-900 dark:text-[var(--text-primary)] mb-1">{title}</h3>
-      <p className="max-w-sm text-xs font-medium text-slate-500 dark:text-[var(--text-secondary)] mb-6 leading-relaxed">
+      <h3 className="text-base font-black text-[var(--text-primary)] mb-1">{title}</h3>
+      <p className="max-w-sm text-xs font-medium text-[var(--text-secondary)] mb-6 leading-relaxed">
         {description}
       </p>
       <div className="flex flex-wrap items-center justify-center gap-3">

@@ -9,7 +9,6 @@ import {
   PieChart,
   Settings,
   BookOpen,
-  AlertTriangle,
 } from 'lucide-react';
 import { useAppStore, type ActiveTab } from '../../store/useAppStore';
 import { db } from '../../db';
@@ -74,9 +73,11 @@ export const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 shrink-0 border-l border-[var(--border-subtle)] bg-[var(--bg-base)]/80 backdrop-blur-md min-h-[calc(100vh-4rem)] p-4 select-none transition-colors">
-      <div className="flex-1 space-y-1.5">
-        <p className="px-3 text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase mb-3 flex items-center justify-between">
+    <aside
+      className="hidden lg:flex flex-col w-64 shrink-0 sticky top-20 self-start max-h-[calc(100vh-5.5rem)] overflow-y-auto scrollbar-none rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/90 backdrop-blur-md p-3 select-none transition-all shadow-2xs z-20"
+    >
+      <div className="space-y-1">
+        <p className="px-3 py-1 text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase flex items-center justify-between">
           <span>منوی اصلی</span>
           <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand-primary)]"></span>
         </p>
@@ -89,7 +90,7 @@ export const Sidebar: React.FC = () => {
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={cn(
-                'relative flex w-full items-center justify-between rounded-2xl px-3.5 py-3 text-sm font-bold transition-all duration-200 cursor-pointer group',
+                'relative flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer group',
                 isActive
                   ? 'text-white'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/[0.03] dark:hover:bg-white/5'
@@ -98,14 +99,14 @@ export const Sidebar: React.FC = () => {
               {isActive && (
                 <motion.div
                   layoutId="sidebarActiveBg"
-                  className="absolute inset-0 bg-[var(--brand-primary)] rounded-2xl shadow-xs"
+                  className="absolute inset-0 bg-[var(--brand-primary)] rounded-xl shadow-2xs"
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />
               )}
-              <div className="relative z-10 flex items-center gap-3">
+              <div className="relative z-10 flex items-center gap-2.5">
                 <Icon
                   className={cn(
-                    'h-5 w-5 transition-transform duration-200 group-hover:scale-105',
+                    'h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-105',
                     isActive ? 'text-white' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'
                   )}
                 />
@@ -137,4 +138,3 @@ export const Sidebar: React.FC = () => {
     </aside>
   );
 };
-

@@ -440,7 +440,7 @@ export const InventoryManager: React.FC = () => {
   const targetPurchaseIngredient = ingredients.find((i) => i.id === Number(purchaseSelectedId));
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -684,7 +684,7 @@ export const InventoryManager: React.FC = () => {
                       key={item.id}
                       variants={tableRowVariants}
                       className={`p-4 space-y-3.5 transition-colors ${
-                        isLow ? 'bg-[var(--status-error-bg)]/10 dark:bg-[var(--status-error-bg)]/5' : 'bg-white dark:bg-stone-950/25'
+                        isLow ? 'bg-[var(--status-error-bg)]/10 dark:bg-[var(--status-error-bg)]/5' : 'bg-white dark:bg-[var(--bg-card)]'
                       }`}
                     >
                       {/* Ingredient Header Info */}
@@ -710,7 +710,7 @@ export const InventoryManager: React.FC = () => {
                       </div>
 
                       {/* Stock Info Details */}
-                      <div className="grid grid-cols-2 gap-3 bg-[var(--bg-base)] dark:bg-stone-900/40 p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-stone-900">
+                      <div className="grid grid-cols-2 gap-3 bg-[var(--bg-base)] dark:bg-[var(--bg-base)] p-2.5 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                         <div className="space-y-0.5">
                           <span className="text-[10px] text-[var(--text-secondary)]">موجودی فعلی:</span>
                           <div className={`text-xs font-black ${isLow ? 'text-[var(--status-error-text)]' : 'text-[var(--text-primary)] dark:text-stone-200'}`}>
@@ -730,7 +730,7 @@ export const InventoryManager: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setHistoryDrawerIngredient(item)}
-                          className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--brand-primary-subtle)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                          className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--brand-primary-subtle)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px]"
                           title="سوابق خرید و نمودار قیمت"
                         >
                           <History className="h-3.5 w-3.5" />
@@ -740,7 +740,7 @@ export const InventoryManager: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => openEditModal(item)}
-                          className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                          className="flex items-center gap-1 px-3 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px]"
                           title="ویرایش مشخصات"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
@@ -750,7 +750,7 @@ export const InventoryManager: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => item.id && handleDelete(item.id, item.name)}
-                          className="flex items-center gap-1 px-2.5 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                          className="flex items-center gap-1 px-2.5 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px]"
                           title="حذف ماده اولیه"
                         >
                           <Trash2 className="h-3.5 w-3.5 text-[var(--status-error-text)]" />
@@ -785,32 +785,35 @@ export const InventoryManager: React.FC = () => {
         onClose={() => setIsPurchaseModalOpen(false)}
         title="ثبت خرید جدید"
         description="ثبت فاکتور خرید مواد اولیه جهت افزایش موجودی انبار و به‌روزرسانی قیمت فی"
-        maxWidth="xl"
+        maxWidth="2xl"
       >
-        <form onSubmit={handleSavePurchase} noValidate className="space-y-4">
-          <SearchableSelect
-            label="انتخاب ماده اولیه"
-            value={purchaseSelectedId}
-            onChange={(val) => {
-              setPurchaseSelectedId(val as number);
-              const found = ingredients.find((i) => i.id === Number(val));
-              if (found) setSelectedIngredient(found);
-            }}
-            options={ingredients.map((ing) => ({
-              value: ing.id!,
-              label: `${ing.name} (موجودی فعلی: ${toPersianDigits(ing.currentStock)} ${getUnitLabel(ing.unit)})`,
-            }))}
-          />
+        <form onSubmit={handleSavePurchase} noValidate className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
+            <SearchableSelect
+              label="انتخاب ماده اولیه"
+              value={purchaseSelectedId}
+              onChange={(val) => {
+                setPurchaseSelectedId(val as number);
+                const found = ingredients.find((i) => i.id === Number(val));
+                if (found) setSelectedIngredient(found);
+              }}
+              options={ingredients.map((ing) => ({
+                value: ing.id!,
+                label: `${ing.name} (موجودی: ${toPersianDigits(ing.currentStock)} ${getUnitLabel(ing.unit)})`,
+              }))}
+            />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <JalaliDatePicker
               label="تاریخ فاکتور خرید"
               value={purchaseDate}
               onChange={setPurchaseDate}
+              showSteppers={true}
             />
+          </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
             <div>
-              <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1">
+              <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1.5">
                 مقدار خرید {targetPurchaseIngredient ? `(${getUnitLabel(targetPurchaseIngredient.unit)})` : ''} <span className="text-[var(--status-error-text)]">*</span>
               </label>
               <input
@@ -824,21 +827,21 @@ export const InventoryManager: React.FC = () => {
                   else if (/^\d*\.?\d*$/.test(eng)) setPurchaseQty(val);
                 }}
                 placeholder="مثلاً: ۱۰"
-                className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+                className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all shadow-2xs"
               />
             </div>
+
+            <SmartMoneyInput
+              label="مبلغ کل فاکتور خرید (تومان)"
+              value={purchaseTotalPrice}
+              onChange={(val) => setPurchaseTotalPrice(val)}
+              placeholder="مثلاً: ۶,۵۰۰,۰۰۰"
+              suffix="تومان"
+            />
           </div>
 
-          <SmartMoneyInput
-            label="مبلغ کل فاکتور خرید (تومان)"
-            value={purchaseTotalPrice}
-            onChange={(val) => setPurchaseTotalPrice(val)}
-            placeholder="مثلاً: ۶,۵۰۰,۰۰۰"
-            suffix="تومان"
-          />
-
           <div>
-            <label className="block text-xs font-bold text-[var(--text-secondary)] mb-1">
+            <label className="block text-xs font-extrabold text-[var(--text-secondary)] mb-1.5">
               توضیحات یا شماره فاکتور (اختیاری)
             </label>
             <input
@@ -846,15 +849,15 @@ export const InventoryManager: React.FC = () => {
               value={purchaseNote}
               onChange={(e) => setPurchaseNote(e.target.value)}
               placeholder="مثلاً: فاکتور شماره ۱۲۴"
-              className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-medium text-[var(--text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+              className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-[var(--bg-card)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all shadow-2xs"
             />
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border-subtle)]">
-            <Button type="button" variant="outline" onClick={() => setIsPurchaseModalOpen(false)} className="h-10 px-4 rounded-xl text-xs font-bold">
+            <Button type="button" variant="outline" size="sm" onClick={() => setIsPurchaseModalOpen(false)}>
               انصراف
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting} className="h-10 px-5 rounded-xl text-xs font-black bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]">
+            <Button type="submit" variant="primary" size="sm" disabled={isSubmitting} className="font-black">
               {isSubmitting ? 'در حال ثبت...' : 'تأیید و ثبت خرید'}
             </Button>
           </div>
@@ -866,13 +869,13 @@ export const InventoryManager: React.FC = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         title="تعریف ماده اولیه جدید"
-        description="تعریف ماده اولیه جدید همراه با ثبت خرید اولیه"
-        maxWidth="xl"
+        description="تعریف مشخصات ماده اولیه همراه با فاکتور خرید اولیه"
+        maxWidth="2xl"
       >
-        <form onSubmit={handleSaveNewIngredient} noValidate className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <form onSubmit={handleSaveNewIngredient} noValidate className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
             <div>
-              <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1">
+              <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1.5">
                 نام ماده اولیه <span className="text-[var(--status-error-text)]">*</span>
               </label>
               <input
@@ -880,7 +883,7 @@ export const InventoryManager: React.FC = () => {
                 value={addName}
                 onChange={(e) => setAddName(e.target.value)}
                 placeholder="مثلاً: فیله مرغ سینه، شیر پرچرب"
-                className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+                className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all shadow-2xs"
               />
             </div>
 
@@ -895,7 +898,7 @@ export const InventoryManager: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
             <SearchableSelect
               label="واحد سنجش"
               value={addUnit}
@@ -907,7 +910,7 @@ export const InventoryManager: React.FC = () => {
             />
 
             <div>
-              <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1">
+              <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1.5">
                 نقطه سفارش (حداقل موجودی)
               </label>
               <input
@@ -921,27 +924,28 @@ export const InventoryManager: React.FC = () => {
                   else if (/^\d*\.?\d*$/.test(eng)) setAddMinStock(val);
                 }}
                 placeholder="مثلاً: ۵"
-                className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+                className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all shadow-2xs"
               />
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-3">
+          <div className="p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-2.5">
             <h4 className="text-xs font-black text-[var(--text-primary)] flex items-center gap-1.5">
-              <ShoppingBag className="h-4 w-4 text-[var(--brand-primary)]" />
+              <ShoppingBag className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
               <span>مشخصات خرید اولیه</span>
             </h4>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
               <JalaliDatePicker
-                label="تاریخ خرید اولیه"
+                label="تاریخ خرید"
                 value={addInitialDate}
                 onChange={setAddInitialDate}
+                showSteppers={true}
               />
 
               <div>
-                <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1">
-                  مقدار خرید اولیه ({getUnitLabel(addUnit)}) <span className="text-[var(--status-error-text)]">*</span>
+                <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1.5">
+                  مقدار ({getUnitLabel(addUnit)}) <span className="text-[var(--status-error-text)]">*</span>
                 </label>
                 <input
                   type="text"
@@ -954,25 +958,25 @@ export const InventoryManager: React.FC = () => {
                     else if (/^\d*\.?\d*$/.test(eng)) setAddInitialStock(val);
                   }}
                   placeholder="مثلاً: ۱۰"
-                  className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+                  className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all shadow-2xs"
                 />
               </div>
-            </div>
 
-            <SmartMoneyInput
-              label="مبلغ کل خرید اولیه"
-              value={addInitialPrice}
-              onChange={(val) => setAddInitialPrice(val)}
-              placeholder="مثلاً: ۲,۵۰۰,۰۰۰"
-              suffix="تومان"
-            />
+              <SmartMoneyInput
+                label="مبلغ کل (تومان)"
+                value={addInitialPrice}
+                onChange={(val) => setAddInitialPrice(val)}
+                placeholder="مثلاً: ۲,۵۰۰,۰۰۰"
+                suffix="تومان"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border-subtle)]">
-            <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)} className="h-10 px-4 rounded-xl text-xs font-bold">
+            <Button type="button" variant="outline" size="sm" onClick={() => setIsAddModalOpen(false)}>
               انصراف
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting} className="h-10 px-5 rounded-xl text-xs font-black bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]">
+            <Button type="submit" variant="primary" size="sm" disabled={isSubmitting} className="font-black">
               {isSubmitting ? 'در حال ثبت...' : 'ذخیره ماده اولیه'}
             </Button>
           </div>
@@ -986,45 +990,47 @@ export const InventoryManager: React.FC = () => {
           onClose={() => setIsEditModalOpen(false)}
           title={`ویرایش و اصلاح موجودی: ${selectedIngredient.name}`}
           description="ویرایش نام، دسته‌بندی، نقطه سفارش و اصلاح موجودی واقعی انبار"
-          maxWidth="lg"
+          maxWidth="xl"
         >
-          <form onSubmit={handleSaveEditSpecs} noValidate className="space-y-4">
-            <div>
-              <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1">
-                نام ماده اولیه <span className="text-[var(--status-error-text)]">*</span>
-              </label>
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                placeholder="نام ماده اولیه"
-                className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+          <form onSubmit={handleSaveEditSpecs} noValidate className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
+              <div>
+                <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1.5">
+                  نام ماده اولیه <span className="text-[var(--status-error-text)]">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="نام ماده اولیه"
+                  className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all shadow-2xs"
+                />
+              </div>
+
+              <SearchableSelect
+                label="دسته‌بندی انبار"
+                value={editCategory}
+                onChange={(val) => setEditCategory(val as string)}
+                options={CATEGORIES.filter((c) => c !== 'همه').map((cat) => ({
+                  value: cat,
+                  label: cat,
+                }))}
               />
             </div>
 
-            <SearchableSelect
-              label="دسته‌بندی انبار"
-              value={editCategory}
-              onChange={(val) => setEditCategory(val as string)}
-              options={CATEGORIES.filter((c) => c !== 'همه').map((cat) => ({
-                value: cat,
-                label: cat,
-              }))}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
+              <SearchableSelect
+                label="واحد سنجش"
+                value={editUnit}
+                onChange={(val) => setEditUnit(val as UnitType)}
+                options={UNITS.map((u) => ({
+                  value: u.value,
+                  label: u.label,
+                }))}
+              />
 
-            <SearchableSelect
-              label="واحد سنجش"
-              value={editUnit}
-              onChange={(val) => setEditUnit(val as UnitType)}
-              options={UNITS.map((u) => ({
-                value: u.value,
-                label: u.label,
-              }))}
-            />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1">
+                <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1.5">
                   موجودی فعلی ({getUnitLabel(editUnit)})
                 </label>
                 <input
@@ -1038,12 +1044,12 @@ export const InventoryManager: React.FC = () => {
                     else if (/^\d*\.?\d*$/.test(eng)) setEditCurrentStock(val);
                   }}
                   placeholder="مثلاً: ۱۲.۵"
-                  className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+                  className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1">
+                <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1.5">
                   نقطه سفارش (حداقل)
                 </label>
                 <input
@@ -1057,7 +1063,7 @@ export const InventoryManager: React.FC = () => {
                     else if (/^\d*\.?\d*$/.test(eng)) setEditMinStock(val);
                   }}
                   placeholder="مثلاً: ۵"
-                  className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+                  className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all shadow-2xs"
                 />
               </div>
             </div>
@@ -1065,7 +1071,7 @@ export const InventoryManager: React.FC = () => {
             {/* Note if stock was changed */}
             {parseFormattedNumber(editCurrentStock) !== selectedIngredient.currentStock && (
               <div>
-                <label className="block text-xs font-bold text-[var(--text-secondary)] mb-1">
+                <label className="block text-xs font-extrabold text-[var(--text-secondary)] mb-1.5">
                   علت اصلاح موجودی
                 </label>
                 <input
@@ -1073,17 +1079,17 @@ export const InventoryManager: React.FC = () => {
                   value={editAdjustmentNote}
                   onChange={(e) => setEditAdjustmentNote(e.target.value)}
                   placeholder="مثلاً: انبارگردانی / کسر ضایعات"
-                  className="w-full h-10 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-medium text-[var(--text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+                  className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-[var(--bg-card)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all shadow-2xs"
                 />
               </div>
             )}
 
             <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border-subtle)]">
-              <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)} className="h-10 px-4 rounded-xl text-xs font-bold">
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsEditModalOpen(false)}>
                 انصراف
               </Button>
-              <Button type="submit" variant="primary" disabled={isSubmitting} className="h-10 px-5 rounded-xl text-xs font-black bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]">
-                {isSubmitting ? 'در حال ثبت...' : 'ذخیره تغییرات'}
+              <Button type="submit" variant="primary" size="sm" disabled={isSubmitting} className="font-black">
+                {isSubmitting ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
               </Button>
             </div>
           </form>

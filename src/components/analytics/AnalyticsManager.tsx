@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { TrendingUp, Target } from 'lucide-react';
-import { db } from '../../db';
+import { db, DEFAULT_SETTINGS } from '../../db';
 import { formatToman, formatNumber, getUnitLabel, roundCurrency, toPersianDigits } from '../../lib/utils';
 import { isDateInPresetFilter } from '../../lib/financial';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
@@ -30,10 +30,14 @@ export const AnalyticsManager: React.FC = () => {
   const menuItemsQuery = useLiveQuery(() => db.menuItems.toArray());
   const ingredientsQuery = useLiveQuery(() => db.ingredients.toArray());
   const salesRecordsQuery = useLiveQuery(() => db.dailySales.toArray());
+  const wasteLogsQuery = useLiveQuery(() => db.wasteLogs.toArray());
+  const settingsQuery = useLiveQuery(() => db.settings.get('config'));
 
   const menuItems = menuItemsQuery ?? [];
   const ingredients = ingredientsQuery ?? [];
   const salesRecords = salesRecordsQuery ?? [];
+  const wasteLogs = wasteLogsQuery ?? [];
+  const settings = settingsQuery ?? DEFAULT_SETTINGS;
 
   // Map real sales volume from sales records (last 30 days only)
   const salesVolumeMap = useMemo(() => {
@@ -94,7 +98,11 @@ export const AnalyticsManager: React.FC = () => {
     });
   }, [processedItems, avgGrossProfit, avgSalesVolume]);
 
-  const isLoading = menuItemsQuery === undefined || ingredientsQuery === undefined || salesRecordsQuery === undefined;
+  const isLoading =
+    menuItemsQuery === undefined ||
+    ingredientsQuery === undefined ||
+    salesRecordsQuery === undefined ||
+    wasteLogsQuery === undefined;
 
   if (isLoading) {
     return <PageSkeleton type="analytics" />;
@@ -132,7 +140,7 @@ export const AnalyticsManager: React.FC = () => {
   }));
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="space-y-6">
       {/* Top Title Banner */}
       <div>
         <h2 className="text-xl font-black text-[var(--text-primary)] dark:text-[var(--text-primary)]">تحلیل و مهندسی سودآوری منو</h2>
@@ -151,7 +159,12 @@ export const AnalyticsManager: React.FC = () => {
       />
 
       {/* Sales Forecasting Section for Upcoming Weeks */}
-      <SalesForecastSection salesRecords={salesRecords} menuItems={menuItems} />
+      <SalesForecastSection
+        salesRecords={salesRecords}
+        menuItems={menuItems}
+        wasteLogs={wasteLogs}
+        settings={settings}
+      />
 
       {/* 30-Day Material Demand Forecast Bar Chart */}
       {forecastChartData.length > 0 && (

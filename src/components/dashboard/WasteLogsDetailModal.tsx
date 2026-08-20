@@ -145,7 +145,7 @@ export const WasteLogsDetailModal: React.FC<WasteLogsDetailModalProps> = ({
             </div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-stone-100 dark:bg-stone-800/60 border border-[var(--border-subtle)]">
+          <div className="p-3 rounded-2xl bg-[var(--bg-base)] border border-[var(--border-subtle)]">
             <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
               <Scale className="h-3.5 w-3.5" />
               <span>میانگین خسارت هر ثبت</span>
@@ -173,7 +173,7 @@ export const WasteLogsDetailModal: React.FC<WasteLogsDetailModalProps> = ({
         </div>
 
         {/* Search, Category Filter, and Sort Toolbar */}
-        <div className="space-y-2.5 bg-[var(--bg-base)] dark:bg-stone-900/60 p-2.5 rounded-2xl border border-[var(--border-subtle)]">
+        <div className="space-y-2.5 bg-[var(--bg-base)] dark:bg-[var(--bg-base)] p-2.5 rounded-2xl border border-[var(--border-subtle)]">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
             {/* Search Box */}
             <div className="relative flex-1">
@@ -249,7 +249,7 @@ export const WasteLogsDetailModal: React.FC<WasteLogsDetailModalProps> = ({
                 className={cn(
                   'px-2 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap',
                   selectedReason === 'all'
-                    ? 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900'
+                    ? 'bg-[var(--brand-primary)] text-white'
                     : 'bg-white dark:bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-subtle)]'
                 )}
               >
@@ -307,7 +307,7 @@ export const WasteLogsDetailModal: React.FC<WasteLogsDetailModalProps> = ({
                           {log.itemName}
                         </span>
                         {log.reason && (
-                          <span className="px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-[10px] font-extrabold text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                          <span className="px-2 py-0.5 rounded-md bg-[var(--bg-base)] text-[10px] font-extrabold text-[var(--text-secondary)] border border-[var(--border-subtle)]">
                             علت: {log.reason}
                           </span>
                         )}

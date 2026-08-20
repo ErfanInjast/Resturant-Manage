@@ -37,7 +37,13 @@ import { db, DEFAULT_SETTINGS, exportDatabaseJSON, importDatabaseJSON, seedDemoD
 import type { AppSettings, FixedCosts } from '../../types';
 import { formatToman, formatNumber, roundCurrency, toPersianDigits, toEnglishDigits } from '../../lib/utils';
 import { formatJalali, getJalaliDate, PERSIAN_MONTH_NAMES, getDaysInJalaliMonth } from '../../lib/jalali';
-import { calculateDailyOverhead, calculateTotalMonthlyOverhead } from '../../lib/financial';
+import {
+  calculateDailyOverhead,
+  calculateTotalMonthlyOverhead,
+  calculateFinancialMetrics,
+  isDateInPresetFilter,
+  findEarliestRecordDate,
+} from '../../lib/financial';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { SmartMoneyInput } from '../ui/SmartMoneyInput';
@@ -325,9 +331,9 @@ export const SettingsManager: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header & Quick Action Bar */}
-      <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-3xl p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] dark:bg-[var(--brand-primary)]/20 shrink-0">
             <Settings className="h-6 w-6" />
@@ -584,7 +590,7 @@ export const SettingsManager: React.FC = () => {
               </div>
 
               {/* Simple Mode Toggle */}
-              <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-stone-900/40 border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-base)] border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 shrink-0">
                     <Eye className="h-5 w-5" />
@@ -602,7 +608,7 @@ export const SettingsManager: React.FC = () => {
                     type="button"
                     onClick={() => setIsSimpleMode(!isSimpleMode, true)}
                     className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-                      isSimpleMode ? 'bg-[var(--brand-primary)]' : 'bg-stone-300 dark:bg-stone-700'
+                      isSimpleMode ? 'bg-[var(--brand-primary)]' : 'bg-stone-300 dark:bg-[var(--border-functional)]'
                     }`}
                   >
                     <span
@@ -1114,29 +1120,18 @@ export const SettingsManager: React.FC = () => {
       {(() => {
         const todayJ = getJalaliDate(new Date());
         const currentMonthName = PERSIAN_MONTH_NAMES[todayJ.jm - 1];
-        const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
-        const startIso = `${todayJ.jy}-${pad(todayJ.jm)}-01`;
-        const todayIso = `${todayJ.jy}-${pad(todayJ.jm)}-${pad(todayJ.jd)}`;
+        const earliestRecordDate = findEarliestRecordDate(salesRecords, wasteLogs);
 
-        const monthSales = salesRecords.filter((s) => s.date >= startIso && s.date <= todayIso);
-        const monthWaste = wasteLogs.filter((w) => w.date >= startIso && w.date <= todayIso);
+        const metrics = calculateFinancialMetrics({
+          salesRecords,
+          wasteLogs,
+          settings,
+          datePreset: 'currentMonth',
+          earliestRecordDate,
+        });
 
-        const totalDaysInM = getDaysInJalaliMonth(todayJ.jy, todayJ.jm);
-        const numDaysPassed = Math.max(1, todayJ.jd);
-
-        const totalRev = monthSales.reduce((acc, s) => acc + (s.totalRevenue || 0), 0);
-        const totalCogs = monthSales.reduce((acc, s) => acc + (s.totalCOGS || 0), 0);
-        const totalWasteAmt = monthWaste.reduce((acc, w) => acc + (w.cost || 0), 0);
-
-        const fixedCostsTotal = calculateTotalMonthlyOverhead(settings.monthlyFixedCosts);
-
-        const dailyOverheadCost = calculateDailyOverhead(fixedCostsTotal, settings.workingDaysPerMonth || 26);
-        const periodOverhead = dailyOverheadCost * numDaysPassed;
-
-        const grossProfit = totalRev - totalCogs;
-        const netProfit = grossProfit - totalWasteAmt - periodOverhead;
-        const foodCostPercent = totalRev > 0 ? roundCurrency((totalCogs / totalRev) * 100) : 0;
-        const netMarginPercent = totalRev > 0 ? roundCurrency((netProfit / totalRev) * 100) : 0;
+        const monthSales = salesRecords.filter((s) => isDateInPresetFilter(s.date, 'currentMonth'));
+        const monthWaste = wasteLogs.filter((w) => isDateInPresetFilter(w.date, 'currentMonth'));
 
         const itemMap = new Map<number, { menuItemId: number; name: string; totalQty: number; totalRev: number; totalCost: number }>();
         monthSales.forEach((s) => {
@@ -1167,19 +1162,7 @@ export const SettingsManager: React.FC = () => {
             filterSubtitle={`از اول ${currentMonthName} تا امروز - روز ${toPersianDigits(todayJ.jd)}`}
             filteredSalesRecords={monthSales}
             filteredWasteLogs={monthWaste}
-            metrics={{
-              totalRevenue: totalRev,
-              totalCOGS: totalCogs,
-              loggedWaste: totalWasteAmt,
-              salesWaste: 0,
-              totalWaste: totalWasteAmt,
-              periodOverhead,
-              grossProfit,
-              netProfit,
-              foodCostPercent,
-              netMarginPercent,
-              periodDaysCount: numDaysPassed,
-            }}
+            metrics={metrics}
             topSoldItems={topSoldItemsList}
             settings={settings}
           />
@@ -1189,7 +1172,7 @@ export const SettingsManager: React.FC = () => {
       {/* Reset Confirmation Modal */}
       {isResetModalOpen && (
         <div dir="rtl" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/75 backdrop-blur-md font-['IRANYekan','iranyekan',sans-serif]">
-          <div className="w-full max-w-md bg-white dark:bg-[var(--bg-card)] border border-[var(--status-error-text)]/30 dark:border-[var(--status-error-text)]/30 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
+          <div className="w-full max-w-md bg-white dark:bg-[var(--bg-card)] border border-[var(--status-error-text)]/30 dark:border-[var(--status-error-text)]/30 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
             {/* Top Close Button & Badge Tag */}
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-[var(--status-error-bg)]/80 text-[var(--status-error-text)] dark:text-rose-300 border border-[var(--status-error-text)]/30 dark:border-[var(--status-error-text)]/30">

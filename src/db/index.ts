@@ -5,6 +5,7 @@ import Dexie, { type Table } from 'dexie';
 import type { Ingredient, MenuItem, DailySalesRecord, WasteLog, AppSettings, PurchaseLog } from '../types';
 import { formatJalali, normalizeDateStr } from '../lib/jalali';
 import { roundCurrency } from '../lib/utils';
+import { calculateMenuItemPricing } from '../lib/financial';
 
 export class RestaurantDatabase extends Dexie {
   ingredients!: Table<Ingredient, number>;
@@ -99,23 +100,25 @@ export async function syncAndRecalculateAllData(): Promise<void> {
       }
     });
 
-    const wasteCost = roundCurrency(materialCost * ((item.wastePercent || 0) / 100));
-    const foodCost = roundCurrency(materialCost + wasteCost);
-    const portionCost = roundCurrency(foodCost + (item.laborCost || 0) + (item.packagingCost || 0));
-    const targetPrice = targetFoodCostPercent > 0 ? roundCurrency(foodCost / (targetFoodCostPercent / 100)) : foodCost;
-    const grossProfit = roundCurrency(item.sellingPrice - portionCost);
-    const marginPercent = item.sellingPrice > 0 ? ((item.sellingPrice - portionCost) / item.sellingPrice) * 100 : 0;
+    const pricing = calculateMenuItemPricing({
+      materialCost,
+      wastePercent: item.wastePercent,
+      laborCost: item.laborCost,
+      packagingCost: item.packagingCost,
+      sellingPrice: item.sellingPrice,
+      targetFoodCostPercent,
+    });
 
     updatedMenuItems.push({
       ...item,
       ingredients: updatedIngredients,
-      totalMaterialCost: materialCost,
-      foodCost,
-      portionCost,
-      primeCost: portionCost,
-      targetPrice,
-      grossProfit,
-      marginPercent,
+      totalMaterialCost: pricing.totalMaterialCost,
+      foodCost: pricing.foodCost,
+      portionCost: pricing.portionCost,
+      primeCost: pricing.primeCost,
+      targetPrice: pricing.targetPrice,
+      grossProfit: pricing.grossProfit,
+      marginPercent: pricing.marginPercent,
       updatedAt: new Date().toISOString(),
     });
   }
@@ -162,6 +165,17 @@ export async function syncAndRecalculateAllData(): Promise<void> {
       totalCOGS += totalCost;
       totalLaborCost += totalLabor;
 
+      const ingredientsSnapshot = sItem.ingredientsSnapshot && sItem.ingredientsSnapshot.length > 0
+        ? sItem.ingredientsSnapshot
+        : (mi?.ingredients || []).map((ri) => ({
+            ingredientId: Number(ri.ingredientId),
+            ingredientName: ri.ingredientName,
+            unit: ri.unit,
+            quantityPerPortion: ri.quantity || 0,
+            totalQuantity: (ri.quantity || 0) * Number(sItem.quantity),
+            unitCost: ri.unitCost || 0,
+          }));
+
       return {
         ...sItem,
         menuItemId: mi?.id || miId,
@@ -170,6 +184,7 @@ export async function syncAndRecalculateAllData(): Promise<void> {
         totalRevenue: totalRev,
         totalCost,
         totalLaborCost: totalLabor,
+        ingredientsSnapshot,
       };
     });
 

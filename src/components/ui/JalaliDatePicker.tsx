@@ -175,20 +175,20 @@ export const JalaliDatePicker: React.FC<JalaliDatePickerProps> = ({
               type="button"
               aria-label={label || 'انتخاب تاریخ شمسی'}
               className={cn(
-                'flex-1 min-w-0 flex items-center justify-between gap-2 border border-[var(--border-functional)] bg-[var(--bg-card)] rounded-xl transition-all cursor-pointer shadow-xs hover:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/20',
+                'flex-1 min-w-0 flex items-center justify-between gap-2 border border-[var(--border-functional)] bg-[var(--bg-card)] rounded-xl transition-all cursor-pointer shadow-xs hover:border-[var(--brand-primary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20',
                 compact ? 'px-2.5 h-9 text-xs font-bold' : 'px-3 h-10 text-xs font-bold',
                 isOpen && 'ring-2 ring-[var(--brand-primary)]/20 border-[var(--brand-primary)]'
               )}
             >
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                 <CalendarIcon className="h-4 w-4 text-[var(--brand-primary)] shrink-0" />
-                <span className="text-[var(--text-primary)] font-extrabold tracking-tight whitespace-nowrap text-xs">
+                <span className="text-[var(--text-primary)] font-extrabold tracking-tight truncate text-xs">
                   {formatJalaliReadable(safeValue) || toPersianDigits(safeValue)}
                 </span>
               </div>
               <ChevronDown
                 className={cn(
-                  'h-3.5 w-3.5 text-[var(--text-secondary)] shrink-0 transition-transform duration-200',
+                  'h-3.5 w-3.5 text-[var(--text-secondary)] shrink-0 transition-transform duration-200 ml-0.5',
                   isOpen && 'rotate-180 text-[var(--brand-primary)]'
                 )}
               />
@@ -206,7 +206,7 @@ export const JalaliDatePicker: React.FC<JalaliDatePickerProps> = ({
                   shiftDay(-1);
                 }}
                 className={cn(
-                  'rounded-xl border border-[var(--border-functional)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:bg-stone-200 dark:hover:bg-stone-800 hover:border-[var(--brand-primary)] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors flex items-center justify-center shadow-2xs shrink-0',
+                  'rounded-xl border border-[var(--border-functional)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:bg-[var(--bg-card)] hover:border-[var(--brand-primary)] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors flex items-center justify-center shadow-2xs shrink-0',
                   compact ? 'h-9 w-8 text-xs' : 'h-10 w-9 text-xs'
                 )}
                 title="یک روز قبل"
@@ -223,7 +223,7 @@ export const JalaliDatePicker: React.FC<JalaliDatePickerProps> = ({
                   shiftDay(1);
                 }}
                 className={cn(
-                  'rounded-xl border border-[var(--border-functional)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:bg-stone-200 dark:hover:bg-stone-800 hover:border-[var(--brand-primary)] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors flex items-center justify-center shadow-2xs shrink-0',
+                  'rounded-xl border border-[var(--border-functional)] bg-[var(--bg-base)] text-[var(--text-primary)] hover:bg-[var(--bg-card)] hover:border-[var(--brand-primary)] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors flex items-center justify-center shadow-2xs shrink-0',
                   compact ? 'h-9 w-8 text-xs' : 'h-10 w-9 text-xs'
                 )}
                 title="یک روز بعد"
@@ -254,11 +254,11 @@ export const JalaliDatePicker: React.FC<JalaliDatePickerProps> = ({
                     className="w-72 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-2xl p-3.5 dir-rtl text-right ring-1 ring-black/10 select-none overflow-hidden"
                   >
                     {/* Header Controls: Navigation + Month/Year View Toggles */}
-                    <div className="flex items-center justify-between gap-1 mb-3 bg-[var(--bg-base)] p-1.5 rounded-xl border border-[var(--border-subtle)]">
+                    <div className="flex items-center justify-between gap-1.5 mb-3 bg-[var(--bg-base)] p-1.5 rounded-xl border border-[var(--border-subtle)]">
                       <button
                         type="button"
                         onClick={handlePrevMonth}
-                        className="p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 text-[var(--text-secondary)] transition-colors cursor-pointer"
+                        className="p-1 rounded-lg hover:bg-[var(--bg-card)] text-[var(--text-secondary)] transition-colors cursor-pointer"
                         title="ماه قبل"
                       >
                         <ChevronRight className="h-4 w-4" />
@@ -270,12 +270,12 @@ export const JalaliDatePicker: React.FC<JalaliDatePickerProps> = ({
                           type="button"
                           onClick={() => setActiveView(activeView === 'months' ? 'days' : 'months')}
                           className={cn(
-                            'flex items-center gap-1 bg-[var(--bg-card)] border border-[var(--border-functional)] hover:border-[var(--brand-primary)] rounded-xl px-2.5 py-1 text-xs font-black text-[var(--text-primary)] transition-colors shadow-2xs cursor-pointer',
+                            'flex items-center justify-between gap-2 bg-[var(--bg-card)] border border-[var(--border-functional)] hover:border-[var(--brand-primary)] rounded-xl px-2.5 py-1 text-xs font-black text-[var(--text-primary)] transition-colors shadow-2xs cursor-pointer min-w-[76px]',
                             activeView === 'months' && 'border-[var(--brand-primary)] ring-2 ring-[var(--brand-primary)]/20 text-[var(--brand-primary)]'
                           )}
                         >
-                          <span>{PERSIAN_MONTH_NAMES[viewMonth - 1]}</span>
-                          <ChevronDown className="h-3 w-3 text-[var(--text-secondary)] shrink-0" />
+                          <span className="truncate">{PERSIAN_MONTH_NAMES[viewMonth - 1]}</span>
+                          <ChevronDown className="h-3.5 w-3.5 text-[var(--text-secondary)] shrink-0" />
                         </button>
 
                         {/* Year Selector Toggle */}
@@ -283,19 +283,19 @@ export const JalaliDatePicker: React.FC<JalaliDatePickerProps> = ({
                           type="button"
                           onClick={() => setActiveView(activeView === 'years' ? 'days' : 'years')}
                           className={cn(
-                            'flex items-center gap-1 bg-[var(--bg-card)] border border-[var(--border-functional)] hover:border-[var(--brand-primary)] rounded-xl px-2.5 py-1 text-xs font-black text-[var(--text-primary)] transition-colors shadow-2xs cursor-pointer',
+                            'flex items-center justify-between gap-2 bg-[var(--bg-card)] border border-[var(--border-functional)] hover:border-[var(--brand-primary)] rounded-xl px-2.5 py-1 text-xs font-black text-[var(--text-primary)] transition-colors shadow-2xs cursor-pointer min-w-[68px]',
                             activeView === 'years' && 'border-[var(--brand-primary)] ring-2 ring-[var(--brand-primary)]/20 text-[var(--brand-primary)]'
                           )}
                         >
                           <span>{toPersianDigits(viewYear)}</span>
-                          <ChevronDown className="h-3 w-3 text-[var(--text-secondary)] shrink-0" />
+                          <ChevronDown className="h-3.5 w-3.5 text-[var(--text-secondary)] shrink-0" />
                         </button>
                       </div>
 
                       <button
                         type="button"
                         onClick={handleNextMonth}
-                        className="p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 text-[var(--text-secondary)] transition-colors cursor-pointer"
+                        className="p-1 rounded-lg hover:bg-[var(--bg-card)] text-[var(--text-secondary)] transition-colors cursor-pointer"
                         title="ماه بعد"
                       >
                         <ChevronLeft className="h-4 w-4" />

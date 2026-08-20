@@ -5,6 +5,7 @@ import { Plus, Search, Edit2, Trash2, UtensilsCrossed, Calculator, ArrowUpDown, 
 import { db, DEFAULT_SETTINGS, syncAndRecalculateAllData } from '../../db';
 import type { MenuItem, MenuCategory, RecipeIngredient } from '../../types';
 import { formatToman, formatNumber, getUnitLabel, roundCurrency, toPersianDigits, toEnglishDigits, parseFormattedNumber } from '../../lib/utils';
+import { calculateMenuItemPricing } from '../../lib/financial';
 import { tablePageVariants, tableRowVariants } from '../../lib/motion';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -165,24 +166,30 @@ export const MenuManager: React.FC = () => {
     setRecipeIngredients(recipeIngredients.filter((_, i) => i !== index));
   };
 
-  // Recipe Cost Calculations
+  // Recipe Cost Calculations using central single source of truth
   const numSellingPrice = parseFormattedNumber(sellingPrice);
   const numWastePercent = parseFormattedNumber(wastePercent);
   const numLaborCost = parseFormattedNumber(laborCost);
   const numPackagingCost = parseFormattedNumber(packagingCost);
 
-  const totalMaterialCost = recipeIngredients.reduce((acc, curr) => acc + (curr.cost || 0), 0);
-  const wasteCost = roundCurrency(totalMaterialCost * (numWastePercent / 100));
-  const foodCost = roundCurrency(totalMaterialCost + wasteCost);
-  const portionCost = roundCurrency(foodCost + numLaborCost + numPackagingCost);
-  const primeCost = portionCost;
-  
-  // Target Price = Pure Food Cost / (Target Food Cost % / 100)
-  const targetFoodCostRatio = (settings.targetFoodCostPercent || 35) / 100;
-  const targetPrice = targetFoodCostRatio > 0 ? roundCurrency(foodCost / targetFoodCostRatio) : 0;
-  
-  const grossProfit = roundCurrency(numSellingPrice - portionCost);
-  const marginPercent = numSellingPrice > 0 ? roundCurrency((grossProfit / numSellingPrice) * 100) : 0;
+  const rawMaterialCost = recipeIngredients.reduce((acc, curr) => acc + (curr.cost || 0), 0);
+  const pricing = calculateMenuItemPricing({
+    materialCost: rawMaterialCost,
+    wastePercent: numWastePercent,
+    laborCost: numLaborCost,
+    packagingCost: numPackagingCost,
+    sellingPrice: numSellingPrice,
+    targetFoodCostPercent: settings.targetFoodCostPercent || 35,
+  });
+
+  const totalMaterialCost = pricing.totalMaterialCost;
+  const wasteCost = pricing.wasteCost;
+  const foodCost = pricing.foodCost;
+  const portionCost = pricing.portionCost;
+  const primeCost = pricing.primeCost;
+  const targetPrice = pricing.targetPrice;
+  const grossProfit = pricing.grossProfit;
+  const marginPercent = pricing.marginPercent;
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -323,7 +330,7 @@ export const MenuManager: React.FC = () => {
   );
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -545,7 +552,7 @@ export const MenuManager: React.FC = () => {
                     <motion.div
                       key={item.id}
                       variants={tableRowVariants}
-                      className="p-4 space-y-3.5 bg-white dark:bg-stone-950/25 transition-colors"
+                      className="p-4 space-y-3.5 bg-white dark:bg-[var(--bg-card)] transition-colors"
                     >
                       {/* Name & Badges */}
                       <div className="flex items-start justify-between gap-2">
@@ -568,7 +575,7 @@ export const MenuManager: React.FC = () => {
                       </div>
 
                       {/* Financial 2x2 Grid */}
-                      <div className="grid grid-cols-2 gap-3 bg-[var(--bg-base)] dark:bg-stone-900/40 p-3 rounded-xl border border-[var(--border-subtle)] dark:border-stone-900">
+                      <div className="grid grid-cols-2 gap-3 bg-[var(--bg-base)] dark:bg-[var(--bg-base)] p-3 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
                         <div className="space-y-0.5">
                           <span className="text-[10px] text-[var(--text-secondary)] font-bold">قیمت فروش فعلی:</span>
                           <div className="text-xs font-black text-[var(--text-primary)] dark:text-stone-100">
@@ -583,14 +590,14 @@ export const MenuManager: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="space-y-0.5 pt-1 border-t border-[var(--border-subtle)]/40 dark:border-stone-800">
+                        <div className="space-y-0.5 pt-1 border-t border-[var(--border-subtle)]/40 dark:border-[var(--border-subtle)]">
                           <span className="text-[10px] text-[var(--text-secondary)] font-bold">بهای تمام‌شده هر پرس:</span>
                           <div className="text-xs font-bold text-[var(--status-warning-text)]">
                             {formatToman(item.foodCost ?? item.totalMaterialCost ?? item.primeCost).text}
                           </div>
                         </div>
 
-                        <div className="space-y-0.5 pt-1 border-t border-[var(--border-subtle)]/40 dark:border-stone-800">
+                        <div className="space-y-0.5 pt-1 border-t border-[var(--border-subtle)]/40 dark:border-[var(--border-subtle)]">
                           <span className="text-[10px] text-[var(--text-secondary)] font-bold">سود ناخالص (حاشیه):</span>
                           <div className="text-xs font-black">
                             <span className={item.grossProfit >= 0 ? 'text-[#00A650] dark:text-[var(--status-success-text)]' : 'text-[var(--status-error-text)]'}>
@@ -605,7 +612,7 @@ export const MenuManager: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => openEditModal(item)}
-                          className="flex items-center gap-1 px-4 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px]"
+                          className="flex items-center gap-1 px-4 py-2 text-[11px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px]"
                           title="ویرایش رسپی"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
@@ -615,7 +622,7 @@ export const MenuManager: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => item.id && handleDelete(item.id, item.name)}
-                          className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-stone-900 transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
+                          className="flex items-center justify-center p-2 text-[var(--text-secondary)] hover:text-[var(--status-error-text)] hover:bg-[var(--status-error-bg)] rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] transition-colors cursor-pointer min-h-[38px] min-w-[38px]"
                           title="حذف آیتم منو"
                         >
                           <Trash2 className="h-3.5 w-3.5 text-[var(--status-error-text)]" />
@@ -652,13 +659,13 @@ export const MenuManager: React.FC = () => {
         description="مشخصات محصول، ترکیبات و هزینه‌های تولید را جهت آنالیز مالی وارد کنید."
         maxWidth="5xl"
       >
-        <form onSubmit={handleSave} noValidate className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <form onSubmit={handleSave} noValidate className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
             {/* Right Column: Basic Info & Recipe Builder */}
-            <div className="lg:col-span-7 space-y-3.5">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="lg:col-span-7 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-start">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] mb-1">
+                  <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] mb-1.5">
                     نام محصول در منو <span className="text-[var(--status-error-text)]">*</span>
                   </label>
                   <input
@@ -666,7 +673,7 @@ export const MenuManager: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="مثلاً: چلو کباب کوبیده، پیتزا سیر و استیک"
-                    className="w-full h-10 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all"
+                    className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] transition-all shadow-2xs"
                   />
                 </div>
 
@@ -681,11 +688,11 @@ export const MenuManager: React.FC = () => {
               </div>
 
               {/* Recipe Builder Box */}
-              <div className="rounded-2xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] p-3.5 bg-[var(--bg-base)] dark:bg-[var(--bg-card)] space-y-2.5">
+              <div className="rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] p-3 bg-[var(--bg-base)] dark:bg-[var(--bg-card)] space-y-2.5">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-1.5">
-                    <Calculator className="h-4 w-4 text-[var(--brand-primary)]" />
-                    فرمول ساخت و ترکیبات اولیه
+                    <Calculator className="h-3.5 w-3.5 text-[var(--brand-primary)]" />
+                    <span>ترکیبات و مواد اولیه رسپی</span>
                   </h4>
                   <span className="text-[10px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
                     {formatNumber(recipeIngredients.length)} ماده اضافه شده
@@ -693,7 +700,7 @@ export const MenuManager: React.FC = () => {
                 </div>
 
                 {/* Ingredient Selector & Add Row */}
-                <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-end">
+                <div className="flex flex-col sm:flex-row gap-2 items-end">
                   <div className="flex-1 w-full">
                     <SearchableSelect
                       value={selectedIngredientId}
@@ -709,7 +716,7 @@ export const MenuManager: React.FC = () => {
                     />
                   </div>
 
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="flex items-center gap-1.5 w-full sm:w-auto">
                     <input
                       type="text"
                       inputMode="decimal"
@@ -721,9 +728,9 @@ export const MenuManager: React.FC = () => {
                         else if (/^\d*\.?\d*$/.test(eng)) setSelectedQty(val);
                       }}
                       placeholder="مقدار"
-                      className="w-full sm:w-24 h-10 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)] text-right dir-rtl placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)]"
+                      className="w-full sm:w-24 h-10 rounded-xl border border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-[var(--text-primary)] text-right dir-rtl placeholder:text-[var(--text-secondary)] focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] shadow-2xs"
                     />
-                    <Button type="button" size="sm" onClick={addIngredientToRecipe} className="h-10 px-3.5 rounded-xl text-xs font-bold shrink-0">
+                    <Button type="button" size="sm" onClick={addIngredientToRecipe} className="h-10 px-3.5 rounded-xl text-xs font-black shrink-0">
                       افزودن
                     </Button>
                   </div>
@@ -731,25 +738,25 @@ export const MenuManager: React.FC = () => {
 
                 {/* Recipe Ingredients Pill / List Container */}
                 {recipeIngredients.length > 0 ? (
-                  <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1 pl-1">
+                  <div className="max-h-36 overflow-y-auto space-y-1.5 pr-0.5 pl-0.5 custom-scrollbar">
                     {recipeIngredients.map((ri, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between rounded-xl bg-white dark:bg-[var(--bg-card)] px-3 py-2 border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-xs font-bold"
+                        className="flex items-center justify-between rounded-xl bg-white dark:bg-[var(--bg-card)] px-3 py-2 border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-xs font-bold shadow-2xs"
                       >
-                        <span className="text-[var(--text-primary)] dark:text-[var(--text-primary)] truncate max-w-[140px]">{ri.ingredientName}</span>
+                        <span className="text-[var(--text-primary)] truncate max-w-[150px] text-xs font-black">{ri.ingredientName}</span>
                         <div className="flex items-center gap-3">
-                          <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] text-[11px]">
+                          <span className="text-[var(--text-secondary)] text-[11px] font-bold">
                             {formatNumber(ri.quantity)} {getUnitLabel(ri.unit || '')}
                           </span>
-                          <span className="text-[var(--text-primary)] dark:text-[var(--text-primary)] font-black text-[11px]">
+                          <span className="text-[var(--text-primary)] font-black text-xs">
                             {formatToman(ri.cost).text}
                           </span>
                           <button
                             type="button"
                             onClick={() => removeRecipeIngredient(index)}
                             aria-label="حذف ماده اولیه از رسپی"
-                            className="text-[var(--status-error-text)] hover:text-[var(--status-error-text)] dark:hover:text-[var(--status-error-text)] p-0.5 cursor-pointer transition-colors"
+                            className="text-[var(--status-error-text)] p-1 hover:bg-[var(--status-error-bg)] rounded-lg cursor-pointer transition-colors"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -758,9 +765,9 @@ export const MenuManager: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-3 text-center border border-dashed border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-xl bg-white/50 dark:bg-[var(--bg-card)]">
-                    <p className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium">
-                      ماده اولیه را انتخاب کرده و مقدار آن را ثبت کنید
+                  <div className="p-3 text-center border border-dashed border-[var(--border-subtle)] rounded-xl bg-white/50 dark:bg-[var(--bg-card)]">
+                    <p className="text-[11px] font-bold text-[var(--text-secondary)]">
+                      ماده اولیه را انتخاب کرده و مقدار مصرف در این فرمول را ثبت کنید
                     </p>
                   </div>
                 )}
@@ -768,11 +775,11 @@ export const MenuManager: React.FC = () => {
             </div>
 
             {/* Left Column: Cost Parameters & Calculated Summary & Price */}
-            <div className="lg:col-span-5 space-y-3.5">
+            <div className="lg:col-span-5 space-y-3">
               {/* Additional Costs (Labor, Packaging, Waste %) */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-start">
                 <div>
-                  <label className="block text-[11px] font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] mb-1 truncate">ضایعات (٪)</label>
+                  <label className="block text-xs font-extrabold text-[var(--text-primary)] mb-1.5 truncate">ضایعات (٪)</label>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -784,7 +791,7 @@ export const MenuManager: React.FC = () => {
                       else if (/^\d*\.?\d*$/.test(eng)) setWastePercent(val);
                     }}
                     placeholder="مثلاً ۵"
-                    className="w-full h-10 rounded-xl border border-[var(--border-subtle)] dark:border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-2.5 py-2 text-xs font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)] text-center dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)]"
+                    className="w-full h-10 rounded-xl border border-[var(--border-functional)] bg-white dark:bg-[var(--bg-card)] px-2 py-2 text-xs font-bold text-[var(--text-primary)] text-center dir-rtl focus:outline-hidden focus:ring-2 focus:ring-[var(--brand-primary)]/20 focus:border-[var(--brand-primary)] shadow-2xs"
                   />
                 </div>
 
@@ -806,35 +813,35 @@ export const MenuManager: React.FC = () => {
               </div>
 
               {/* Financial Calculation Live Card */}
-              <div className="rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] p-4 space-y-2 shadow-2xs transition-colors">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-extrabold">هزینه مواد اولیه (فودکاست خالص):</span>
-                  <span className="font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">{formatToman(foodCost).text}</span>
+              <div className="rounded-xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] p-3 space-y-2 text-xs">
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-[var(--text-secondary)] font-bold">هزینه مواد اولیه:</span>
+                  <span className="font-bold text-[var(--text-primary)]">{formatToman(foodCost).text}</span>
                 </div>
                 {(numLaborCost > 0 || numPackagingCost > 0) && (
-                  <div className="flex justify-between items-center text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
-                    <span>دستمزد و بسته‌بندی هر پرس:</span>
-                    <span className="font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)]">{formatToman(numLaborCost + numPackagingCost).text}</span>
+                  <div className="flex justify-between items-center text-[11px] text-[var(--text-secondary)]">
+                    <span>دستمزد و بسته‌بندی:</span>
+                    <span className="font-bold text-[var(--text-primary)]">{formatToman(numLaborCost + numPackagingCost).text}</span>
                   </div>
                 )}
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-extrabold">بهای تمام‌شده هر پرس:</span>
-                  <span className="font-black text-[var(--brand-primary)] dark:text-[var(--status-warning-text)]">{formatToman(portionCost).text}</span>
+                <div className="flex justify-between items-center text-xs pt-1 border-t border-[var(--border-subtle)]">
+                  <span className="text-[var(--text-secondary)] font-bold">بهای تمام‌شده هر پرس:</span>
+                  <span className="font-black text-[var(--brand-primary)] dark:text-[var(--status-warning-text)] text-sm">{formatToman(portionCost).text}</span>
                 </div>
-                <div className="flex justify-between items-center text-xs pt-2 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-                  <span className="text-[var(--text-primary)] dark:text-[var(--text-secondary)] font-black">قیمت پیشنهادی (فودکاست {formatNumber(settings.targetFoodCostPercent)}٪):</span>
-                  <span className="font-black text-[var(--status-success-text)] dark:text-[var(--status-success-text)] text-sm">{formatToman(targetPrice).text}</span>
+                <div className="flex justify-between items-center text-xs pt-1 border-t border-[var(--border-subtle)]">
+                  <span className="text-[var(--text-primary)] font-black text-[11px]">پیشنهادی (فودکاست {formatNumber(settings.targetFoodCostPercent)}٪):</span>
+                  <span className="font-black text-[var(--status-success-text)] text-xs">{formatToman(targetPrice).text}</span>
                 </div>
               </div>
 
               {/* Selling Price Entry & Live Margin Badge */}
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)]">
+                  <label className="text-xs font-extrabold text-[var(--text-primary)] mb-0.5">
                     قیمت فروش نهایی <span className="text-[var(--status-error-text)]">*</span>
                   </label>
                   {numSellingPrice > 0 && (
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${grossProfit >= 0 ? 'bg-emerald-500/15 text-[var(--status-success-text)] dark:text-[var(--status-success-text)]' : 'bg-rose-500/15 text-[var(--status-error-text)] dark:text-[var(--status-error-text)]'}`}>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${grossProfit >= 0 ? 'bg-emerald-500/15 text-[var(--status-success-text)]' : 'bg-rose-500/15 text-[var(--status-error-text)]'}`}>
                       سود: {formatToman(grossProfit).text} ({formatNumber(marginPercent)}٪)
                     </span>
                   )}
@@ -848,11 +855,11 @@ export const MenuManager: React.FC = () => {
               </div>
 
               {/* Footer Action Buttons */}
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
-                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="h-10 px-4 rounded-xl text-xs font-bold">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-subtle)]">
+                <Button type="button" variant="outline" size="sm" onClick={() => setIsModalOpen(false)}>
                   انصراف
                 </Button>
-                <Button type="submit" variant="primary" disabled={isSubmitting} className="h-10 px-5 rounded-xl text-xs font-black bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]">
+                <Button type="submit" variant="primary" size="sm" disabled={isSubmitting} className="font-black">
                   {isSubmitting ? 'در حال ثبت...' : 'ذخیره آیتم منو'}
                 </Button>
               </div>

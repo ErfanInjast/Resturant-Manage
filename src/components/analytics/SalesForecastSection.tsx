@@ -14,10 +14,17 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  Building2,
 } from 'lucide-react';
-import type { DailySalesRecord, MenuItem } from '../../types';
+import type { DailySalesRecord, MenuItem, WasteLog, AppSettings } from '../../types';
+import { DEFAULT_SETTINGS } from '../../db';
 import { formatToman, formatNumber, roundCurrency, toPersianDigits } from '../../lib/utils';
-import { isDateInPresetFilter } from '../../lib/financial';
+import {
+  isDateInPresetFilter,
+  calculateTotalMonthlyOverhead,
+  calculateDailyOverhead,
+  calculateWorkingDays,
+} from '../../lib/financial';
 import { tablePageVariants, tableRowVariants } from '../../lib/motion';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
@@ -36,6 +43,8 @@ import {
 interface SalesForecastSectionProps {
   salesRecords: DailySalesRecord[];
   menuItems: MenuItem[];
+  wasteLogs?: WasteLog[];
+  settings?: AppSettings;
 }
 
 type ScenarioKey = 'baseline' | 'optimistic' | 'peak' | 'conservative';
@@ -74,6 +83,8 @@ const SCENARIOS: { key: ScenarioKey; label: string; multiplier: number; descript
 export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
   salesRecords,
   menuItems,
+  wasteLogs = [],
+  settings,
 }) => {
   const [selectedScenario, setSelectedScenario] = useState<ScenarioKey>('baseline');
   const [forecastWeeks, setForecastWeeks] = useState<number>(4);
@@ -82,6 +93,12 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
   const [itemsPerPage, setItemsPerPage] = useState<number>(6);
   const [sortField, setSortField] = useState<string>('forecastRevenue');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const activeSettings = settings || DEFAULT_SETTINGS;
+  const workingDays = activeSettings.workingDaysPerMonth || calculateWorkingDays();
+  const fixedCosts = activeSettings.monthlyFixedCosts || DEFAULT_SETTINGS.monthlyFixedCosts;
+  const totalMonthlyOverhead = calculateTotalMonthlyOverhead(fixedCosts);
+  const dailyOverhead = calculateDailyOverhead(totalMonthlyOverhead, workingDays);
 
   const handlePageChange = (newPage: number, dir: number) => {
     setDirection(dir);
@@ -119,7 +136,7 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
   // Daily average run rates
   let avgDailyRevenue = 0;
   let avgDailyCOGS = 0;
-  let avgDailyProfit = 0;
+  let avgDailyWaste = 0;
 
   if (isDataDriven) {
     const recentRecords = salesRecords.filter((r) => isDateInPresetFilter(r.date, 'last30'));
@@ -128,8 +145,8 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
     const sumRecords = (recs: DailySalesRecord[]) => {
       const rev = recs.reduce((acc, r) => acc + (r.totalRevenue || 0), 0);
       const cogs = recs.reduce((acc, r) => acc + (r.totalCOGS || 0), 0);
-      const profit = recs.reduce((acc, r) => acc + (r.netProfit || 0), 0);
-      return { rev, cogs, profit };
+      const waste = recs.reduce((acc, r) => acc + (r.totalWasteCost || 0), 0);
+      return { rev, cogs, waste };
     };
 
     if (recentRecords.length > 0 && olderRecords.length > 0) {
@@ -139,26 +156,26 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
       const recentAvg = {
         rev: recentSum.rev / recentRecords.length,
         cogs: recentSum.cogs / recentRecords.length,
-        profit: recentSum.profit / recentRecords.length,
+        waste: recentSum.waste / recentRecords.length,
       };
       const olderAvg = {
         rev: olderSum.rev / olderRecords.length,
         cogs: olderSum.cogs / olderRecords.length,
-        profit: olderSum.profit / olderRecords.length,
+        waste: olderSum.waste / olderRecords.length,
       };
 
       // 70% weight for last 30 days, 30% weight for older history
       avgDailyRevenue = 0.7 * recentAvg.rev + 0.3 * olderAvg.rev;
       avgDailyCOGS = 0.7 * recentAvg.cogs + 0.3 * olderAvg.cogs;
-      avgDailyProfit = 0.7 * recentAvg.profit + 0.3 * olderAvg.profit;
+      avgDailyWaste = 0.7 * recentAvg.waste + 0.3 * olderAvg.waste;
     } else {
       const totalRev = salesRecords.reduce((acc, r) => acc + (r.totalRevenue || 0), 0);
       const totalCOGS = salesRecords.reduce((acc, r) => acc + (r.totalCOGS || 0), 0);
-      const totalProfit = salesRecords.reduce((acc, r) => acc + (r.netProfit || 0), 0);
+      const totalWaste = salesRecords.reduce((acc, r) => acc + (r.totalWasteCost || 0), 0);
 
       avgDailyRevenue = totalRev / totalSalesDays;
       avgDailyCOGS = totalCOGS / totalSalesDays;
-      avgDailyProfit = totalProfit / totalSalesDays;
+      avgDailyWaste = totalWaste / totalSalesDays;
     }
   } else {
     // Fallback based on estimated menu items volume if no daily sales recorded yet
@@ -172,30 +189,39 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
     );
     avgDailyRevenue = estimatedMonthlyRevenue / 30;
     avgDailyCOGS = estimatedMonthlyCOGS / 30;
-    avgDailyProfit = (estimatedMonthlyRevenue - estimatedMonthlyCOGS) / 30;
+    avgDailyWaste = 0;
   }
 
-  // 2. Weekly Projections
+  // 2. Weekly Projections incorporating fixed daily overhead
+  const forecastDays = forecastWeeks * 7;
   const weeklyProjections = Array.from({ length: forecastWeeks }).map((_, index) => {
     const weekNum = index + 1;
     // Slight organic trend factor for future weeks (1.0, 1.015, 1.03, 1.045)
     const organicFactor = 1 + index * 0.015;
     const weeklyRevenue = roundCurrency(7 * avgDailyRevenue * scenarioMultiplier * organicFactor);
     const weeklyCOGS = roundCurrency(7 * avgDailyCOGS * scenarioMultiplier * organicFactor);
-    const weeklyProfit = roundCurrency(7 * avgDailyProfit * scenarioMultiplier * organicFactor);
+    const weeklyWaste = roundCurrency(7 * avgDailyWaste * scenarioMultiplier * organicFactor);
+    const weeklyOverhead = roundCurrency(7 * dailyOverhead);
+    const weeklyGrossProfit = roundCurrency(weeklyRevenue - weeklyCOGS);
+    // Real Net Profit = Gross Profit - Waste - Fixed Period Overhead
+    const weeklyNetProfit = roundCurrency(weeklyGrossProfit - weeklyWaste - weeklyOverhead);
 
     return {
       weekLabel: `هفته ${toPersianDigits(weekNum)}`,
       weekNum,
       'درآمد پیش‌بینی‌شده': weeklyRevenue,
       'بهای تمام‌شده': weeklyCOGS,
-      'سود خالص پیش‌بینی‌شده': weeklyProfit,
+      'سود ناخالص': weeklyGrossProfit,
+      'سربار و هزینه ثابت': weeklyOverhead,
+      'سود خالص واقعی': weeklyNetProfit,
     };
   });
 
   const projectedTotalRevenue = weeklyProjections.reduce((acc, w) => acc + w['درآمد پیش‌بینی‌شده'], 0);
   const projectedTotalCOGS = weeklyProjections.reduce((acc, w) => acc + w['بهای تمام‌شده'], 0);
-  const projectedTotalProfit = weeklyProjections.reduce((acc, w) => acc + w['سود خالص پیش‌بینی‌شده'], 0);
+  const projectedTotalOverhead = weeklyProjections.reduce((acc, w) => acc + w['سربار و هزینه ثابت'], 0);
+  const projectedTotalGrossProfit = weeklyProjections.reduce((acc, w) => acc + w['سود ناخالص'], 0);
+  const projectedTotalNetProfit = weeklyProjections.reduce((acc, w) => acc + w['سود خالص واقعی'], 0);
 
   // 3. Item level run-rate forecasting
   const itemRunRateMap = new Map<number, { name: string; category: string; avgDailyQty: number; unitPrice: number; unitCost: number }>();
@@ -239,7 +265,6 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
     });
   }
 
-  const forecastDays = forecastWeeks * 7;
   const itemForecastList = Array.from(itemRunRateMap.entries())
     .map(([id, info]) => {
       const forecastQty = Math.round(info.avgDailyQty * forecastDays * scenarioMultiplier);
@@ -312,7 +337,7 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
               پیش‌بینی فروش و درآمد هفته‌های آینده
             </CardTitle>
             <p className="text-xs text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium mt-0.5">
-              تحلیل و برآورد روند فروش، سود و حجم آماده‌سازی منو برای هفته‌های پیش‌رو
+              تحلیل و برآورد روند فروش، سود خالص واقعی (با کسر سربار ثابت روزانه) و حجم آماده‌سازی منو
             </p>
           </div>
 
@@ -358,7 +383,7 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
           <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
             <span className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)] flex items-center gap-1.5">
               <PieChart className="h-3.5 w-3.5 text-[var(--status-error-text)] dark:text-[var(--status-error-text)]" />
-              بهای تمام‌شده تخمینی مواد
+              بهای تمام‌شده تخمینی مواد (COGS)
             </span>
             <div className="text-lg font-black text-[var(--status-error-text)] dark:text-[var(--status-error-text)] tracking-tight">
               {formatToman(projectedTotalCOGS).text}
@@ -370,27 +395,27 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
 
           <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
             <span className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)] flex items-center gap-1.5">
-              <ArrowUpRight className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-              سود ناخالص پیش‌بینی‌شده
+              <Building2 className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+              سربار و هزینه‌های ثابت دوره‌ای
             </span>
             <div className="text-lg font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] tracking-tight">
-              {formatToman(projectedTotalProfit).text}
+              {formatToman(projectedTotalOverhead).text}
             </div>
             <p className="text-[10px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium">
-              حاشیه سود تخمینی: {projectedTotalRevenue > 0 ? formatNumber(roundCurrency((projectedTotalProfit / projectedTotalRevenue) * 100)) : '۰'}٪
+              روزانه: {formatToman(roundCurrency(dailyOverhead)).text} ({toPersianDigits(forecastDays)} روز کاری)
             </p>
           </div>
 
           <div className="p-4 rounded-2xl bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] space-y-1">
             <span className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)] flex items-center gap-1.5">
-              <ShoppingBag className="h-3.5 w-3.5 text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]" />
-              حجم آماده‌سازی (تعداد کل پرس)
+              <ArrowUpRight className={`h-3.5 w-3.5 ${projectedTotalNetProfit >= 0 ? 'text-[var(--status-success-text)] dark:text-[var(--status-success-text)]' : 'text-[var(--status-error-text)] dark:text-[var(--status-error-text)]'}`} />
+              سود خالص واقعی پیش‌بینی‌شده
             </span>
-            <div className="text-lg font-black text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)] tracking-tight">
-              {formatNumber(totalProjectedPortions)} پرس
+            <div className={`text-lg font-black tracking-tight ${projectedTotalNetProfit >= 0 ? 'text-[var(--status-success-text)] dark:text-[var(--status-success-text)]' : 'text-[var(--status-error-text)] dark:text-[var(--status-error-text)]'}`}>
+              {formatToman(projectedTotalNetProfit).text}
             </div>
             <p className="text-[10px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium">
-              میانگین روزانه: {formatNumber(Math.round(totalProjectedPortions / forecastDays))} پرس در روز
+              حاشیه سود خالص واقعی: {projectedTotalRevenue > 0 ? formatNumber(roundCurrency((projectedTotalNetProfit / projectedTotalRevenue) * 100)) : '۰'}٪
             </p>
           </div>
         </div>
@@ -400,7 +425,7 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
               <Calendar className="h-4 w-4 text-[var(--brand-primary)]" />
-              نمودار پیش‌بینی تفکیکی هفته به هفته
+              نمودار پیش‌بینی تفکیکی هفته به هفته (درآمد، هزینه مواد، سربار و سود خالص)
             </h4>
             <div className="flex items-center gap-1.5">
               {[2, 3, 4, 6].map((w) => (
@@ -414,7 +439,7 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
                   className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                     forecastWeeks === w
                       ? 'bg-[var(--brand-primary)] text-white shadow-2xs'
-                      : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:bg-stone-200'
+                      : 'bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] hover:bg-[var(--bg-base)]'
                   }`}
                 >
                   {toPersianDigits(w)} هفته
@@ -430,6 +455,14 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--status-success-text)" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="var(--status-success-text)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--status-error-text)" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="var(--status-error-text)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorOverhead" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="colorProf" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--brand-primary)" stopOpacity={0.3} />
@@ -458,13 +491,29 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
                   type="monotone"
                   dataKey="درآمد پیش‌بینی‌شده"
                   stroke="var(--status-success-text)"
-                  strokeWidth={2.5}
+                  strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#colorRev)"
                 />
                 <Area
                   type="monotone"
-                  dataKey="سود خالص پیش‌بینی‌شده"
+                  dataKey="بهای تمام‌شده"
+                  stroke="var(--status-error-text)"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorCost)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="سربار و هزینه ثابت"
+                  stroke="#8B5CF6"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorOverhead)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="سود خالص واقعی"
                   stroke="var(--brand-primary)"
                   strokeWidth={2.5}
                   fillOpacity={1}
@@ -475,21 +524,29 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
           </div>
         </div>
 
-        {/* Top Forecasted Items Breakdown Table */}
-        <div className="pt-2 space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
-              <ShoppingBag className="h-4 w-4 text-[var(--status-success-text)]" />
-              پیش‌بینی فروش به تفکیک پرفروش‌ترین آیتم‌های منو
-            </h4>
-            <span className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-bold">
-              تعداد آماده‌سازی برای {toPersianDigits(forecastDays)} روز آینده
-            </span>
+        {/* Forecast Details Table Per Item */}
+        <div className="pt-2 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h4 className="text-xs font-extrabold text-[var(--text-primary)] dark:text-[var(--text-primary)] flex items-center gap-2">
+                <Sliders className="h-4 w-4 text-[var(--brand-primary)]" />
+                جدول برآورد تقاضای اقلام منو ({toPersianDigits(forecastWeeks)} هفته پیش‌رو)
+              </h4>
+              <p className="text-[11px] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-medium mt-0.5">
+                تخمین حجم فروش، درآمد و سود به تفکیک هر محصول جهت برنامه‌ریزی سفارشات
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-secondary)] dark:text-[var(--text-secondary)]">
+              <span>مجموع پرس برآوردی:</span>
+              <span className="font-black text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)] bg-[var(--status-warning-bg)]/80 px-2 py-0.5 rounded-lg border border-[var(--status-warning-text)]/30">
+                {formatNumber(totalProjectedPortions)} پرس
+              </span>
+            </div>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-[var(--border-subtle)] dark:border-[var(--border-subtle)]">
+          <div className="border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl overflow-hidden bg-white dark:bg-[var(--bg-card)]">
             <table className="w-full text-right text-xs">
-              <thead className="bg-[var(--bg-base)] dark:bg-[var(--bg-card)] border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] font-extrabold select-none">
+              <thead className="bg-[var(--bg-base)] dark:bg-[var(--bg-card)] text-[var(--text-secondary)] dark:text-[var(--text-secondary)] border-b border-[var(--border-subtle)] dark:border-[var(--border-subtle)] font-bold">
                 <tr>
                   <th
                     onClick={() => handleSort('name')}
@@ -633,14 +690,17 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
           <CheckCircle2 className="h-5 w-5 text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)] shrink-0 mt-0.5" />
           <div className="text-xs text-[var(--text-primary)] dark:text-[var(--text-secondary)] leading-relaxed space-y-1">
             <p className="font-bold text-[var(--text-primary)] dark:text-[var(--text-primary)]">
-              توصیه هوشمند مدیریت سفارشات و انبار ({toPersianDigits(forecastWeeks)} هفته آینده):
+              توضیح محاسبات مالی و توصیه هوشمند مدیریت ({toPersianDigits(forecastWeeks)} هفته آینده):
             </p>
             <p>
-              بر اساس سناریوی «{scenarioObj.label}»، محبوب‌ترین محصول پیش‌بینی‌شده{' '}
+              • سود خالص واقعی پیش‌بینی‌شده با کسر سهم واقعی سربار و هزینه‌های ثابت (اجاره، حقوق ماهانه، قبوض و استهلاک به مبلغ روزانه {formatToman(roundCurrency(dailyOverhead)).text}) از سود ناخالص محاسبه شده است تا تصمیم‌گیری‌های مالی کاملاً دقیق و واقع‌بینانه باشد.
+            </p>
+            <p>
+              • بر اساس سناریوی «{scenarioObj.label}»، محبوب‌ترین محصول پیش‌بینی‌شده{' '}
               <strong className="text-[var(--text-primary)] dark:text-[var(--text-primary)]">
                 «{topForecastItem?.name || 'محصول اصلی'}»
               </strong>{' '}
-              با حدود <strong className="text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]">{formatNumber(topForecastItem?.forecastQty || 0)} پرس</strong> سفارش است. قبل از شروع هفته، موجودی مواد اولیه مرتبط در بخش مدیریت انبار چک و خریدهای اولیه انجام شود.
+              با حدود <strong className="text-[var(--status-warning-text)] dark:text-[var(--status-warning-text)]">{formatNumber(topForecastItem?.forecastQty || 0)} پرس</strong> سفارش است. قبل از شروع هفته، موجودی مواد اولیه مرتبط در انبار چک و ثبت شود.
             </p>
           </div>
         </div>
@@ -652,7 +712,7 @@ export const SalesForecastSection: React.FC<SalesForecastSectionProps> = ({
 const CustomForecastTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl p-3.5 shadow-xl dir-rtl text-right min-w-[200px]">
+      <div className="bg-white dark:bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[var(--border-subtle)] rounded-2xl p-3.5 shadow-xl dir-rtl text-right min-w-[220px]">
         <div className="text-xs font-black text-[var(--text-primary)] dark:text-[var(--text-primary)] pb-2 mb-2 border-b border-[#F4F0EB] dark:border-[var(--border-subtle)]">
           {label}
         </div>
